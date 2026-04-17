@@ -11,6 +11,7 @@
     <PackageReference Include="Polly.RateLimiting" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
   </ItemGroup>
 </Project>
