@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.Cache</PackageId>
+    <AssemblyName>Boutquin.MarketData.Cache</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.Cache</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Boutquin.Storage.Infrastructure" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

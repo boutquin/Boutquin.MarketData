@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.Normalization</PackageId>
+    <AssemblyName>Boutquin.MarketData.Normalization</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.Normalization</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Catalog\Boutquin.MarketData.Catalog.csproj" />
+  </ItemGroup>
+</Project>

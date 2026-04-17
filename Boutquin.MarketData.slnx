@@ -1,0 +1,32 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Boutquin.MarketData.Abstractions/Boutquin.MarketData.Abstractions.csproj" />
+    <Project Path="src/Boutquin.MarketData.Cache/Boutquin.MarketData.Cache.csproj" />
+    <Project Path="src/Boutquin.MarketData.Calendars/Boutquin.MarketData.Calendars.csproj" />
+    <Project Path="src/Boutquin.MarketData.Catalog/Boutquin.MarketData.Catalog.csproj" />
+    <Project Path="src/Boutquin.MarketData.Conventions/Boutquin.MarketData.Conventions.csproj" />
+    <Project Path="src/Boutquin.MarketData.DayCount/Boutquin.MarketData.DayCount.csproj" />
+    <Project Path="src/Boutquin.MarketData.DependencyInjection/Boutquin.MarketData.DependencyInjection.csproj" />
+    <Project Path="src/Boutquin.MarketData.Normalization/Boutquin.MarketData.Normalization.csproj" />
+    <Project Path="src/Boutquin.MarketData.Orchestration/Boutquin.MarketData.Orchestration.csproj" />
+    <Project Path="src/Boutquin.MarketData.Storage/Boutquin.MarketData.Storage.csproj" />
+    <Project Path="src/Boutquin.MarketData.Testing/Boutquin.MarketData.Testing.csproj" />
+    <Project Path="src/Boutquin.MarketData.Transport/Boutquin.MarketData.Transport.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Boutquin.MarketData.Abstractions.Tests.Unit/Boutquin.MarketData.Abstractions.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.ArchitectureTests/Boutquin.MarketData.ArchitectureTests.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Cache.Tests.Unit/Boutquin.MarketData.Cache.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Calendars.Tests.Unit/Boutquin.MarketData.Calendars.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Catalog.Tests.Unit/Boutquin.MarketData.Catalog.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Conventions.Tests.Unit/Boutquin.MarketData.Conventions.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.DayCount.Tests.Unit/Boutquin.MarketData.DayCount.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.DependencyInjection.Tests.Unit/Boutquin.MarketData.DependencyInjection.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Normalization.Tests.Unit/Boutquin.MarketData.Normalization.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Orchestration.Tests.Unit/Boutquin.MarketData.Orchestration.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Storage.Tests.Unit/Boutquin.MarketData.Storage.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Testing.Tests.Unit/Boutquin.MarketData.Testing.Tests.Unit.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Tests.Integration/Boutquin.MarketData.Tests.Integration.csproj" />
+    <Project Path="tests/Boutquin.MarketData.Transport.Tests.Unit/Boutquin.MarketData.Transport.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

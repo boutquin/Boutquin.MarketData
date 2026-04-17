@@ -1,0 +1,26 @@
+#nullable enable
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.DisplayName.get -> string!
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.LicenseFlag.get -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Notes.get -> string?
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.PrimaryFrequency.get -> Boutquin.MarketData.Abstractions.Requests.DataFrequency
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SourceDescriptor(string! SourceId, string! DisplayName, Boutquin.MarketData.Catalog.Governance.DataSourceTier Tier, Boutquin.MarketData.Catalog.Governance.DataLicenseFlag LicenseFlag, Boutquin.MarketData.Abstractions.Requests.DataFrequency PrimaryFrequency, bool SupportsHistorical = true, bool SupportsEndOfDay = true, bool SupportsIntraday = false, bool SupportsRedistribution = false, string? Notes = null) -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SourceId.get -> string!
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsEndOfDay.get -> bool
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsHistorical.get -> bool
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsIntraday.get -> bool
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsRedistribution.get -> bool
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Tier.get -> Boutquin.MarketData.Catalog.Governance.DataSourceTier
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.BenchmarkLicenseRequired = 4 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.CommercialSubscription = 5 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.DelayedFree = 3 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.InternalOnly = 6 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.PublicDomainLike = 0 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.PublicWithAttribution = 1 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataLicenseFlag.WebsiteViewOnly = 2 -> Boutquin.MarketData.Catalog.Governance.DataLicenseFlag
+Boutquin.MarketData.Catalog.Governance.DataSourceTier
+Boutquin.MarketData.Catalog.Governance.DataSourceTier.Tier1OfficialPublic = 1 -> Boutquin.MarketData.Catalog.Governance.DataSourceTier
+Boutquin.MarketData.Catalog.Governance.DataSourceTier.Tier2FreeIndicative = 2 -> Boutquin.MarketData.Catalog.Governance.DataSourceTier
+Boutquin.MarketData.Catalog.Governance.DataSourceTier.Tier3Commercial = 3 -> Boutquin.MarketData.Catalog.Governance.DataSourceTier
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.GetRequired(string! providerKey) -> Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!

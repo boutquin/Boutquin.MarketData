@@ -1,0 +1,84 @@
+#nullable enable
+Boutquin.MarketData.Abstractions.Contracts.ISnapshotSerializer<T>
+Boutquin.MarketData.Abstractions.Contracts.ISnapshotSerializer<T>.SerializeAsync(System.IO.Stream! stream, T data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Abstractions.Contracts.ISnapshotSerializer<T>.DeserializeAsync(System.IO.Stream! stream, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T>!
+Boutquin.MarketData.Abstractions.Primitives.TimeSeries<T>
+Boutquin.MarketData.Abstractions.Primitives.TimeSeries<T>.TimeSeries(System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<T>!>! points) -> void
+Boutquin.MarketData.Abstractions.Primitives.TimeSeries<T>.Points.get -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<T>!>!
+Boutquin.MarketData.Abstractions.Primitives.TimeSeries<T>.Count.get -> int
+Boutquin.MarketData.Abstractions.Primitives.TimeSeries<T>.IsEmpty.get -> bool
+Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<T>
+Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<T>.TimeSeriesPoint(System.DateOnly Date, T Value) -> void
+Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<T>.Date.get -> System.DateOnly
+Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<T>.Value.get -> T
+Boutquin.MarketData.Abstractions.Requests.RequestContext
+Boutquin.MarketData.Abstractions.Requests.RequestContext.RequestContext(System.Guid CorrelationId, System.DateTimeOffset RequestedAtUtc) -> void
+Boutquin.MarketData.Abstractions.Requests.RequestContext.CorrelationId.get -> System.Guid
+Boutquin.MarketData.Abstractions.Requests.RequestContext.RequestedAtUtc.get -> System.DateTimeOffset
+static Boutquin.MarketData.Abstractions.Requests.RequestContext.Create() -> Boutquin.MarketData.Abstractions.Requests.RequestContext!
+Boutquin.MarketData.Abstractions.Results.CompletenessStatus
+Boutquin.MarketData.Abstractions.Results.CompletenessStatus.Complete = 0 -> Boutquin.MarketData.Abstractions.Results.CompletenessStatus
+Boutquin.MarketData.Abstractions.Results.CompletenessStatus.Partial = 1 -> Boutquin.MarketData.Abstractions.Results.CompletenessStatus
+Boutquin.MarketData.Abstractions.Results.CompletenessStatus.Missing = 2 -> Boutquin.MarketData.Abstractions.Results.CompletenessStatus
+Boutquin.MarketData.Abstractions.Results.DataCoverage.Status.get -> Boutquin.MarketData.Abstractions.Results.CompletenessStatus
+Boutquin.MarketData.Abstractions.Results.DataProvenance.DataDate.get -> System.DateOnly?
+Boutquin.MarketData.Abstractions.Results.DataProvenance.DataProvenance(string! Provider, string! Dataset, string! LicenseFlag, string! RetrievalMode, Boutquin.MarketData.Abstractions.Results.FreshnessClass Freshness, System.DateTimeOffset RetrievedAtUtc, string? SourceUrl, System.DateOnly? DataDate = null) -> void
+Boutquin.MarketData.Abstractions.Results.DataProvenance.Freshness.get -> Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Results.FreshnessClass.Live = 0 -> Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Results.FreshnessClass.Delayed = 1 -> Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Results.FreshnessClass.EndOfDay = 2 -> Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Results.FreshnessClass.Stale = 3 -> Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Results.FreshnessClass.Unknown = 4 -> Boutquin.MarketData.Abstractions.Results.FreshnessClass
+Boutquin.MarketData.Abstractions.Contracts.IBatchDataRequest<out TPartitionKey>
+Boutquin.MarketData.Abstractions.Contracts.IBatchDataRequest<out TPartitionKey>.PartitionKeys.get -> System.Collections.Generic.IReadOnlyList<TPartitionKey>!
+Boutquin.MarketData.Abstractions.Contracts.IClock
+Boutquin.MarketData.Abstractions.Records.CorporateAction
+Boutquin.MarketData.Abstractions.Records.CorporateAction.ActionType.get -> Boutquin.MarketData.Abstractions.Records.CorporateActionType
+Boutquin.MarketData.Abstractions.Records.CorporateAction.Amount.get -> decimal?
+Boutquin.MarketData.Abstractions.Records.CorporateAction.CorporateAction(System.DateOnly EffectiveDate, string! Symbol, Boutquin.MarketData.Abstractions.Records.CorporateActionType ActionType, decimal? Factor, decimal? Amount, string? Currency, string? Description) -> void
+Boutquin.MarketData.Abstractions.Records.CorporateAction.Currency.get -> string?
+Boutquin.MarketData.Abstractions.Records.CorporateAction.Description.get -> string?
+Boutquin.MarketData.Abstractions.Records.CorporateAction.EffectiveDate.get -> System.DateOnly
+Boutquin.MarketData.Abstractions.Records.CorporateAction.Factor.get -> decimal?
+Boutquin.MarketData.Abstractions.Records.CorporateAction.Symbol.get -> string!
+Boutquin.MarketData.Abstractions.Records.CorporateActionType
+Boutquin.MarketData.Abstractions.Records.CorporateActionType.CashDividend = 0 -> Boutquin.MarketData.Abstractions.Records.CorporateActionType
+Boutquin.MarketData.Abstractions.Records.CorporateActionType.RightsIssue = 3 -> Boutquin.MarketData.Abstractions.Records.CorporateActionType
+Boutquin.MarketData.Abstractions.Records.CorporateActionType.SpinOff = 2 -> Boutquin.MarketData.Abstractions.Records.CorporateActionType
+Boutquin.MarketData.Abstractions.Records.CorporateActionType.Split = 1 -> Boutquin.MarketData.Abstractions.Records.CorporateActionType
+Boutquin.MarketData.Abstractions.Records.DividendPayment
+Boutquin.MarketData.Abstractions.Records.DividendPayment.Amount.get -> decimal
+Boutquin.MarketData.Abstractions.Records.DividendPayment.Currency.get -> string!
+Boutquin.MarketData.Abstractions.Records.DividendPayment.DividendPayment(System.DateOnly ExDate, decimal Amount, string! Currency) -> void
+Boutquin.MarketData.Abstractions.Records.DividendPayment.ExDate.get -> System.DateOnly
+Boutquin.MarketData.Abstractions.Records.OptionQuote
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Ask.get -> decimal?
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Bid.get -> decimal?
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Date.get -> System.DateOnly
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Expiry.get -> System.DateOnly
+Boutquin.MarketData.Abstractions.Records.OptionQuote.ImpliedVolatility.get -> decimal?
+Boutquin.MarketData.Abstractions.Records.OptionQuote.LastPrice.get -> decimal?
+Boutquin.MarketData.Abstractions.Records.OptionQuote.OpenInterest.get -> long
+Boutquin.MarketData.Abstractions.Records.OptionQuote.OptionQuote(System.DateOnly Date, string! Underlying, System.DateOnly Expiry, decimal Strike, Boutquin.MarketData.Abstractions.Records.OptionType Type, decimal? Bid, decimal? Ask, decimal? LastPrice, decimal? ImpliedVolatility, long OpenInterest, long Volume) -> void
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Strike.get -> decimal
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Type.get -> Boutquin.MarketData.Abstractions.Records.OptionType
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Underlying.get -> string!
+Boutquin.MarketData.Abstractions.Records.OptionQuote.Volume.get -> long
+Boutquin.MarketData.Abstractions.Records.OptionType
+Boutquin.MarketData.Abstractions.Records.OptionType.Call = 0 -> Boutquin.MarketData.Abstractions.Records.OptionType
+Boutquin.MarketData.Abstractions.Records.OptionType.Put = 1 -> Boutquin.MarketData.Abstractions.Records.OptionType
+Boutquin.MarketData.Abstractions.Contracts.IClock.UtcNow.get -> System.DateTimeOffset
+Boutquin.MarketData.Abstractions.Requests.FxHistoryRequest.PartitionKeys.get -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Records.FxPair!>!
+Boutquin.MarketData.Abstractions.Requests.PriceHistoryRequest.PartitionKeys.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment.None = 0 -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment.Following = 1 -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment.ModifiedFollowing = 2 -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment.Preceding = 3 -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment.ModifiedPreceding = 4 -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar
+Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar.Code.get -> string!
+Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar.IsBusinessDay(System.DateOnly date) -> bool
+Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar.Adjust(System.DateOnly date, Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment adjustment) -> System.DateOnly
+Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar.Advance(System.DateOnly date, int businessDays) -> System.DateOnly

@@ -1,0 +1,6 @@
+#nullable enable
+Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore
+Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.InMemoryFixingsStore(System.Collections.Generic.IEnumerable<(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName Benchmark, System.DateOnly Date, decimal Value)>! seed) -> void
+Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.GetFixing(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, System.DateOnly fixingDate) -> decimal?
+Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.TryGetFixing(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, System.DateOnly fixingDate, out decimal value) -> bool
+Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.GetFixings(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, Boutquin.MarketData.Abstractions.Requests.DateRange! range) -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<decimal>!>!

@@ -1,0 +1,18 @@
+#nullable enable
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.LazyAsyncCache() -> void
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.LazyAsyncCache(System.Collections.Generic.IEqualityComparer<TKey>! comparer) -> void
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.Count.get -> int
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.GetOrAddAsync(TKey key, System.Func<TKey, System.Threading.CancellationToken, System.Threading.Tasks.Task<TValue>>! factory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TValue>!
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.TryRemove(TKey key) -> bool
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.Clear() -> void
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.Dispose() -> void
+Boutquin.MarketData.Cache.Keys.CacheKeyBuilder
+static Boutquin.MarketData.Cache.Keys.CacheKeyBuilder.FromSegments(string! prefix, System.Collections.Generic.IEnumerable<string!>! segments) -> string!
+static Boutquin.MarketData.Cache.Keys.CacheKeyBuilder.FromDateRange(string! prefix, string! identifier, System.DateOnly? from, System.DateOnly? to) -> string!
+Boutquin.MarketData.Cache.WriteThrough.WriteThroughCache<TKey, TData>
+Boutquin.MarketData.Cache.WriteThrough.WriteThroughCache<TKey, TData>.WriteThroughCache(Boutquin.MarketData.Abstractions.Contracts.ISnapshotStore! store, Boutquin.MarketData.Abstractions.Contracts.ISnapshotSerializer<TData>! serializer, System.Func<TKey, string!>! keyMapper) -> void
+Boutquin.MarketData.Cache.WriteThrough.WriteThroughCache<TKey, TData>.ExistsAsync(TKey key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Boutquin.MarketData.Cache.WriteThrough.WriteThroughCache<TKey, TData>.TryReadAsync(TKey key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TData?>!
+Boutquin.MarketData.Cache.WriteThrough.WriteThroughCache<TKey, TData>.WriteAsync(TKey key, TData data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Cache.WriteThrough.WriteThroughCache<TKey, TData>.GetOrFetchAsync(TKey key, System.Func<TKey, System.Threading.CancellationToken, System.Threading.Tasks.Task<TData>!>! factory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TData>!

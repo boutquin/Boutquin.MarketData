@@ -1,0 +1,5 @@
+#nullable enable
+Boutquin.MarketData.DependencyInjection.DecoratorExtensions
+static Boutquin.MarketData.DependencyInjection.DecoratorExtensions.Decorate<TService>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<TService, System.IServiceProvider!, TService>! decoratorFactory) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions
+static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.AddMarketDataKernel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string? snapshotDirectory = null, string? rawDocumentDirectory = null, string? checkpointDirectory = null, string? eventLogDirectory = null, System.Action<Boutquin.MarketData.Transport.Http.TransportOptions!>? configureTransport = null, System.Action<Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions!>? configurePipeline = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

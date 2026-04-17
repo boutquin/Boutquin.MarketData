@@ -1,0 +1,20 @@
+#nullable enable
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>.Build() -> Boutquin.MarketData.Abstractions.Results.DataEnvelope<TPayload>!
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>.EnvelopeBuilder() -> void
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>.WithCoverage(int requested, int returned, int missing, decimal ratio) -> Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>!
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>.WithIssue(Boutquin.MarketData.Abstractions.Diagnostics.IssueCode code, Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity severity, string! message) -> Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>!
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>.WithPayload(TPayload payload) -> Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>!
+Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>.WithProvenance(Boutquin.MarketData.Abstractions.Provenance.ProviderCode provider, string! dataset, Boutquin.MarketData.Abstractions.Provenance.LicenseType licenseFlag = Boutquin.MarketData.Abstractions.Provenance.LicenseType.Free, Boutquin.MarketData.Abstractions.Provenance.RetrievalMode retrievalMode = Boutquin.MarketData.Abstractions.Provenance.RetrievalMode.Api, Boutquin.MarketData.Abstractions.Results.FreshnessClass freshness = Boutquin.MarketData.Abstractions.Results.FreshnessClass.Unknown, string? sourceUrl = null) -> Boutquin.MarketData.Testing.Builders.EnvelopeBuilder<TPayload>!
+Boutquin.MarketData.Testing.Fakes.FakeDataSourceAdapter<TRequest, TRecord>
+Boutquin.MarketData.Testing.Fakes.FakeDataSourceAdapter<TRequest, TRecord>.CanHandle(TRequest request) -> bool
+Boutquin.MarketData.Testing.Fakes.FakeDataSourceAdapter<TRequest, TRecord>.FakeDataSourceAdapter(Boutquin.MarketData.Abstractions.Provenance.ProviderCode providerKey, System.Func<TRequest, Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>! factory, System.Func<TRequest, bool>? canHandle = null) -> void
+Boutquin.MarketData.Testing.Fakes.FakeDataSourceAdapter<TRequest, TRecord>.FetchAsync(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>!
+Boutquin.MarketData.Testing.Fakes.FakeDataSourceAdapter<TRequest, TRecord>.Invocations.get -> System.Collections.Generic.IReadOnlyList<TRequest>!
+Boutquin.MarketData.Testing.Fakes.FakeDataSourceAdapter<TRequest, TRecord>.ProviderKey.get -> Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler
+Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.AllRequests.get -> System.Collections.Generic.IReadOnlyList<System.Net.Http.HttpRequestMessage!>!
+Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.FakeHttpMessageHandler(string! defaultContent = "", System.Net.HttpStatusCode defaultStatusCode = System.Net.HttpStatusCode.OK) -> void
+Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.LastRequest.get -> System.Net.Http.HttpRequestMessage?
+Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.RespondTo(string! urlKey, string! content, System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK) -> Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler!
+Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.RespondToWithBytes(string! urlKey, byte[]! bytes, string! mediaType = "application/octet-stream", System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK) -> Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler!

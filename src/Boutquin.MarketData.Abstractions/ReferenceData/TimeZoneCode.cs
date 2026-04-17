@@ -1,0 +1,93 @@
+// Copyright (c) 2026 Pierre G. Boutquin. All rights reserved.
+//
+//   Licensed under the Apache License, Version 2.0 (the "License").
+//   You may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//
+
+using System.ComponentModel;
+
+namespace Boutquin.MarketData.Abstractions.ReferenceData;
+
+/// <summary>
+/// Canonical trading-session timezones keyed by ISO 8601 designators.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Relocated from <c>Boutquin.Trading.Domain.Enums.TimeZoneCode</c>. The
+/// <c>[Description]</c> attribute on each member carries the ISO 8601 offset
+/// (or "Z" / "GMT" for UTC / Greenwich) so string serialisers can surface the
+/// offset without a separate lookup table.
+/// </para>
+/// <para>
+/// Resolve <see cref="Records.Bar"/> or <see cref="Records.FxRate"/> timestamps
+/// through <see cref="ExchangeMetadata.GetTimeZone(ExchangeCode)"/> — the
+/// exchange is the canonical authority for the session timezone, not the
+/// observation itself.
+/// </para>
+/// </remarks>
+public enum TimeZoneCode
+{
+    /// <summary>
+    /// Coordinated Universal Time.
+    /// </summary>
+    [Description("Z")]
+    UTC,
+
+    /// <summary>
+    /// Central European Time.
+    /// </summary>
+    [Description("+01:00")]
+    CET,
+
+    /// <summary>
+    /// Greenwich Mean Time.
+    /// </summary>
+    [Description("GMT")]
+    GMT,
+
+    /// <summary>
+    /// Eastern Standard Time.
+    /// </summary>
+    [Description("-05:00")]
+    EST,
+
+    /// <summary>
+    /// China Standard Time.
+    /// </summary>
+    [Description("+08:00")]
+    CST,
+
+    /// <summary>
+    /// Japan Standard Time.
+    /// </summary>
+    [Description("+09:00")]
+    JST,
+
+    /// <summary>
+    /// Hong Kong Time.
+    /// </summary>
+    [Description("+08:00")]
+    HKT,
+
+    /// <summary>
+    /// Moscow Standard Time.
+    /// </summary>
+    [Description("+04:00")]
+    MSK,
+
+    /// <summary>
+    /// Australian Eastern Standard Time.
+    /// </summary>
+    [Description("+10:00")]
+    AEST,
+}

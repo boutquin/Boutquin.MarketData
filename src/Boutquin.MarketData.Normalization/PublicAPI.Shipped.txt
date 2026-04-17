@@ -1,0 +1,31 @@
+#nullable enable
+Boutquin.MarketData.Normalization.Filters.DateRangeFilter
+static Boutquin.MarketData.Normalization.Filters.DateRangeFilter.Apply<TValue>(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.DateOnly, TValue>>! source, System.DateOnly? from, System.DateOnly? to) -> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.DateOnly, TValue>>!
+static Boutquin.MarketData.Normalization.Filters.DateRangeFilter.Apply<T>(System.Collections.Generic.IEnumerable<T>! source, System.Func<T, System.DateOnly>! dateSelector, System.DateOnly? from, System.DateOnly? to) -> System.Collections.Generic.IEnumerable<T>!
+Boutquin.MarketData.Normalization.Normalizers.BarNormalizer
+Boutquin.MarketData.Normalization.Normalizers.BarNormalizer.BarNormalizer(int decimalPlaces = 4) -> void
+Boutquin.MarketData.Normalization.Normalizers.BarNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.Bar! raw) -> Boutquin.MarketData.Abstractions.Records.Bar!
+Boutquin.MarketData.Normalization.Normalizers.FxRateNormalizer
+Boutquin.MarketData.Normalization.Normalizers.FxRateNormalizer.FxRateNormalizer(int decimalPlaces = 6) -> void
+Boutquin.MarketData.Normalization.Normalizers.FxRateNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FxRate! raw) -> Boutquin.MarketData.Abstractions.Records.FxRate!
+Boutquin.MarketData.Normalization.Normalizers.ScalarObservationNormalizer
+Boutquin.MarketData.Normalization.Normalizers.ScalarObservationNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.ScalarObservation! raw) -> Boutquin.MarketData.Abstractions.Records.ScalarObservation!
+Boutquin.MarketData.Normalization.Normalizers.ScalarObservationNormalizer.ScalarObservationNormalizer() -> void
+Boutquin.MarketData.Normalization.Normalizers.YieldCurveQuoteNormalizer
+Boutquin.MarketData.Normalization.Normalizers.YieldCurveQuoteNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.YieldCurveQuote! raw) -> Boutquin.MarketData.Abstractions.Records.YieldCurveQuote!
+Boutquin.MarketData.Normalization.Normalizers.YieldCurveQuoteNormalizer.YieldCurveQuoteNormalizer() -> void
+Boutquin.MarketData.Normalization.Normalizers.FuturesSettlementNormalizer
+Boutquin.MarketData.Normalization.Normalizers.FuturesSettlementNormalizer.FuturesSettlementNormalizer(int decimalPlaces = 4) -> void
+Boutquin.MarketData.Normalization.Normalizers.FuturesSettlementNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FuturesSettlement! raw) -> Boutquin.MarketData.Abstractions.Records.FuturesSettlement!
+Boutquin.MarketData.Normalization.Normalizers.FactorObservationNormalizer
+Boutquin.MarketData.Normalization.Normalizers.FactorObservationNormalizer.FactorObservationNormalizer() -> void
+Boutquin.MarketData.Normalization.Normalizers.FactorObservationNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FactorObservation! raw) -> Boutquin.MarketData.Abstractions.Records.FactorObservation!
+Boutquin.MarketData.Normalization.Normalizers.DividendPaymentNormalizer
+Boutquin.MarketData.Normalization.Normalizers.DividendPaymentNormalizer.DividendPaymentNormalizer(int decimalPlaces = 4) -> void
+Boutquin.MarketData.Normalization.Normalizers.DividendPaymentNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.DividendPayment! raw) -> Boutquin.MarketData.Abstractions.Records.DividendPayment!
+Boutquin.MarketData.Normalization.Normalizers.CorporateActionNormalizer
+Boutquin.MarketData.Normalization.Normalizers.CorporateActionNormalizer.CorporateActionNormalizer() -> void
+Boutquin.MarketData.Normalization.Normalizers.CorporateActionNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.CorporateAction! raw) -> Boutquin.MarketData.Abstractions.Records.CorporateAction!
+Boutquin.MarketData.Normalization.Normalizers.OptionQuoteNormalizer
+Boutquin.MarketData.Normalization.Normalizers.OptionQuoteNormalizer.OptionQuoteNormalizer(int decimalPlaces = 4) -> void
+Boutquin.MarketData.Normalization.Normalizers.OptionQuoteNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.OptionQuote! raw) -> Boutquin.MarketData.Abstractions.Records.OptionQuote!

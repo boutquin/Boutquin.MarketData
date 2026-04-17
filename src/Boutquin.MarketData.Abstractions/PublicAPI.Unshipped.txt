@@ -1,0 +1,173 @@
+#nullable enable
+Boutquin.MarketData.Abstractions.Calendars.BusinessCalendarExtensions
+static Boutquin.MarketData.Abstractions.Calendars.BusinessCalendarExtensions.BusinessDaysBetween(this Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar! calendar, System.DateOnly start, System.DateOnly end) -> System.Collections.Generic.IReadOnlyList<System.DateOnly>!
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata.InstrumentMetadata(string! Ticker, string! Name, string! Exchange, System.DateOnly? InceptionDate, string? Description) -> void
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata.Description.get -> string?
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata.Exchange.get -> string!
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata.InceptionDate.get -> System.DateOnly?
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata.Name.get -> string!
+Boutquin.MarketData.Abstractions.Records.InstrumentMetadata.Ticker.get -> string!
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest.InstrumentMetadataRequest(System.Collections.Generic.IReadOnlyList<string!>! Symbols) -> void
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest.DatasetKey.get -> string!
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest.Frequency.get -> Boutquin.MarketData.Abstractions.Requests.DataFrequency
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest.PartitionKeys.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest.Range.get -> Boutquin.MarketData.Abstractions.Requests.DateRange!
+Boutquin.MarketData.Abstractions.Requests.InstrumentMetadataRequest.Symbols.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Boutquin.MarketData.Abstractions.IDividendClassifier
+Boutquin.MarketData.Abstractions.IDividendClassifier.Classify(Boutquin.MarketData.Abstractions.ReferenceData.Symbol symbol, Boutquin.MarketData.Abstractions.ReferenceData.CurrencyCode assetCurrency, Boutquin.MarketData.Abstractions.ReferenceData.CurrencyCode investorBaseCurrency) -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.CA = 0 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.CN = 1 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.FR = 2 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.DE = 3 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.HK = 4 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.IN = 5 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.JP = 6 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.RU = 7 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.KR = 8 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.GB = 9 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryCode.US = 10 -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.AF = 0 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.AN = 1 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.AS = 2 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.EU = 3 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.NA = 4 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.OC = 5 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode.SA = 6 -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.UTC = 0 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.CET = 1 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.GMT = 2 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.EST = 3 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.CST = 4 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.JST = 5 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.HKT = 6 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.MSK = 7 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode.AEST = 8 -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.CanadianEligible = 0 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.CanadianNonEligible = 1 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.UsQualified = 2 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.UsOrdinary = 3 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.Foreign = 4 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.ReturnOfCapital = 5 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.CapitalGainDistribution = 6 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.DividendType.Unclassified = 7 -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.ReferenceData.ExchangeMetadata
+static Boutquin.MarketData.Abstractions.ReferenceData.ExchangeMetadata.GetTimeZone(Boutquin.MarketData.Abstractions.ReferenceData.ExchangeCode exchange) -> Boutquin.MarketData.Abstractions.ReferenceData.TimeZoneCode
+static Boutquin.MarketData.Abstractions.ReferenceData.ExchangeMetadata.GetCountry(Boutquin.MarketData.Abstractions.ReferenceData.ExchangeCode exchange) -> Boutquin.MarketData.Abstractions.ReferenceData.CountryCode
+Boutquin.MarketData.Abstractions.ReferenceData.CountryMetadata
+static Boutquin.MarketData.Abstractions.ReferenceData.CountryMetadata.GetContinent(Boutquin.MarketData.Abstractions.ReferenceData.CountryCode country) -> Boutquin.MarketData.Abstractions.ReferenceData.ContinentCode
+*REMOVED*Boutquin.MarketData.Abstractions.Records.DividendPayment.Currency.get -> string!
+*REMOVED*Boutquin.MarketData.Abstractions.Records.DividendPayment.DividendPayment(System.DateOnly ExDate, decimal Amount, string! Currency) -> void
+Boutquin.MarketData.Abstractions.Records.DividendPayment.Currency.get -> Boutquin.MarketData.Abstractions.ReferenceData.CurrencyCode
+Boutquin.MarketData.Abstractions.Records.DividendPayment.Type.get -> Boutquin.MarketData.Abstractions.ReferenceData.DividendType
+Boutquin.MarketData.Abstractions.Records.DividendPayment.DividendPayment(System.DateOnly ExDate, decimal Amount, Boutquin.MarketData.Abstractions.ReferenceData.CurrencyCode Currency, Boutquin.MarketData.Abstractions.ReferenceData.DividendType Type) -> void
+Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Abstractions.Provenance.ProviderCode.ProviderCode() -> void
+Boutquin.MarketData.Abstractions.Provenance.ProviderCode.ProviderCode(string! value) -> void
+Boutquin.MarketData.Abstractions.Provenance.ProviderCode.Value.get -> string!
+Boutquin.MarketData.Abstractions.Provenance.ProviderCode.CompareTo(Boutquin.MarketData.Abstractions.Provenance.ProviderCode other) -> int
+override Boutquin.MarketData.Abstractions.Provenance.ProviderCode.ToString() -> string!
+Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Provenance.LicenseType.Free = 0 -> Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Provenance.LicenseType.DelayedFifteenMin = 1 -> Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Provenance.LicenseType.Commercial = 2 -> Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Provenance.LicenseType.ResearchOnly = 3 -> Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Provenance.LicenseType.Redistribution = 4 -> Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Provenance.RetrievalMode.Api = 0 -> Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Provenance.RetrievalMode.Cache = 1 -> Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Provenance.RetrievalMode.Snapshot = 2 -> Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Provenance.RetrievalMode.Derived = 3 -> Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Provenance.RetrievalMode.Fixture = 4 -> Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity
+Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity.Warning = 0 -> Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity
+Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity.Error = 1 -> Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity
+Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.IssueCode() -> void
+Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.IssueCode(string! value) -> void
+Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.Value.get -> string!
+Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.CompareTo(Boutquin.MarketData.Abstractions.Diagnostics.IssueCode other) -> int
+override Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.ToString() -> string!
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.MissingField -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.StaleData -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.RateLimited -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.HolidayGap -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.UnexpectedGap -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.SchemaDrift -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.SnapshotStale -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+static readonly Boutquin.MarketData.Abstractions.Diagnostics.IssueCode.PartitionFailed -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId
+Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId.YieldCurveId() -> void
+Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId.YieldCurveId(string! value) -> void
+Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId.Value.get -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId.CompareTo(Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId other) -> int
+override Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId.ToString() -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId
+Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId.EconomicSeriesId() -> void
+Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId.EconomicSeriesId(string! value) -> void
+Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId.Value.get -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId.CompareTo(Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId other) -> int
+override Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId.ToString() -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId
+Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId.FactorDatasetId() -> void
+Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId.FactorDatasetId(string! value) -> void
+Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId.Value.get -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId.CompareTo(Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId other) -> int
+override Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId.ToString() -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode
+Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode.FuturesProductCode() -> void
+Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode.FuturesProductCode(string! value) -> void
+Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode.Value.get -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode.CompareTo(Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode other) -> int
+override Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode.ToString() -> string!
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.ContractMonth() -> void
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.ContractMonth(int year, int month) -> void
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.ContractMonth(string! text) -> void
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.Year.get -> int
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.Month.get -> int
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.CompareTo(Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth other) -> int
+Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.ToFirstOfMonth() -> System.DateOnly
+static Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.implicit operator System.DateOnly(Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth month) -> System.DateOnly
+override Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth.ToString() -> string!
+*REMOVED*Boutquin.MarketData.Abstractions.Results.DataProvenance.DataProvenance(string! Provider, string! Dataset, string! LicenseFlag, string! RetrievalMode, Boutquin.MarketData.Abstractions.Results.FreshnessClass Freshness, System.DateTimeOffset RetrievedAtUtc, string? SourceUrl, System.DateOnly? DataDate = null) -> void
+Boutquin.MarketData.Abstractions.Results.DataProvenance.DataProvenance(Boutquin.MarketData.Abstractions.Provenance.ProviderCode Provider, string! Dataset, Boutquin.MarketData.Abstractions.Provenance.LicenseType LicenseFlag, Boutquin.MarketData.Abstractions.Provenance.RetrievalMode RetrievalMode, Boutquin.MarketData.Abstractions.Results.FreshnessClass Freshness, System.DateTimeOffset RetrievedAtUtc, string? SourceUrl, System.DateOnly? DataDate = null) -> void
+Boutquin.MarketData.Abstractions.Results.DataProvenance.Provider.get -> Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Abstractions.Results.DataProvenance.Dataset.get -> string!
+Boutquin.MarketData.Abstractions.Results.DataProvenance.LicenseFlag.get -> Boutquin.MarketData.Abstractions.Provenance.LicenseType
+Boutquin.MarketData.Abstractions.Results.DataProvenance.RetrievalMode.get -> Boutquin.MarketData.Abstractions.Provenance.RetrievalMode
+Boutquin.MarketData.Abstractions.Results.DataProvenance.RetrievedAtUtc.get -> System.DateTimeOffset
+Boutquin.MarketData.Abstractions.Results.DataProvenance.SourceUrl.get -> string?
+Boutquin.MarketData.Abstractions.Results.DataIssue
+Boutquin.MarketData.Abstractions.Results.DataIssue.DataIssue(Boutquin.MarketData.Abstractions.Diagnostics.IssueCode Code, Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity Severity, string! Message) -> void
+Boutquin.MarketData.Abstractions.Results.DataIssue.Code.get -> Boutquin.MarketData.Abstractions.Diagnostics.IssueCode
+Boutquin.MarketData.Abstractions.Results.DataIssue.Severity.get -> Boutquin.MarketData.Abstractions.Diagnostics.IssueSeverity
+Boutquin.MarketData.Abstractions.Results.DataIssue.Message.get -> string!
+Boutquin.MarketData.Abstractions.Results.FallbackResult<TResponse>
+Boutquin.MarketData.Abstractions.Results.FallbackResult<TResponse>.FallbackResult(TResponse Response, Boutquin.MarketData.Abstractions.Provenance.ProviderCode SelectedProviderKey, System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.FallbackAttempt!>! Attempts) -> void
+Boutquin.MarketData.Abstractions.Results.FallbackResult<TResponse>.Response.get -> TResponse
+Boutquin.MarketData.Abstractions.Results.FallbackResult<TResponse>.SelectedProviderKey.get -> Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Abstractions.Results.FallbackResult<TResponse>.Attempts.get -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.FallbackAttempt!>!
+Boutquin.MarketData.Abstractions.Results.FallbackAttempt
+Boutquin.MarketData.Abstractions.Results.FallbackAttempt.FallbackAttempt(Boutquin.MarketData.Abstractions.Provenance.ProviderCode ProviderKey, int Priority, bool Succeeded, string! Outcome) -> void
+Boutquin.MarketData.Abstractions.Results.FallbackAttempt.ProviderKey.get -> Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Abstractions.Results.FallbackAttempt.Priority.get -> int
+Boutquin.MarketData.Abstractions.Results.FallbackAttempt.Succeeded.get -> bool
+Boutquin.MarketData.Abstractions.Results.FallbackAttempt.Outcome.get -> string!
+Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<in TRequest, TRecord>.ProviderKey.get -> Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Abstractions.Requests.YieldCurveQuoteRequest.YieldCurveQuoteRequest(Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId CurveId, System.DateOnly AsOfDate) -> void
+Boutquin.MarketData.Abstractions.Requests.YieldCurveQuoteRequest.CurveId.get -> Boutquin.MarketData.Abstractions.ReferenceData.YieldCurveId
+Boutquin.MarketData.Abstractions.Requests.EconomicSeriesRequest.EconomicSeriesRequest(Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId SeriesId, Boutquin.MarketData.Abstractions.Requests.DateRange! Range, Boutquin.MarketData.Abstractions.Requests.DataFrequency Frequency = Boutquin.MarketData.Abstractions.Requests.DataFrequency.Daily) -> void
+Boutquin.MarketData.Abstractions.Requests.EconomicSeriesRequest.SeriesId.get -> Boutquin.MarketData.Abstractions.ReferenceData.EconomicSeriesId
+Boutquin.MarketData.Abstractions.Requests.FactorSeriesRequest.FactorSeriesRequest(Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId DatasetName, Boutquin.MarketData.Abstractions.Requests.DateRange! Range, Boutquin.MarketData.Abstractions.Requests.DataFrequency Frequency = Boutquin.MarketData.Abstractions.Requests.DataFrequency.Daily) -> void
+Boutquin.MarketData.Abstractions.Requests.FactorSeriesRequest.DatasetName.get -> Boutquin.MarketData.Abstractions.ReferenceData.FactorDatasetId
+Boutquin.MarketData.Abstractions.Requests.FuturesSettlementRequest.FuturesSettlementRequest(Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode ProductCode, Boutquin.MarketData.Abstractions.Requests.DateRange! Range, Boutquin.MarketData.Abstractions.Requests.DataFrequency Frequency = Boutquin.MarketData.Abstractions.Requests.DataFrequency.Daily) -> void
+Boutquin.MarketData.Abstractions.Requests.FuturesSettlementRequest.ProductCode.get -> Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode
+Boutquin.MarketData.Abstractions.Records.FuturesSettlement.FuturesSettlement(System.DateOnly Date, Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode ContractCode, Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth ContractMonth, decimal SettlePrice, decimal? ImpliedRate) -> void
+Boutquin.MarketData.Abstractions.Records.FuturesSettlement.ContractCode.get -> Boutquin.MarketData.Abstractions.ReferenceData.FuturesProductCode
+Boutquin.MarketData.Abstractions.Records.FuturesSettlement.ContractMonth.get -> Boutquin.MarketData.Abstractions.ReferenceData.ContractMonth

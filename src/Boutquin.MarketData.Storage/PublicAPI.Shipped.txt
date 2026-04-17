@@ -1,0 +1,66 @@
+#nullable enable
+Boutquin.MarketData.Storage.Cdc.SnapshotChangeSource
+Boutquin.MarketData.Storage.Cdc.SnapshotChangeSource.ReadChangesAsync(long position, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Boutquin.Storage.Domain.ValueObjects.ChangeRecord<string!, byte[]!>!>!
+Boutquin.MarketData.Storage.Cdc.SnapshotChangeSource.SnapshotChangeSource(Boutquin.Storage.Domain.Interfaces.Cdc.IChangeDataCaptureSource<string!, byte[]!>! inner) -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Dataset.get -> string!
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.IngestionCheckpoint(string! Provider, string! Dataset, int SymbolIndex, System.DateTimeOffset LastSuccessUtc) -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.LastSuccessUtc.get -> System.DateTimeOffset
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Provider.get -> string!
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.SymbolIndex.get -> int
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpointStore
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpointStore.IngestionCheckpointStore(Boutquin.Storage.Domain.Interfaces.Streaming.ICheckpointStore! inner) -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpointStore.LoadAsync(string! pipelineId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint?>!
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpointStore.SaveAsync(string! pipelineId, Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint! checkpoint, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Storage.Events.IngestionAction
+Boutquin.MarketData.Storage.Events.IngestionAction.Cached = 2 -> Boutquin.MarketData.Storage.Events.IngestionAction
+Boutquin.MarketData.Storage.Events.IngestionAction.Failed = 3 -> Boutquin.MarketData.Storage.Events.IngestionAction
+Boutquin.MarketData.Storage.Events.IngestionAction.Fetched = 0 -> Boutquin.MarketData.Storage.Events.IngestionAction
+Boutquin.MarketData.Storage.Events.IngestionAction.Normalized = 1 -> Boutquin.MarketData.Storage.Events.IngestionAction
+Boutquin.MarketData.Storage.Events.IngestionEvent
+Boutquin.MarketData.Storage.Events.IngestionEvent.Action.get -> Boutquin.MarketData.Storage.Events.IngestionAction
+Boutquin.MarketData.Storage.Events.IngestionEvent.Dataset.get -> string!
+Boutquin.MarketData.Storage.Events.IngestionEvent.ErrorMessage.get -> string?
+Boutquin.MarketData.Storage.Events.IngestionEvent.IngestionEvent(string! Provider, string! Dataset, string! Symbol, Boutquin.MarketData.Storage.Events.IngestionAction Action, System.DateTimeOffset TimestampUtc, string? ErrorMessage = null) -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.Provider.get -> string!
+Boutquin.MarketData.Storage.Events.IngestionEvent.Symbol.get -> string!
+Boutquin.MarketData.Storage.Events.IngestionEvent.TimestampUtc.get -> System.DateTimeOffset
+Boutquin.MarketData.Storage.Events.IngestionEventLog
+Boutquin.MarketData.Storage.Events.IngestionEventLog.IngestionEventLog(Boutquin.Storage.Domain.Interfaces.Events.IEventLog<Boutquin.MarketData.Storage.Events.IngestionEvent!>! inner) -> void
+Boutquin.MarketData.Storage.Events.IngestionEventLog.LogAsync(Boutquin.MarketData.Storage.Events.IngestionEvent! evt, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
+Boutquin.MarketData.Storage.Events.IngestionEventLog.ReadFromAsync(long position, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<(long Position, Boutquin.MarketData.Storage.Events.IngestionEvent! Event)>!
+Boutquin.MarketData.Storage.InMemory.InMemorySnapshotStore
+Boutquin.MarketData.Storage.InMemory.InMemorySnapshotStore.ExistsAsync(string! snapshotKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Boutquin.MarketData.Storage.InMemory.InMemorySnapshotStore.InMemorySnapshotStore() -> void
+Boutquin.MarketData.Storage.InMemory.InMemorySnapshotStore.InMemorySnapshotStore(Boutquin.Storage.Domain.Interfaces.ObjectStore.IObjectStore! store) -> void
+Boutquin.MarketData.Storage.InMemory.InMemorySnapshotStore.ReadAsync(string! snapshotKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IO.Stream?>!
+Boutquin.MarketData.Storage.InMemory.InMemorySnapshotStore.WriteAsync(string! snapshotKey, System.IO.Stream! content, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Storage.RawDocuments.FileRawDocumentStore
+Boutquin.MarketData.Storage.RawDocuments.FileRawDocumentStore.FileRawDocumentStore(Boutquin.Storage.Domain.Interfaces.ObjectStore.IObjectStore! store) -> void
+Boutquin.MarketData.Storage.RawDocuments.FileRawDocumentStore.FileRawDocumentStore(string! rootDirectory) -> void
+Boutquin.MarketData.Storage.RawDocuments.FileRawDocumentStore.LoadAsync(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+Boutquin.MarketData.Storage.RawDocuments.FileRawDocumentStore.SaveAsync(string! key, string! content, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Storage.Snapshots.FileSnapshotStore
+Boutquin.MarketData.Storage.Snapshots.FileSnapshotStore.ExistsAsync(string! snapshotKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Boutquin.MarketData.Storage.Snapshots.FileSnapshotStore.FileSnapshotStore(Boutquin.Storage.Domain.Interfaces.ObjectStore.IObjectStore! store) -> void
+Boutquin.MarketData.Storage.Snapshots.FileSnapshotStore.FileSnapshotStore(string! baseDirectory) -> void
+Boutquin.MarketData.Storage.Snapshots.FileSnapshotStore.ReadAsync(string! snapshotKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IO.Stream?>!
+Boutquin.MarketData.Storage.Snapshots.FileSnapshotStore.WriteAsync(string! snapshotKey, System.IO.Stream! content, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Storage.Serializers.JsonSnapshotSerializer<T>
+Boutquin.MarketData.Storage.Serializers.JsonSnapshotSerializer<T>.JsonSnapshotSerializer() -> void
+Boutquin.MarketData.Storage.Serializers.JsonSnapshotSerializer<T>.SerializeAsync(System.IO.Stream! stream, T data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Storage.Serializers.JsonSnapshotSerializer<T>.DeserializeAsync(System.IO.Stream! stream, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Metadata.get -> Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata!
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Payload.get -> T
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.SnapshotEnvelope(Boutquin.Storage.Domain.ValueObjects.SchemaVersion Version, Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata! Metadata, T Payload) -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Version.get -> Boutquin.Storage.Domain.ValueObjects.SchemaVersion
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelopeSerializer<T>
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelopeSerializer<T>.DeserializeAsync(System.IO.Stream! stream, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>!>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelopeSerializer<T>.SerializeAsync(System.IO.Stream! stream, Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>! data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelopeSerializer<T>.SnapshotEnvelopeSerializer(Boutquin.MarketData.Abstractions.Contracts.ISnapshotSerializer<T>! innerSerializer) -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Issues.get -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataIssue!>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Provenance.get -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataProvenance!>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.SnapshotMetadata(System.DateTimeOffset StoredAtUtc, System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataProvenance!>! Provenance, System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataIssue!>! Issues) -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.StoredAtUtc.get -> System.DateTimeOffset

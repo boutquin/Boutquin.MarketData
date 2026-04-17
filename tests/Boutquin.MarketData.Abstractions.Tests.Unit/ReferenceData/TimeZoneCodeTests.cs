@@ -1,0 +1,78 @@
+// Copyright (c) 2026 Pierre G. Boutquin. All rights reserved.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License").
+//  You may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+using System.ComponentModel;
+using System.Reflection;
+
+using Boutquin.MarketData.Abstractions.ReferenceData;
+
+using FluentAssertions;
+
+using Xunit;
+
+namespace Boutquin.MarketData.Abstractions.Tests.Unit.ReferenceData;
+
+public sealed class TimeZoneCodeTests
+{
+    // Description carries the ISO 8601 offset token (or "Z" / "GMT" for UTC /
+    // Greenwich). Two members intentionally share "+08:00" (CST and HKT) —
+    // they are geographically distinct but observe the same fixed offset.
+    private static readonly IReadOnlyDictionary<string, (int Ordinal, string Description)> s_expected =
+        new Dictionary<string, (int, string)>
+        {
+            ["UTC"] = (0, "Z"),
+            ["CET"] = (1, "+01:00"),
+            ["GMT"] = (2, "GMT"),
+            ["EST"] = (3, "-05:00"),
+            ["CST"] = (4, "+08:00"),
+            ["JST"] = (5, "+09:00"),
+            ["HKT"] = (6, "+08:00"),
+            ["MSK"] = (7, "+04:00"),
+            ["AEST"] = (8, "+10:00"),
+        };
+
+    [Fact]
+    public void Has_expected_member_count()
+    {
+        Enum.GetValues<TimeZoneCode>().Should().HaveCount(s_expected.Count);
+    }
+
+    [Fact]
+    public void All_members_match_snapshot_ordinals()
+    {
+        foreach (var code in Enum.GetValues<TimeZoneCode>())
+        {
+            var name = code.ToString();
+            s_expected.Should().ContainKey(name);
+            ((int)code).Should().Be(s_expected[name].Ordinal);
+        }
+    }
+
+    [Fact]
+    public void All_members_carry_expected_Description_attribute()
+    {
+        foreach (var code in Enum.GetValues<TimeZoneCode>())
+        {
+            var name = code.ToString();
+            var description = typeof(TimeZoneCode)
+                .GetField(name)!
+                .GetCustomAttribute<DescriptionAttribute>()
+                ?.Description;
+
+            description.Should().Be(s_expected[name].Description);
+        }
+    }
+}

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.Orchestration</PackageId>
+    <AssemblyName>Boutquin.MarketData.Orchestration</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.Orchestration</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Calendars\Boutquin.MarketData.Calendars.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Catalog\Boutquin.MarketData.Catalog.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Cache\Boutquin.MarketData.Cache.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Storage\Boutquin.MarketData.Storage.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Normalization\Boutquin.MarketData.Normalization.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Transport\Boutquin.MarketData.Transport.csproj" />
+  </ItemGroup>
+</Project>

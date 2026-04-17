@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.Calendars</PackageId>
+    <AssemblyName>Boutquin.MarketData.Calendars</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.Calendars</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

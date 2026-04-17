@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.DayCount</PackageId>
+    <AssemblyName>Boutquin.MarketData.DayCount</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.DayCount</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.DependencyInjection</PackageId>
+    <AssemblyName>Boutquin.MarketData.DependencyInjection</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.DependencyInjection</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Boutquin.Storage.Infrastructure" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Orchestration\Boutquin.MarketData.Orchestration.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Transport\Boutquin.MarketData.Transport.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Cache\Boutquin.MarketData.Cache.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Storage\Boutquin.MarketData.Storage.csproj" />
+  </ItemGroup>
+</Project>

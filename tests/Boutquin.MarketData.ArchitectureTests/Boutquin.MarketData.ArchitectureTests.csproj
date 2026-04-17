@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);CA1823</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Boutquin.MarketData.Abstractions/Boutquin.MarketData.Abstractions.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Transport/Boutquin.MarketData.Transport.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Cache/Boutquin.MarketData.Cache.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Storage/Boutquin.MarketData.Storage.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Catalog/Boutquin.MarketData.Catalog.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.DayCount/Boutquin.MarketData.DayCount.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Calendars/Boutquin.MarketData.Calendars.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Conventions/Boutquin.MarketData.Conventions.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Normalization/Boutquin.MarketData.Normalization.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Orchestration/Boutquin.MarketData.Orchestration.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.DependencyInjection/Boutquin.MarketData.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Testing/Boutquin.MarketData.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NetArchTest.eNhancedEdition" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

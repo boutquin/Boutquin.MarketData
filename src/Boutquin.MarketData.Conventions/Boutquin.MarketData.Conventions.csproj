@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Boutquin.MarketData.Conventions</PackageId>
+    <AssemblyName>Boutquin.MarketData.Conventions</AssemblyName>
+    <RootNamespace>Boutquin.MarketData.Conventions</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

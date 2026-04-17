@@ -1,0 +1,13 @@
+#nullable enable
+Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator
+Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.Compute(Boutquin.MarketData.Abstractions.Requests.DateRange! range, Boutquin.MarketData.Abstractions.Requests.DataFrequency frequency, int returnedPoints) -> Boutquin.MarketData.Abstractions.Results.DataCoverage!
+Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.CoverageCalculator(Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar! calendar) -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipeline
+Boutquin.MarketData.Orchestration.Pipeline.DataPipeline.DataPipeline(Boutquin.MarketData.Abstractions.Contracts.ILocalCache! localCache, Boutquin.MarketData.Abstractions.Contracts.ISnapshotStore! snapshotStore, Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpointStore! checkpointStore, Boutquin.MarketData.Storage.Events.IngestionEventLog! eventLog, Boutquin.MarketData.Cache.Policies.SnapshotStalenessPolicy! stalenessPolicy, Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator! coverageCalculator, Microsoft.Extensions.Options.IOptions<Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions!>! options, System.IServiceProvider! serviceProvider, Boutquin.MarketData.Abstractions.Contracts.IClock! clock, Microsoft.Extensions.Logging.ILogger<Boutquin.MarketData.Orchestration.Pipeline.DataPipeline!>! logger) -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipeline.ExecuteAsync<TRequest, TRecord>(TRequest request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>!
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.ContinueOnPartitionFailure.get -> bool
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.ContinueOnPartitionFailure.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.DataPipelineOptions() -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.L1CacheTtl.get -> System.TimeSpan
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.L1CacheTtl.set -> void

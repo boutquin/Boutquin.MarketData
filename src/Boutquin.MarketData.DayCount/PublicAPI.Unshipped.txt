@@ -1,0 +1,10 @@
+#nullable enable
+Boutquin.MarketData.DayCount.ActualActualInPeriod
+Boutquin.MarketData.DayCount.ActualActualInPeriod.Code.get -> string!
+Boutquin.MarketData.DayCount.ActualActualInPeriod.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
+Boutquin.MarketData.DayCount.ActualActualInPeriod.YearFraction(System.DateOnly start, System.DateOnly end, System.DateOnly periodStart, System.DateOnly periodEnd, int couponFrequency) -> double
+static readonly Boutquin.MarketData.DayCount.ActualActualInPeriod.Instance -> Boutquin.MarketData.DayCount.ActualActualInPeriod!
+Boutquin.MarketData.DayCount.ThirtyE360
+Boutquin.MarketData.DayCount.ThirtyE360.Code.get -> string!
+Boutquin.MarketData.DayCount.ThirtyE360.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
+static readonly Boutquin.MarketData.DayCount.ThirtyE360.Instance -> Boutquin.MarketData.DayCount.ThirtyE360!
