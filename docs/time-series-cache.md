@@ -404,7 +404,7 @@ already constructs stores generically from the record's own attributes.
 
 ## Qualified dependency candidate migration
 
-The 2.0 RC uses the exact Storage candidate in `dependency-source.json`. Value-log
+The 2.0 RC uses published Storage 2.0.0 archives pinned in `dependency-source.json`. Value-log
 dispatch is disabled with `TimeSeriesValueLog = null`; row stores opt in using valid
 `ValueLogOptions`. The old `int.MaxValue` threshold is no longer valid.
 

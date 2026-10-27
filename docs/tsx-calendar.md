@@ -17,7 +17,9 @@ References:
 - [Ontario Family Day introduction](https://www.ontario.ca/document/employment-standard-act-policy-and-interpretation-manual/part-x-public-holidays)
 - [Bank of Canada, September 12, 2001](https://www.bankofcanada.ca/2001/09/bank-canada-update-financial-markets/)
 
-## Calendar-only adoption
+## Separate calendar compatibility builds
+
+The published 2.0 RC uses matching 2.0 RC Abstractions and assembly/file versions `2.0.0.0`. The optional build below creates a separate compatibility candidate; it is not the qualified public RC. Set the four environment variables to the existing consumer ABI and a fresh package identity before running it.
 
 The normal build retains its project reference to current Abstractions. For an application still
 using an older Abstractions package, pass `CalendarAbstractionsPackageVersion` to build and pack
@@ -26,9 +28,9 @@ Calendars against that exact package ABI. This does not repack or upgrade the ke
 ```bash
 dotnet pack src/Boutquin.MarketData.Calendars/Boutquin.MarketData.Calendars.csproj \
   --configuration Release --configfile /path/to/consumer/nuget.config \
-  /p:CalendarAbstractionsPackageVersion=1.1.0-local-20260726 \
-  /p:MinVerVersionOverride=<unique-calendar-version> \
-  /p:AssemblyVersion=1.0.0.0 /p:FileVersion=1.1.1.0 --output nupkg
+  /p:CalendarAbstractionsPackageVersion="$CONSUMER_ABSTRACTIONS_VERSION" \
+  /p:MinVerVersionOverride="$UNIQUE_CALENDAR_VERSION" \
+  /p:AssemblyVersion="$CONSUMER_ASSEMBLY_VERSION" /p:FileVersion="$CONSUMER_FILE_VERSION" --output nupkg
 ```
 
 Verify the packed dependency version, assembly binding identity and the consuming application's

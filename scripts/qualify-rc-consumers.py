@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run cold, locked package consumers without changing the working consumer repositories."""
 from __future__ import annotations
-import argparse, hashlib, json, os, re, shutil, subprocess, xml.etree.ElementTree as ET
+import argparse, base64, hashlib, json, os, re, shutil, subprocess, xml.etree.ElementTree as ET
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,6 +37,24 @@ def validate_adapter_checkout(adapter):
     if subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=all"], cwd=adapter, text=True).strip():
         raise ValueError("Adapter qualification requires a clean baseline checkout")
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=adapter, text=True).strip()
+
+def validate_adapter_lock_changes(adapter, changed, old_version, version, feed):
+    """Allow only regenerated kernel version/hash pins in committed consumer locks."""
+    signed_path = feed.parent / 'signed-packages.json'
+    signed_hashes = {item['id']: item['contentHash'] for item in json.loads(signed_path.read_text())} if signed_path.exists() else {}
+    for relative in changed - set(ADAPTER_PIN_FILES):
+        if Path(relative).name != 'packages.lock.json':
+            raise ValueError('Unexpected changed Adapter source: ' + relative)
+        original = subprocess.check_output(['git', 'show', 'HEAD:' + relative], cwd=adapter, text=True)
+        expected = json.loads(original.replace(old_version, version))
+        actual = json.loads((adapter / relative).read_text())
+        for dependencies in expected['dependencies'].values():
+            for name, item in dependencies.items():
+                if name in PACKAGE_IDS and 'contentHash' in item:
+                    archive = feed / (name + '.' + version + '.nupkg')
+                    item['contentHash'] = signed_hashes.get(name, base64.b64encode(hashlib.sha512(archive.read_bytes()).digest()).decode())
+        if actual != expected:
+            raise ValueError('Consumer lock changed beyond exact kernel version/hash pins: ' + relative)
 
 def verify_restored_packages(cache, cwd, packages, version, manifest, require_all):
     resolved = set()
@@ -165,7 +183,8 @@ Assert.Equal(item.GetProperty("dllSha256").GetString(),Convert.ToHexStringLower(
     if subprocess.check_output(['git','rev-parse','HEAD'],cwd=adapter,text=True).strip()!=baseline:
         raise ValueError('Adapter baseline changed during qualification')
     changed=set(subprocess.check_output(['git','diff','HEAD','--name-only'],cwd=adapter,text=True).splitlines())
-    if changed != set(ADAPTER_PIN_FILES) or any(path.read_text(encoding='utf-8')!=content for path,content in pin_changes.items()):
+    validate_adapter_lock_changes(adapter, changed, old_version, version, feed)
+    if not set(ADAPTER_PIN_FILES).issubset(changed) or any(path.read_text(encoding='utf-8')!=content for path,content in pin_changes.items()):
         raise ValueError('Adapter qualification changed more than the two reviewed identity pins')
     untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=adapter,text=True).splitlines()
     if any(Path(name).name!='packages.lock.json' for name in untracked):
