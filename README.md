@@ -1,13 +1,13 @@
 # Boutquin.MarketData
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/LICENSE.txt)
 [![Build](https://github.com/boutquin/Boutquin.MarketData/actions/workflows/pr-verify.yml/badge.svg)](https://github.com/boutquin/Boutquin.MarketData/actions/workflows/pr-verify.yml)
 
 Shared data ingestion kernel for [Boutquin.Curves](https://github.com/boutquin/Boutquin.Curves), [Boutquin.Trading](https://github.com/boutquin/Boutquin.Trading), and [Boutquin.OptionPricing](https://github.com/boutquin/Boutquin.OptionPricing). Owns transport, caching, storage, normalization, pipeline orchestration, calendars, day-count conventions, and all canonical record and reference-data types — domain repositories own their builders and recipes that compose kernel adapters into domain-specific bundles.
 
 Concrete source adapters (Tiingo, Frankfurter, FRED, Bank of Canada, etc.) live in [Boutquin.MarketData.Adapter](https://github.com/boutquin/Boutquin.MarketData.Adapter). The kernel ships contracts and infrastructure only — adapters are plug-ins, not dependencies.
 
-**2.0 RC:** targets .NET 10 and published Storage 2.0.0. Install the explicit prerelease version below; unversioned installs select the older stable release. See [migration](docs/migration-2.0.md) and [building and release verification](docs/runner-dependencies.md).
+**2.0 RC:** targets .NET 10 and published Storage 2.0.0. Install the explicit prerelease version below; unversioned installs select the older stable release. See [migration](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/migration-2.0.md) and [building and release verification](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/runner-dependencies.md).
 
 ## Solution Structure
 
@@ -110,11 +110,11 @@ Assigning a `YieldCurveId` to a `FactorDatasetId` field is now a compile error, 
 
 ### Time-series store cache tier (preview)
 
-Behind `DataPipelineOptions.UseTimeSeriesStore` (default `false`), the pipeline can route cache reads and gap-fill writes through a columnar LSM time-series store instead of the L2 exact-key snapshot store — a request whose date range is already covered returns with zero adapter calls, and only genuinely missing dates trigger a fetch. The tier also adds snapshot-isolated reads (`IDataPipeline.AcquireReadSnapshotAsync`) for backtests and calibration runs that need a coherent point-in-time view. See [`docs/time-series-cache.md`](docs/time-series-cache.md) for the full flow, the segment-format and compaction choices, and the Boutquin.Storage 2.0 migration note.
+Behind `DataPipelineOptions.UseTimeSeriesStore` (default `false`), the pipeline can route cache reads and gap-fill writes through a columnar LSM time-series store instead of the L2 exact-key snapshot store — a request whose date range is already covered returns with zero adapter calls, and only genuinely missing dates trigger a fetch. The tier also adds snapshot-isolated reads (`IDataPipeline.AcquireReadSnapshotAsync`) for backtests and calibration runs that need a coherent point-in-time view. See [`docs/time-series-cache.md`](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/time-series-cache.md) for the full flow, the segment-format and compaction choices, and the Boutquin.Storage 2.0 migration note.
 
 ### Default normalizer registration (opt-in)
 
-Behind `DataPipelineOptions.RegisterDefaultNormalizers` (default `false`, alongside `UseTimeSeriesStore` above), `AddMarketDataKernel` registers all nine shipped normalizers — one per canonical record type — so step 6 of the pipeline above actually runs instead of silently passing records through un-normalized. A normalizer a host registers itself always wins over the kernel default, in either registration order. See [`docs/normalization.md`](docs/normalization.md) for what each normalizer does, override/opt-out recipes, and a cache-coherence note for hosts with an already-populated cache directory.
+Behind `DataPipelineOptions.RegisterDefaultNormalizers` (default `false`, alongside `UseTimeSeriesStore` above), `AddMarketDataKernel` registers all nine shipped normalizers — one per canonical record type — so step 6 of the pipeline above actually runs instead of silently passing records through un-normalized. A normalizer a host registers itself always wins over the kernel default, in either registration order. See [`docs/normalization.md`](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/normalization.md) for what each normalizer does, override/opt-out recipes, and a cache-coherence note for hosts with an already-populated cache directory.
 
 ## Typed Requests
 
@@ -155,13 +155,13 @@ Each typed request drives `IDataPipeline.ExecuteAsync<TRequest, TRecord>` and re
 Add a reference to the abstractions package:
 
 ```bash
-dotnet add package Boutquin.MarketData.Abstractions --version 2.0.0-rc.20261027.3
+dotnet add package Boutquin.MarketData.Abstractions --version 2.0.0-rc.20261027.4
 ```
 
 To use the full pipeline with DI composition:
 
 ```bash
-dotnet add package Boutquin.MarketData.DependencyInjection --version 2.0.0-rc.20261027.3
+dotnet add package Boutquin.MarketData.DependencyInjection --version 2.0.0-rc.20261027.4
 ```
 
 Register the kernel in your `IServiceCollection`:
@@ -193,11 +193,11 @@ dotnet format Boutquin.MarketData.slnx --verify-no-changes
 
 ## Documentation
 
-- [Architecture Overview](docs/architecture.md) — layered package design, pipeline internals, and three-layer data architecture constraint
-- [Time-Series Store Cache Tier](docs/time-series-cache.md) — the preview `UseTimeSeriesStore` gap-fill flow, snapshot-isolated reads, segment-format and compaction choices, quarantine options, and the Boutquin.Storage 2.0 wire-format migration note
-- [Default Normalizer Registration](docs/normalization.md) — what the nine shipped normalizers do, the opt-in `RegisterDefaultNormalizers` flag, host-override and opt-out recipes, the `InstrumentMetadata` asymmetry, and the cache-coherence rule for enabling the flag over an existing cache directory
-- [Reference Data](docs/reference-data.md) — Tier 1 and Tier 2 enumerations, `Symbol`, `ExchangeMetadata` / `CountryMetadata`, rate benchmarks, instrument conventions, fixings, exception hierarchy, `Provenance` / `Diagnostics` typed wrappers, external identifiers, and the pre-typed migration table
-- [Day-Count Conventions](docs/day-counts.md) — shipped conventions, alias table, `ActualActualInPeriod` ICMA guidance, and the `Thirty360` Bond Basis vs. 30E/360 Eurobond distinction
+- [Architecture Overview](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/architecture.md) — layered package design, pipeline internals, and three-layer data architecture constraint
+- [Time-Series Store Cache Tier](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/time-series-cache.md) — the preview `UseTimeSeriesStore` gap-fill flow, snapshot-isolated reads, segment-format and compaction choices, quarantine options, and the Boutquin.Storage 2.0 wire-format migration note
+- [Default Normalizer Registration](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/normalization.md) — what the nine shipped normalizers do, the opt-in `RegisterDefaultNormalizers` flag, host-override and opt-out recipes, the `InstrumentMetadata` asymmetry, and the cache-coherence rule for enabling the flag over an existing cache directory
+- [Reference Data](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/reference-data.md) — Tier 1 and Tier 2 enumerations, `Symbol`, `ExchangeMetadata` / `CountryMetadata`, rate benchmarks, instrument conventions, fixings, exception hierarchy, `Provenance` / `Diagnostics` typed wrappers, external identifiers, and the pre-typed migration table
+- [Day-Count Conventions](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/docs/day-counts.md) — shipped conventions, alias table, `ActualActualInPeriod` ICMA guidance, and the `Thirty360` Bond Basis vs. 30E/360 Eurobond distinction
 
 ## Disclaimer
 
@@ -207,6 +207,6 @@ Boutquin.MarketData is open-source software provided under the Apache 2.0 Licens
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE.txt).
+Licensed under the [Apache License, Version 2.0](https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.0-rc.20261027.4/LICENSE.txt).
 
 Copyright (c) 2026 Pierre G. Boutquin. All rights reserved.

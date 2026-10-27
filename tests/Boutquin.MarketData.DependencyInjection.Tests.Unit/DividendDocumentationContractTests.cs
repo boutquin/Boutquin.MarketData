@@ -1125,7 +1125,7 @@ public sealed partial class DividendDocumentationContractTests
     public void ChangelogReleaseAdded_AnnouncesEveryShippedDeliverable(string deliverable)
     {
         var leads = DividendDocumentationContract.ReadBoldBulletLeads(
-            ReadRepoFile(Changelog), "[2.0.0-rc.20261027.3]", "Added");
+            ReadRepoFile(Changelog), "[2.0.0-rc.20261027.4]", "Added");
 
         leads.Should().NotBeEmpty(because: "the versioned RC Added block carries this release's entries");
         leads.Any(lead => DividendDocumentationContract.AnnouncesAffirmatively(lead, deliverable))
