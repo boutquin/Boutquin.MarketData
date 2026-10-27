@@ -902,13 +902,6 @@ public sealed partial class DividendDocumentationContractTests
         return File.ReadAllText(path);
     }
 
-    private static string ReplaceFirst(string source, string oldValue, string newValue)
-    {
-        var index = source.IndexOf(oldValue, StringComparison.Ordinal);
-        index.Should().BeGreaterThanOrEqualTo(0, because: $"the ship recipe must contain {oldValue}");
-        return string.Concat(source.AsSpan(0, index), newValue, source.AsSpan(index + oldValue.Length));
-    }
-
     private static string GeneratedAbstractionsXml()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "Boutquin.MarketData.Abstractions.xml");
@@ -1132,7 +1125,7 @@ public sealed partial class DividendDocumentationContractTests
     public void ChangelogReleaseAdded_AnnouncesEveryShippedDeliverable(string deliverable)
     {
         var leads = DividendDocumentationContract.ReadBoldBulletLeads(
-            ReadRepoFile(Changelog), "[2.0.0-rc.20261027.2]", "Added");
+            ReadRepoFile(Changelog), "[2.0.0-rc.20261027.3]", "Added");
 
         leads.Should().NotBeEmpty(because: "the versioned RC Added block carries this release's entries");
         leads.Any(lead => DividendDocumentationContract.AnnouncesAffirmatively(lead, deliverable))

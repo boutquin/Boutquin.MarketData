@@ -155,13 +155,13 @@ Each typed request drives `IDataPipeline.ExecuteAsync<TRequest, TRecord>` and re
 Add a reference to the abstractions package:
 
 ```bash
-dotnet add package Boutquin.MarketData.Abstractions --version 2.0.0-rc.20261027.2
+dotnet add package Boutquin.MarketData.Abstractions --version 2.0.0-rc.20261027.3
 ```
 
 To use the full pipeline with DI composition:
 
 ```bash
-dotnet add package Boutquin.MarketData.DependencyInjection --version 2.0.0-rc.20261027.2
+dotnet add package Boutquin.MarketData.DependencyInjection --version 2.0.0-rc.20261027.3
 ```
 
 Register the kernel in your `IServiceCollection`:

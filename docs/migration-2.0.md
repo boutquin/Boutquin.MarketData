@@ -1,6 +1,6 @@
 # Migrating to 2.0 RC
 
-Use .NET 10 and the same explicit `2.0.0-rc.20261027.2` version for every MarketData package. The storage implementation uses published Boutquin.Storage 2.0.0; restore from NuGet.org. Numerics is not a kernel dependency.
+Use .NET 10 and the same explicit `2.0.0-rc.20261027.3` version for every MarketData package. The storage implementation uses published Boutquin.Storage 2.0.0; restore from NuGet.org. Numerics is not a kernel dependency.
 
 Review the [changelog](../CHANGELOG.md) for API changes and [dividend contracts](dividends.md) for classification and coverage behavior. Currency and shared value objects come from Boutquin.Domain. Concrete providers are in the separate MarketData.Adapter packages.
 
