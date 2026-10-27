@@ -29,3 +29,6 @@ review-accepted.yaml export-ignore
 #*.jpg   binary
 #*.png   binary
 #*.gif   binary
+
+# Tests of private planning artifacts do not belong in public source exports.
+tests/Boutquin.MarketData.DependencyInjection.Tests.Unit/DividendPrivateSpecificationTests.cs export-ignore

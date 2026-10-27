@@ -710,7 +710,7 @@ internal static class DividendDocumentationContract
 /// decorative.
 /// </para>
 /// </remarks>
-public sealed class DividendDocumentationContractTests
+public sealed partial class DividendDocumentationContractTests
 {
     private const string DividendHistoryRequestMember =
         "T:Boutquin.MarketData.Abstractions.Requests.DividendHistoryRequest";
@@ -720,7 +720,6 @@ public sealed class DividendDocumentationContractTests
     private const string Changelog = "CHANGELOG.md";
     private const string Readme = "README.md";
     private const string RequestSource = "src/Boutquin.MarketData.Abstractions/Requests/DividendHistoryRequest.cs";
-    private const string FeatureSpec = "specs/feature-dividend-history-wiring.md";
 
     /// <summary>A document that states the opposite of the shipped default, in the same vocabulary.</summary>
     private const string DocumentInvertingTheDefault = """
@@ -971,62 +970,6 @@ public sealed class DividendDocumentationContractTests
     }
 
     [Fact]
-    public void FeatureSpec_Ac32_RequiresPositiveDividendCashOnly()
-    {
-        DividendDocumentationContract.HasPositiveOnlyDividendCashAcceptanceCriterion(ReadRepoFile(FeatureSpec)).Should().BeTrue();
-    }
-
-    [Fact]
-    public void FeatureSpec_ShipRecipe_IsCommitQualifiedV2AndColdConsumerIsolated()
-    {
-        DividendDocumentationContract.HasV2SafeShipRecipe(ReadRepoFile(FeatureSpec)).Should().BeTrue(
-            because: "the active release rehearsal must pack an exact clean commit as v2 and prove restore from a distinct cold cache");
-    }
-
-    [Fact]
-    public void FeatureSpec_ShipRecipe_RestoreBuildAndPackShareTheExecutableBuildContext()
-    {
-        DividendDocumentationContract.FindExecutableShipRecipeDefects(ReadRepoFile(FeatureSpec)).Should().BeEmpty(
-            because: "each --no-restore build/pack must read the assets produced by restore from the same "
-                + "artifact root, isolated cache, and v2 version-property context");
-    }
-
-    [Fact]
-    public void FeatureSpec_ShipRecipe_AlignsAdapterKernelIdentityBeforeRestore()
-    {
-        var recipe = ReadRepoFile(FeatureSpec);
-        const string alignCommand = "python3 - \"$ADAPTER_CLONE/Directory.Packages.props\" ";
-        const string adapterRestore = "dotnet restore Boutquin.MarketData.Adapter.slnx";
-
-        var alignIndex = recipe.IndexOf(alignCommand, StringComparison.Ordinal);
-        var restoreIndex = recipe.IndexOf(adapterRestore, StringComparison.Ordinal);
-
-        alignIndex.Should().BeGreaterThanOrEqualTo(0,
-            because: "the detached Adapter clone must receive the generated kernel identity");
-        restoreIndex.Should().BeGreaterThan(alignIndex,
-            because: "the Adapter kernel pins and identity-test constants must be aligned before restore");
-        recipe.Should().Contain("$ADAPTER_CLONE/tests/Boutquin.MarketData.Adapter.Tests.Integration/KernelPackageIdentityTests.cs");
-        recipe.Should().Contain("<MarketDataKernelVersion>{version}</MarketDataKernelVersion>");
-        recipe.Should().Contain("<MarketDataKernelCommit>{commit}</MarketDataKernelCommit>");
-        recipe.Should().Contain("ExpectedKernelVersion = \"{version}\";");
-        recipe.Should().Contain("ExpectedKernelCommit = \"{commit}\";");
-    }
-
-    [Theory]
-    [InlineData("NUGET_PACKAGES=\"$BUILD_PACKAGES\"", "NUGET_PACKAGES=\"$CONSUMER_PACKAGES\"")]
-    [InlineData("--artifacts-path \"$KERNEL_ARTIFACTS\"", "--artifacts-path \"$ADAPTER_ARTIFACTS\"")]
-    [InlineData("/p:AssemblyVersion=\"$ASSEMBLY_VERSION\"", "/p:AssemblyVersion=\"1.0.0.0\"")]
-    public void Contract_RejectsShipRecipeWhenKernelRestoreBreaksTheBuildContext(
-        string requiredValue,
-        string incompatibleValue)
-    {
-        var falsified = ReplaceFirst(ReadRepoFile(FeatureSpec), requiredValue, incompatibleValue);
-
-        DividendDocumentationContract.FindExecutableShipRecipeDefects(falsified).Should().ContainSingle()
-            .Which.Should().Be("kernel restore");
-    }
-
-    [Fact]
     public void DividendsDoc_WorkedExample_RecomputesFromItsOwnTable()
     {
         var example = DividendDocumentationContract.ParseWorkedExample(ReadRepoFile(DividendsDoc));
@@ -1189,7 +1132,7 @@ public sealed class DividendDocumentationContractTests
     public void ChangelogReleaseAdded_AnnouncesEveryShippedDeliverable(string deliverable)
     {
         var leads = DividendDocumentationContract.ReadBoldBulletLeads(
-            ReadRepoFile(Changelog), "[2.0.0-rc.20261027.1]", "Added");
+            ReadRepoFile(Changelog), "[2.0.0-rc.20261027.2]", "Added");
 
         leads.Should().NotBeEmpty(because: "the versioned RC Added block carries this release's entries");
         leads.Any(lead => DividendDocumentationContract.AnnouncesAffirmatively(lead, deliverable))
@@ -1448,8 +1391,6 @@ public sealed class DividendDocumentationContractTests
             DocumentClaimingDefaultHostNormalization.ReplaceLineEndings(newline)).Should().BeTrue();
         DividendDocumentationContract.ClaimsPriceRangeControlsDividendCacheReuse(
             DocumentClaimingPriceRangeControlsDividendCacheReuse.ReplaceLineEndings(newline)).Should().BeTrue();
-        DividendDocumentationContract.FindExecutableShipRecipeDefects(
-            ReadRepoFile(FeatureSpec).ReplaceLineEndings(newline)).Should().BeEmpty();
     }
 
     [Fact]
