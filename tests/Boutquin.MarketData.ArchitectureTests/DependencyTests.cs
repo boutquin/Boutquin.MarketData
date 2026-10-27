@@ -46,8 +46,10 @@ public sealed class DependencyTests : BaseArchitectureTest
     [InlineData(nameof(TransportAssembly))]
     [InlineData(nameof(CacheAssembly))]
     [InlineData(nameof(StorageAssembly))]
+    [InlineData(nameof(CatalogAssembly))]
     [InlineData(nameof(DayCountAssembly))]
     [InlineData(nameof(CalendarsAssembly))]
+    [InlineData(nameof(ConventionsAssembly))]
     public void InfrastructurePackages_ShouldNotDependOnCompositionOrDiLayers(string assemblyName)
     {
         var assembly = GetAssemblyByName(assemblyName);
@@ -102,26 +104,15 @@ public sealed class DependencyTests : BaseArchitectureTest
             because: $"Testing must only depend on Abstractions [{GetFailingTypes(result)}]");
     }
 
+    /// <summary>
+    /// Enforces the three-layer data architecture — MarketData is the shared ingestion
+    /// kernel and must never reference a domain repo. <c>Boutquin.Analytics</c> stays in
+    /// the forbid-list as a defensive alias after its 2026 rename to
+    /// <c>Boutquin.Curves</c>, so an accidental resurrection of the old package name
+    /// fails this test rather than silently reintroducing a cross-layer cycle.
+    /// </summary>
     [Fact]
-    public void Conventions_ShouldNotDependOnCurvesOrTradingOrAnalytics()
-    {
-        var result = Types
-            .InAssembly(ConventionsAssembly)
-            .Should()
-            .NotHaveDependencyOnAny(
-                "Boutquin.Curves",
-                "Boutquin.Trading",
-                "Boutquin.Analytics",
-                "Boutquin.OptionPricing",
-                "Coverlet.Core.Instrumentation")
-            .GetResult();
-
-        result.IsSuccessful.Should().BeTrue(
-            because: $"Conventions must not depend on domain repos [{GetFailingTypes(result)}]");
-    }
-
-    [Fact]
-    public void NoMarketDataAssembly_ShouldDependOnAnalyticsOrTradingOrOptionPricing()
+    public void AllAssemblies_ShouldNotDependOnDomainRepos()
     {
         foreach (var assembly in AllSourceAssemblies)
         {
@@ -129,13 +120,14 @@ public sealed class DependencyTests : BaseArchitectureTest
                 .InAssembly(assembly)
                 .Should()
                 .NotHaveDependencyOnAny(
+                    "Boutquin.Curves",
                     "Boutquin.Analytics",
                     "Boutquin.Trading",
                     "Boutquin.OptionPricing")
                 .GetResult();
 
             result.IsSuccessful.Should().BeTrue(
-                because: $"MarketData must not depend on Analytics, Trading, or OptionPricing [{assembly.GetName().Name}: {GetFailingTypes(result)}]");
+                because: $"MarketData must not depend on Curves, Trading, or OptionPricing [{assembly.GetName().Name}: {GetFailingTypes(result)}]");
         }
     }
 
@@ -144,8 +136,10 @@ public sealed class DependencyTests : BaseArchitectureTest
         nameof(TransportAssembly) => TransportAssembly,
         nameof(CacheAssembly) => CacheAssembly,
         nameof(StorageAssembly) => StorageAssembly,
+        nameof(CatalogAssembly) => CatalogAssembly,
         nameof(DayCountAssembly) => DayCountAssembly,
         nameof(CalendarsAssembly) => CalendarsAssembly,
+        nameof(ConventionsAssembly) => ConventionsAssembly,
         _ => throw new ArgumentException($"Unknown assembly: {name}"),
     };
 }

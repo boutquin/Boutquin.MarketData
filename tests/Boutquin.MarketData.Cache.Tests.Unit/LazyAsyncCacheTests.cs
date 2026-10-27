@@ -111,6 +111,43 @@ public sealed class LazyAsyncCacheTests
         result.Should().Be(42);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetOrAddAsync_evicts_factory_cancellation_and_retries(bool synchronous)
+    {
+        using var cache = new LazyAsyncCache<string, int>();
+        using var factoryCancellation = new CancellationTokenSource();
+        factoryCancellation.Cancel();
+        var first = () => cache.GetOrAddAsync("key", (_, _) => synchronous
+            ? throw new OperationCanceledException(factoryCancellation.Token)
+            : Task.FromCanceled<int>(factoryCancellation.Token));
+
+        await first.Should().ThrowAsync<OperationCanceledException>();
+
+        cache.Count.Should().Be(0, "factory cancellation must evict the failed computation");
+        var result = await cache.GetOrAddAsync("key", (_, _) => Task.FromResult(42));
+        result.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task GetOrAddAsync_cancelled_waiter_preserves_shared_computation()
+    {
+        using var cache = new LazyAsyncCache<string, int>();
+        using var callerCancellation = new CancellationTokenSource();
+        var completion = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var first = cache.GetOrAddAsync("key", (_, token) => completion.Task.WaitAsync(token), callerCancellation.Token);
+        var second = cache.GetOrAddAsync("key", (_, _) => Task.FromResult(-1));
+
+        callerCancellation.Cancel();
+        var cancelledWait = () => first;
+        await cancelledWait.Should().ThrowAsync<OperationCanceledException>();
+        cache.Count.Should().Be(1);
+
+        completion.SetResult(42);
+        (await second).Should().Be(42, "one waiter's token cannot cancel the shared factory");
+    }
+
     [Fact]
     public async Task TryRemove_removes_existing_entry()
     {

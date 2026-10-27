@@ -22,8 +22,11 @@ namespace Boutquin.MarketData.Abstractions.Results;
 /// <param name="RequestedPoints">The total number of data points expected based on the request date range and frequency.</param>
 /// <param name="ReturnedPoints">The number of data points actually returned by the adapter.</param>
 /// <param name="MissingPoints">The number of expected data points that were not available (holidays, gaps, or source outages).</param>
-/// <param name="CoverageRatio">The ratio of returned to requested points, ranging from 0.0 (no data) to 1.0 (complete).</param>
+/// <param name="CoverageRatio">The completeness ratio, capped at 1.0 when returned points exceed requested points. Zero expected points are complete.</param>
 /// <remarks>
+/// A source can certify complete coverage with fewer returned records than requested points
+/// when absent observations are known-empty (for example, dates with no dividend payment).
+/// Such a certificate has ratio 1.0 and zero missing points; returned counts remain actual rows.
 /// Coverage is computed by the pipeline after normalization. A ratio below 1.0 does not necessarily
 /// indicate an error — weekends and holidays produce expected gaps for daily equity data. Consumers
 /// should evaluate coverage in the context of the data frequency and asset class.

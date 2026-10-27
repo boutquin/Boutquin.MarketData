@@ -15,6 +15,7 @@
 //
 
 using Boutquin.MarketData.Abstractions.Contracts;
+using Boutquin.MarketData.Abstractions.Keys;
 using Boutquin.MarketData.Abstractions.Records;
 
 namespace Boutquin.MarketData.Normalization.Normalizers;
@@ -27,15 +28,25 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// Yield sources often publish rates in percent form (e.g., 4.5 for 4.5%). This normalizer
 /// uses the heuristic that rates with |value| &gt;= 1 are in percent form and divides by 100.
 /// Rates with |value| &lt; 1 are assumed to already be in decimal form.
+/// <para>The tenor rule itself is <b>not</b> owned here: <see cref="YieldCurveQuote.Tenor"/> is the
+/// discriminant column of <see cref="YieldCurveQuoteDatasetKey"/>, so the canonical label is defined
+/// once by <see cref="YieldCurveQuoteDatasetKey.CanonicalTenor"/> and applied both to the projected
+/// key (by <c>YieldCurveQuoteFanOut</c>, unconditionally) and to the record body here. Encoding that
+/// one identity relation in two places is what let the persisted key disagree with the persisted
+/// body across a <c>RegisterDefaultNormalizers</c> flip.</para>
 /// </remarks>
 public sealed class YieldCurveQuoteNormalizer : INormalizer<YieldCurveQuote, YieldCurveQuote>
 {
     /// <inheritdoc />
     public YieldCurveQuote Normalize(YieldCurveQuote raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfRequiredStringIsNull(
+            raw.Tenor,
+            nameof(YieldCurveQuote.Tenor),
+            nameof(raw));
 
-        var tenor = raw.Tenor.Trim().ToUpperInvariant();
+        var tenor = YieldCurveQuoteDatasetKey.CanonicalTenor(raw.Tenor);
 
         // Heuristic: |rate| >= 1 → percent form; |rate| < 1 → already decimal. This covers the
         // overwhelming majority of published yield data but can misclassify legitimately large
@@ -47,6 +58,6 @@ public sealed class YieldCurveQuoteNormalizer : INormalizer<YieldCurveQuote, Yie
             ? raw.Rate / 100m
             : raw.Rate;
 
-        return new YieldCurveQuote(tenor, rate);
+        return new YieldCurveQuote(raw.Date, tenor, rate);
     }
 }

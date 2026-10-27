@@ -22,7 +22,8 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 
 /// <summary>
 /// Normalizes <see cref="FuturesSettlement"/> records by uppercasing contract codes,
-/// rounding settlement prices, and computing implied rates from price when missing.
+/// rounding settlement prices, and computing decimal implied rates for supported
+/// price-quoted interest-rate products when missing.
 /// </summary>
 /// <remarks>
 /// Contract-month canonicalisation now lives inside
@@ -30,30 +31,46 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// reaches this normalizer, so the previous <c>YYYYMM → YYYY-MM</c> pass is unnecessary.
 /// Contract-code case-folding is kept as a convenience because
 /// <see cref="FuturesProductCode"/> preserves the originating casing.
+/// The implied-rate fallback is deliberately restricted to CME <c>SR3</c> and <c>ZQ</c>, whose
+/// prices use the <c>100 - rate</c> convention. Other product families retain
+/// <see langword="null"/> rather than receiving a fabricated rate.
 /// </remarks>
 public sealed class FuturesSettlementNormalizer : INormalizer<FuturesSettlement, FuturesSettlement>
 {
+    private static readonly HashSet<string> s_priceQuotedRateProducts =
+        new(StringComparer.OrdinalIgnoreCase) { "SR3", "ZQ" };
+
     private readonly int _decimalPlaces;
 
     /// <summary>
     /// Initializes a new <see cref="FuturesSettlementNormalizer"/>.
     /// </summary>
     /// <param name="decimalPlaces">Decimal places for price rounding. Defaults to 4.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Precision is outside the decimal rounding range of 0 through 28.</exception>
     public FuturesSettlementNormalizer(int decimalPlaces = 4)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(decimalPlaces);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(decimalPlaces, 28);
         _decimalPlaces = decimalPlaces;
     }
 
     /// <inheritdoc />
     public FuturesSettlement Normalize(FuturesSettlement raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfRequiredStringIsNull(
+            raw.ContractCode == default ? null : raw.ContractCode.Value,
+            nameof(FuturesSettlement.ContractCode),
+            nameof(raw));
 
         var code = new FuturesProductCode(raw.ContractCode.Value.Trim().ToUpperInvariant());
         var price = Math.Round(raw.SettlePrice, _decimalPlaces, MidpointRounding.AwayFromZero);
 
-        // Compute implied rate: (100 - price) / 100 → decimal form
-        var impliedRate = raw.ImpliedRate ?? (100m - raw.SettlePrice) / 100m;
+        var impliedRate = raw.ImpliedRate;
+        if (impliedRate is null && s_priceQuotedRateProducts.Contains(code.Value))
+        {
+            impliedRate = (100m - raw.SettlePrice) / 100m;
+        }
 
         return new FuturesSettlement(raw.Date, code, raw.ContractMonth, price, impliedRate);
     }

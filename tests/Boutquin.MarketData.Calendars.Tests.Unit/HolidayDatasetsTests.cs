@@ -27,6 +27,16 @@ namespace Boutquin.MarketData.Calendars.Tests.Unit;
 /// </summary>
 public sealed class HolidayDatasetsTests
 {
+    [Theory]
+    [InlineData(2023, 1, 2)]
+    [InlineData(2026, 12, 28)]
+    public void Target_DoesNotSubstituteWeekendHolidays(int year, int month, int day)
+    {
+        var calendar = new HolidayCalendar("TARGET", HolidayDatasets.Target());
+
+        calendar.IsBusinessDay(new DateOnly(year, month, day)).Should().BeTrue();
+    }
+
     [Fact]
     public void UsSifma_ReturnsNonEmptyArray()
     {

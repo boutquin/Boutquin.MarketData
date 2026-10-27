@@ -3,4 +3,54 @@ Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore
 Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.InMemoryFixingsStore(System.Collections.Generic.IEnumerable<(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName Benchmark, System.DateOnly Date, decimal Value)>! seed) -> void
 Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.GetFixing(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, System.DateOnly fixingDate) -> decimal?
 Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.TryGetFixing(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, System.DateOnly fixingDate, out decimal value) -> bool
-Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.GetFixings(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, Boutquin.MarketData.Abstractions.Requests.DateRange! range) -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<decimal>!>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Coverage.get -> Boutquin.MarketData.Abstractions.Results.DataCoverage?
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Coverage.init -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.<Clone>$() -> Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint!
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Dataset.init -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Deconstruct(out string! Provider, out string! Dataset, out int SymbolIndex, out System.DateTimeOffset LastSuccessUtc) -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Equals(Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint? other) -> bool
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.LastSuccessUtc.init -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Provider.init -> void
+Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.SymbolIndex.init -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.<Clone>$() -> Boutquin.MarketData.Storage.Events.IngestionEvent!
+Boutquin.MarketData.Storage.Events.IngestionEvent.Action.init -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.Dataset.init -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.Deconstruct(out string! Provider, out string! Dataset, out string! Symbol, out Boutquin.MarketData.Storage.Events.IngestionAction Action, out System.DateTimeOffset TimestampUtc, out string? ErrorMessage) -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.Equals(Boutquin.MarketData.Storage.Events.IngestionEvent? other) -> bool
+Boutquin.MarketData.Storage.Events.IngestionEvent.ErrorMessage.init -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.Provider.init -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.Symbol.init -> void
+Boutquin.MarketData.Storage.Events.IngestionEvent.TimestampUtc.init -> void
+Boutquin.MarketData.Storage.InMemory.InMemoryFixingsStore.GetFixings(Boutquin.MarketData.Abstractions.ReferenceData.BenchmarkName benchmark, Boutquin.Domain.ValueObjects.DateRange range) -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Primitives.TimeSeriesPoint<decimal>!>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.<Clone>$() -> Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>!
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Deconstruct(out Boutquin.Storage.Domain.ValueObjects.SchemaVersion Version, out Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata! Metadata, out T Payload) -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Equals(Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>? other) -> bool
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Metadata.init -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Payload.init -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Version.init -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.<Clone>$() -> Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata!
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Deconstruct(out System.DateTimeOffset StoredAtUtc, out System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataProvenance!>! Provenance, out System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataIssue!>! Issues) -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Equals(Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata? other) -> bool
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Issues.init -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Provenance.init -> void
+Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.StoredAtUtc.init -> void
+override Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.Equals(object? obj) -> bool
+override Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.GetHashCode() -> int
+override Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.ToString() -> string!
+override Boutquin.MarketData.Storage.Events.IngestionEvent.Equals(object? obj) -> bool
+override Boutquin.MarketData.Storage.Events.IngestionEvent.GetHashCode() -> int
+override Boutquin.MarketData.Storage.Events.IngestionEvent.ToString() -> string!
+override Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.Equals(object? obj) -> bool
+override Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.GetHashCode() -> int
+override Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.ToString() -> string!
+override Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.Equals(object? obj) -> bool
+override Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.GetHashCode() -> int
+override Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.ToString() -> string!
+static Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.operator !=(Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint? left, Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint? right) -> bool
+static Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint.operator ==(Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint? left, Boutquin.MarketData.Storage.Checkpointing.IngestionCheckpoint? right) -> bool
+static Boutquin.MarketData.Storage.Events.IngestionEvent.operator !=(Boutquin.MarketData.Storage.Events.IngestionEvent? left, Boutquin.MarketData.Storage.Events.IngestionEvent? right) -> bool
+static Boutquin.MarketData.Storage.Events.IngestionEvent.operator ==(Boutquin.MarketData.Storage.Events.IngestionEvent? left, Boutquin.MarketData.Storage.Events.IngestionEvent? right) -> bool
+static Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.operator !=(Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>? left, Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>? right) -> bool
+static Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>.operator ==(Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>? left, Boutquin.MarketData.Storage.Snapshots.SnapshotEnvelope<T>? right) -> bool
+static Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.operator !=(Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata? left, Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata? right) -> bool
+static Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata.operator ==(Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata? left, Boutquin.MarketData.Storage.Snapshots.SnapshotMetadata? right) -> bool

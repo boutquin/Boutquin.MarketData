@@ -28,14 +28,18 @@ namespace Boutquin.MarketData.Abstractions.Results;
 public static class CoverageComputation
 {
     /// <summary>
-    /// Computes coverage using a specific calendar.
+    /// Computes coverage using a specific calendar, preserving the actual returned count
+    /// while bounding the completeness ratio at one for surplus observations.
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The returned point count is negative.</exception>
     public static DataCoverage Compute(
         IBusinessCalendar calendar, DateRange range, DataFrequency frequency, int returnedPoints)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(returnedPoints);
+
         var requested = CountExpectedPoints(calendar, range, frequency);
         var missing = Math.Max(0, requested - returnedPoints);
-        var ratio = requested == 0 ? 1.0m : (decimal)returnedPoints / requested;
+        var ratio = requested == 0 ? 1.0m : Math.Min(1.0m, (decimal)returnedPoints / requested);
         return new DataCoverage(requested, returnedPoints, missing, ratio);
     }
 
@@ -45,7 +49,10 @@ public static class CoverageComputation
     /// <param name="calendar">The business calendar governing publication days for the data source.</param>
     /// <param name="range">The requested date range (inclusive).</param>
     /// <param name="frequency">The data sampling frequency.</param>
-    /// <param name="returnedDates">The set of dates for which data was actually returned.</param>
+    /// <param name="returnedDates">
+    /// The set of dates for which data was actually returned. Dates outside the requested range,
+    /// and non-business dates at daily frequency, do not contribute to coverage.
+    /// </param>
     /// <returns>A tuple of the computed coverage and any gap-related issues.</returns>
     public static (DataCoverage Coverage, IReadOnlyList<DataIssue> GapIssues) ComputeWithGaps(
         IBusinessCalendar calendar,
@@ -53,7 +60,9 @@ public static class CoverageComputation
         DataFrequency frequency,
         IReadOnlySet<DateOnly> returnedDates)
     {
-        var coverage = Compute(calendar, range, frequency, returnedDates.Count);
+        var eligibleCount = returnedDates.Count(date => date >= range.From && date <= range.To
+            && (frequency != DataFrequency.Daily || calendar.IsBusinessDay(date)));
+        var coverage = Compute(calendar, range, frequency, eligibleCount);
 
         var gapIssues = frequency == DataFrequency.Daily
             ? ClassifyGaps(calendar, range, returnedDates)
@@ -68,11 +77,14 @@ public static class CoverageComputation
     /// <remarks>
     /// Accumulators are computed in a single pass using <see cref="long"/> to avoid
     /// <see cref="int"/> overflow when many partitions × large date ranges push totals past
-    /// <see cref="int.MaxValue"/>. <see cref="DataCoverage.MissingPoints"/> is derived from the
-    /// canonical identity <c>max(0, requested − returned)</c> rather than summed from per-partition
-    /// values, so the aggregate stays consistent even if a caller constructed an individual
-    /// coverage with an inconsistent missing count.
+    /// <see cref="int.MaxValue"/>. A partition with complete coverage and zero missing points
+    /// certifies its whole requested range, including known-empty dates in sparse series.
+    /// Other partitions contribute at most their requested count from their returned observations.
+    /// Missing points and the ratio are recomputed from those covered units, so a surplus in one
+    /// partition cannot conceal a gap in another. Actual returned counts are preserved separately.
+    /// Counts must be non-negative, and the same rules apply to a single partition.
     /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">A partition has a negative point count.</exception>
     /// <exception cref="OverflowException">
     /// Thrown when the aggregated total exceeds <see cref="int.MaxValue"/>, which indicates the
     /// coverage sum is no longer representable in the canonical <see cref="int"/>-valued fields.
@@ -84,21 +96,28 @@ public static class CoverageComputation
             return new DataCoverage(0, 0, 0, 1.0m);
         }
 
-        if (coverages.Count == 1)
-        {
-            return coverages[0];
-        }
-
         long totalRequested = 0;
         long totalReturned = 0;
+        long totalCovered = 0;
         for (var i = 0; i < coverages.Count; i++)
         {
-            totalRequested += coverages[i].RequestedPoints;
-            totalReturned += coverages[i].ReturnedPoints;
+            var coverage = coverages[i];
+            if (coverage.RequestedPoints < 0 || coverage.ReturnedPoints < 0 || coverage.MissingPoints < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(coverages), "Coverage point counts must be non-negative.");
+            }
+
+            totalRequested += coverage.RequestedPoints;
+            totalReturned += coverage.ReturnedPoints;
+            // Source-certified empty dates are covered even though they produce no records.
+            // Keep that certificate within its own partition, as with returned observations.
+            totalCovered += coverage.Status == CompletenessStatus.Complete && coverage.MissingPoints == 0
+                ? coverage.RequestedPoints
+                : Math.Min(coverage.RequestedPoints, coverage.ReturnedPoints);
         }
 
-        var totalMissing = Math.Max(0L, totalRequested - totalReturned);
-        var ratio = totalRequested == 0 ? 1.0m : (decimal)totalReturned / totalRequested;
+        var totalMissing = totalRequested - totalCovered;
+        var ratio = totalRequested == 0 ? 1.0m : (decimal)totalCovered / totalRequested;
 
         return new DataCoverage(
             checked((int)totalRequested),
@@ -125,6 +144,14 @@ public static class CoverageComputation
     /// </summary>
     public static int CountBusinessDays(IBusinessCalendar calendar, DateOnly from, DateOnly to)
     {
+        // Fast-path: sentinel full-universe range used by point-in-time requests such as
+        // InstrumentMetadataRequest. Avoids iterating ~3.65 million days and prevents
+        // DateOnly.MaxValue.AddDays(1) overflow at the loop boundary.
+        if (from == DateOnly.MinValue && to == DateOnly.MaxValue)
+        {
+            return 0;
+        }
+
         var count = 0;
         var current = from;
         while (current <= to)
@@ -132,6 +159,11 @@ public static class CoverageComputation
             if (calendar.IsBusinessDay(current))
             {
                 count++;
+            }
+
+            if (current == to)
+            {
+                break;
             }
 
             current = current.AddDays(1);
@@ -160,6 +192,11 @@ public static class CoverageComputation
                     IssueCode.UnexpectedGap,
                     IssueSeverity.Warning,
                     $"Expected data for business day {current:yyyy-MM-dd} but none was returned."));
+            }
+
+            if (current == range.To)
+            {
+                break;
             }
 
             current = current.AddDays(1);

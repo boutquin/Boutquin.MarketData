@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.Records;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
@@ -35,20 +36,20 @@ public sealed class DividendPaymentTests
         var dp = new DividendPayment(
             new DateOnly(2024, 8, 15),
             0.82m,
-            CurrencyCode.USD,
+            Currency.USD,
             DividendType.UsQualified);
 
         dp.ExDate.Should().Be(new DateOnly(2024, 8, 15));
         dp.Amount.Should().Be(0.82m);
-        dp.Currency.Should().Be(CurrencyCode.USD);
+        dp.Currency.Should().Be(Currency.USD);
         dp.Type.Should().Be(DividendType.UsQualified);
     }
 
     [Fact]
     public void Equality_requires_matching_Type()
     {
-        var a = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.USD, DividendType.UsQualified);
-        var b = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.USD, DividendType.UsQualified);
+        var a = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.USD, DividendType.UsQualified);
+        var b = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.USD, DividendType.UsQualified);
 
         a.Should().Be(b);
     }
@@ -59,8 +60,8 @@ public sealed class DividendPaymentTests
         // Classification matters for portfolio-income aggregation: two payments
         // with the same ex-date, amount, and currency are *not* the same economic
         // event if the jurisdictional category differs.
-        var qualified = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.USD, DividendType.UsQualified);
-        var ordinary = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.USD, DividendType.UsOrdinary);
+        var qualified = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.USD, DividendType.UsQualified);
+        var ordinary = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.USD, DividendType.UsOrdinary);
 
         qualified.Should().NotBe(ordinary);
     }
@@ -68,8 +69,8 @@ public sealed class DividendPaymentTests
     [Fact]
     public void Different_currency_is_not_equal()
     {
-        var a = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.USD, DividendType.UsOrdinary);
-        var b = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.GBP, DividendType.Foreign);
+        var a = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.USD, DividendType.UsOrdinary);
+        var b = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.GBP, DividendType.Foreign);
 
         a.Should().NotBe(b);
     }
@@ -85,7 +86,7 @@ public sealed class DividendPaymentTests
     [InlineData(DividendType.Unclassified)]
     public void Every_DividendType_member_is_accepted(DividendType type)
     {
-        var dp = new DividendPayment(new DateOnly(2024, 8, 15), 1m, CurrencyCode.USD, type);
+        var dp = new DividendPayment(new DateOnly(2024, 8, 15), 1m, Currency.USD, type);
 
         dp.Type.Should().Be(type);
     }
@@ -95,7 +96,7 @@ public sealed class DividendPaymentTests
     {
         // Supports the adapter-side "classify after construction" workflow where
         // a provider emits the payment first and a classifier enriches it later.
-        var raw = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, CurrencyCode.USD, DividendType.Unclassified);
+        var raw = new DividendPayment(new DateOnly(2024, 8, 15), 0.82m, Currency.USD, DividendType.Unclassified);
 
         var classified = raw with { Type = DividendType.UsQualified };
 

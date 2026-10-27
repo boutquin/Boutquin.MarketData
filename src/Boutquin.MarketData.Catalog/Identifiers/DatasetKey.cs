@@ -27,7 +27,7 @@ namespace Boutquin.MarketData.Catalog.Identifiers;
 /// <c>"fred:DGS10"</c>) and should be treated as opaque by infrastructure code.
 /// </para>
 /// <para>
-/// Explicit construction (<c>new DatasetKey("…")</c>) validates that the value is neither
+/// Explicit construction and init assignments validate that the value is neither
 /// <see langword="null"/> nor whitespace. <c>default(DatasetKey)</c> is still reachable as
 /// a zero-value via struct semantics and has <c>Value = null</c>; consumers MUST check for
 /// this when they cannot trust the origin of a <see cref="DatasetKey"/> instance.
@@ -36,10 +36,15 @@ namespace Boutquin.MarketData.Catalog.Identifiers;
 public readonly record struct DatasetKey(string Value)
 {
     /// <summary>
-    /// Gets the underlying string value. Always non-null and non-whitespace for instances
-    /// created via the primary constructor.
+    /// The provider-scoped dataset identifier; non-null and non-whitespace when constructed normally.
     /// </summary>
-    public string Value { get; init; } = ValidateValue(Value);
+    public string Value
+    {
+        get => _value;
+        init => _value = ValidateValue(value);
+    }
+
+    private readonly string _value = ValidateValue(Value);
 
     private static string ValidateValue(string value)
     {

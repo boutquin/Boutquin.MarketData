@@ -29,6 +29,7 @@ using Boutquin.MarketData.Storage.Checkpointing;
 using Boutquin.MarketData.Storage.Events;
 using Boutquin.MarketData.Storage.InMemory;
 using Boutquin.MarketData.Storage.Snapshots;
+using Boutquin.Storage.Domain.Interfaces.Streaming;
 using Boutquin.Storage.Domain.ValueObjects;
 using Boutquin.Storage.Infrastructure.Events;
 using Boutquin.Storage.Infrastructure.Streaming.Checkpointing;
@@ -58,7 +59,10 @@ internal sealed record BatchTestRequest(
     DateRange Range,
     DataFrequency Frequency = DataFrequency.Daily) : IDataRequest, IBatchDataRequest<string>
 {
-    public string DatasetKey => string.Join("+", Symbols);
+    // Join with '_' (not '+') to match PriceHistoryRequest's real convention: '+' is rejected by
+    // FileSystemObjectStore's key validator and by Storage 2.0's checkpoint ValidateProcessorId
+    // ([alphanumeric, '.', '_', '-']); '_' is the production join character.
+    public string DatasetKey => string.Join("_", Symbols);
     public IReadOnlyList<string> PartitionKeys => Symbols;
 }
 
@@ -160,6 +164,35 @@ internal sealed class TestPartitioner : IRequestPartitioner<TestRequest>
     public IReadOnlyList<TestRequest> Partition(TestRequest request) => _partitions;
 }
 
+internal sealed class RecordingCheckpointStore : ICheckpointStore
+{
+    private readonly Dictionary<string, (long Offset, byte[] State)> _checkpoints = new(StringComparer.Ordinal);
+
+    public IReadOnlyCollection<string> ProcessorIds => _checkpoints.Keys;
+
+    public ValueTask SaveAsync(
+        string processorId,
+        long offset,
+        byte[] state,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _checkpoints[processorId] = (offset, state.ToArray());
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask<(long Offset, byte[] State)?> LoadAsync(
+        string processorId,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return _checkpoints.TryGetValue(processorId, out var checkpoint)
+            ? ValueTask.FromResult<(long Offset, byte[] State)?>(
+                (checkpoint.Offset, checkpoint.State.ToArray()))
+            : ValueTask.FromResult<(long Offset, byte[] State)?>(null);
+    }
+}
+
 #endregion
 
 public sealed class DataPipelineTests
@@ -201,6 +234,73 @@ public sealed class DataPipelineTests
         return (pipeline, sp, clock, l1, snapshotStore, eventLog);
     }
 
+    private static (DataPipeline Pipeline, WriteThroughCache<string, SnapshotEnvelope<IReadOnlyList<TestRecord>>>? WriteThrough) BuildBatchPipeline(
+        IngestionCheckpointStore checkpointStore,
+        Func<BatchTestRequest, CancellationToken, Task<DataEnvelope<IReadOnlyList<TestRecord>>>> fetch,
+        DataPipelineOptions? options = null,
+        InMemorySnapshotStore? snapshotStore = null)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
+        services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
+        services.AddSingleton<IDataSourceAdapter<BatchTestRequest, TestRecord>>(
+            new FakeBatchAdapter("test", 100, fetch));
+        services.AddSingleton<IRequestPartitioner<BatchTestRequest>>(new BatchPartitioner());
+
+        WriteThroughCache<string, SnapshotEnvelope<IReadOnlyList<TestRecord>>>? writeThrough = null;
+        if (snapshotStore is not null)
+        {
+            writeThrough = new WriteThroughCache<string, SnapshotEnvelope<IReadOnlyList<TestRecord>>>(
+                snapshotStore,
+                new TestRecordSerializer(),
+                key => key);
+            services.AddSingleton(writeThrough);
+        }
+
+        var pipeline = new DataPipeline(
+            new ExactOnceMemoryCache(),
+            snapshotStore ?? new InMemorySnapshotStore(),
+            checkpointStore,
+            new IngestionEventLog(new InMemoryEventLog<IngestionEvent>()),
+            new SnapshotStalenessPolicy(TimeSpan.FromHours(24)),
+            new CoverageCalculator(new WeekendOnlyCalendar()),
+            Options.Create(options ?? new DataPipelineOptions()),
+            services.BuildServiceProvider(),
+            new FakeClock(),
+            NullLogger<DataPipeline>.Instance);
+
+        return (pipeline, writeThrough);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Cache_identity_preserves_frequency(bool useL1)
+    {
+        var calls = 0;
+        var snapshots = new InMemorySnapshotStore();
+        var (pipeline, _, clock, _, _, _) = BuildPipeline(svc =>
+        {
+            svc.AddSingleton<IDataSourceAdapter<TestRequest, TestRecord>>(
+                new FakeAdapter("test", 100, (request, _) =>
+                {
+                    calls++;
+                    return Task.FromResult(MakeEnvelope(new TestRecord("AAPL", (int)request.Frequency)));
+                }));
+            svc.AddSingleton(new WriteThroughCache<string, SnapshotEnvelope<IReadOnlyList<TestRecord>>>(
+                snapshots, new TestRecordSerializer(), key => key));
+        }, new DataPipelineOptions { L1CacheTtl = useL1 ? TimeSpan.FromHours(1) : TimeSpan.Zero });
+        clock.UtcNow = new DateTimeOffset(2099, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+        await pipeline.ExecuteAsync<TestRequest, TestRecord>(new TestRequest("AAPL", s_range, DataFrequency.Daily)).ConfigureAwait(true);
+        var weekly = await pipeline.ExecuteAsync<TestRequest, TestRecord>(new TestRequest("AAPL", s_range, DataFrequency.Weekly)).ConfigureAwait(true);
+        weekly.Payload.Single().Value.Should().Be((int)DataFrequency.Weekly);
+        calls.Should().Be(2);
+        var daily = await pipeline.ExecuteAsync<TestRequest, TestRecord>(new TestRequest("AAPL", s_range, DataFrequency.Daily)).ConfigureAwait(true);
+        daily.Payload.Single().Value.Should().Be((int)DataFrequency.Daily);
+        calls.Should().Be(2);
+    }
+
     // Test 1
     [Fact]
     public async Task L1_cache_hit_returns_without_calling_adapters()
@@ -220,7 +320,7 @@ public sealed class DataPipelineTests
         var expected = MakeEnvelope(new TestRecord("AAPL", 150m));
 
         // Pre-populate L1
-        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("TestRecord", "AAPL", s_range.From, s_range.To);
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("pipeline-v2/TestRecord/Daily", "AAPL", s_range.From, s_range.To);
         await l1.SetAsync(cacheKey, expected, TimeSpan.FromHours(1)).ConfigureAwait(true);
 
         // Act
@@ -256,7 +356,7 @@ public sealed class DataPipelineTests
         });
 
         // Pre-populate L2 with a fresh snapshot
-        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("TestRecord", "AAPL", s_range.From, s_range.To);
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("pipeline-v2/TestRecord/Daily", "AAPL", s_range.From, s_range.To);
         var metadata = new SnapshotMetadata(DateTimeOffset.UtcNow, [s_provenance], []);
         var snapshotEnvelope = new SnapshotEnvelope<IReadOnlyList<TestRecord>>(
             new SchemaVersion(1), metadata, new List<TestRecord> { new("AAPL", 200m) });
@@ -305,7 +405,7 @@ public sealed class DataPipelineTests
         });
 
         // Pre-populate L2 with a STALE snapshot (48 hours old)
-        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("TestRecord", "AAPL", s_range.From, s_range.To);
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("pipeline-v2/TestRecord/Daily", "AAPL", s_range.From, s_range.To);
         var staleTime = DateTimeOffset.UtcNow.AddHours(-48);
         var metadata = new SnapshotMetadata(staleTime, [s_provenance], []);
         var snapshotEnvelope = new SnapshotEnvelope<IReadOnlyList<TestRecord>>(
@@ -350,7 +450,7 @@ public sealed class DataPipelineTests
         result.Coverage.ReturnedPoints.Should().Be(2);
 
         // L1 should be populated
-        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("TestRecord", "AAPL", s_range.From, s_range.To);
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("pipeline-v2/TestRecord/Daily", "AAPL", s_range.From, s_range.To);
         var cached = await l1.GetAsync<DataEnvelope<IReadOnlyList<TestRecord>>>(cacheKey).ConfigureAwait(true);
         cached.Should().NotBeNull();
 
@@ -393,7 +493,7 @@ public sealed class DataPipelineTests
     public async Task Batch_request_checkpoint_saves_per_symbol()
     {
         var fetchCount = 0;
-        var checkpointStoreInner = new InMemoryCheckpointStore();
+        var checkpointStoreInner = new RecordingCheckpointStore();
         var checkpointStore = new IngestionCheckpointStore(checkpointStoreInner);
 
         var clock = new FakeClock();
@@ -432,7 +532,7 @@ public sealed class DataPipelineTests
         fetchCount.Should().Be(3);
 
         // Checkpoint should exist
-        var pipelineId = $"BatchTestRequest:{request.DatasetKey}";
+        var pipelineId = checkpointStoreInner.ProcessorIds.Single();
         var cp = await checkpointStore.LoadAsync(pipelineId).ConfigureAwait(true);
         cp.Should().NotBeNull();
         cp!.SymbolIndex.Should().Be(2); // last index
@@ -440,48 +540,183 @@ public sealed class DataPipelineTests
 
     // Test 7
     [Fact]
-    public async Task Batch_request_resume_skips_checkpointed()
+    public async Task Batch_request_with_checkpoint_safely_restarts_from_zero()
     {
-        var fetchedSymbols = new List<string>();
-        var checkpointStoreInner = new InMemoryCheckpointStore();
+        var checkpointStoreInner = new RecordingCheckpointStore();
         var checkpointStore = new IngestionCheckpointStore(checkpointStoreInner);
-
-        var clock = new FakeClock();
-        var l1 = new ExactOnceMemoryCache();
-        var snapshotStore = new InMemorySnapshotStore();
-        var eventLogInner = new InMemoryEventLog<IngestionEvent>();
-        var eventLog = new IngestionEventLog(eventLogInner);
-
-        var services = new ServiceCollection();
-        services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
-        services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-        services.AddSingleton<IDataSourceAdapter<BatchTestRequest, TestRecord>>(
-            new FakeBatchAdapter("test", 100, (req, _) =>
-            {
-                fetchedSymbols.Add(req.DatasetKey);
-                return Task.FromResult(MakeEnvelope(new TestRecord(req.DatasetKey, 1m)));
-            }));
-        services.AddSingleton<IRequestPartitioner<BatchTestRequest>>(new BatchPartitioner());
-        var sp = services.BuildServiceProvider();
-
-        // Pre-populate checkpoint at index 0 (so resume from index 1)
         var request = new BatchTestRequest(["AAPL", "MSFT", "GOOG"], s_range);
-        var pipelineId = $"BatchTestRequest:{request.DatasetKey}";
-        await checkpointStore.SaveAsync(pipelineId,
-            new IngestionCheckpoint("test", request.DatasetKey, 0, clock.UtcNow)).ConfigureAwait(true);
+        var (firstPipeline, _) = BuildBatchPipeline(
+            checkpointStore,
+            (partition, _) => Task.FromResult(
+                MakeEnvelope(new TestRecord(partition.DatasetKey, 1m))));
+        await firstPipeline.ExecuteAsync<BatchTestRequest, TestRecord>(request).ConfigureAwait(true);
 
-        var pipeline = new DataPipeline(
-            l1, snapshotStore, checkpointStore, eventLog,
-            new SnapshotStalenessPolicy(), new CoverageCalculator(new WeekendOnlyCalendar()),
-            Options.Create(new DataPipelineOptions()), sp, clock,
-            NullLogger<DataPipeline>.Instance);
+        var restartedFetches = new List<string>();
+        var (restartedPipeline, _) = BuildBatchPipeline(
+            checkpointStore,
+            (partition, _) =>
+            {
+                restartedFetches.Add(partition.DatasetKey);
+                return Task.FromResult(MakeEnvelope(new TestRecord(partition.DatasetKey, 1m)));
+            });
 
-        // Act
-        var result = await pipeline.ExecuteAsync<BatchTestRequest, TestRecord>(request).ConfigureAwait(true);
+        var result = await restartedPipeline
+            .ExecuteAsync<BatchTestRequest, TestRecord>(request)
+            .ConfigureAwait(true);
 
-        // Assert — should skip AAPL (index 0), fetch MSFT (index 1) and GOOG (index 2)
-        fetchedSymbols.Should().NotContain("AAPL");
-        fetchedSymbols.Should().HaveCount(2);
+        restartedFetches.Should().Equal("AAPL", "MSFT", "GOOG");
+        result.Payload.Select(record => record.Symbol).Should().Equal("AAPL", "MSFT", "GOOG");
+    }
+
+    [Fact]
+    public async Task Batch_request_restart_after_cancellation_rebuilds_complete_envelope_and_snapshot()
+    {
+        var checkpointStoreInner = new RecordingCheckpointStore();
+        var checkpointStore = new IngestionCheckpointStore(checkpointStoreInner);
+        using var cancellation = new CancellationTokenSource();
+
+        var (interruptedPipeline, _) = BuildBatchPipeline(
+            checkpointStore,
+            (request, cancellationToken) =>
+            {
+                if (request.DatasetKey == "MSFT")
+                {
+                    cancellation.Cancel();
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
+                return Task.FromResult(MakeEnvelope(new TestRecord(request.DatasetKey, 1m)));
+            });
+
+        var request = new BatchTestRequest(["AAPL", "MSFT", "GOOG"], s_range);
+        await FluentActions
+            .Invoking(() => interruptedPipeline.ExecuteAsync<BatchTestRequest, TestRecord>(
+                request,
+                cancellation.Token))
+            .Should()
+            .ThrowAsync<OperationCanceledException>()
+            .ConfigureAwait(true);
+
+        checkpointStoreInner.ProcessorIds.Should().ContainSingle(
+            "the first successful partition must be checkpointed before cancellation");
+
+        var restartedFetches = new List<string>();
+        var snapshotStore = new InMemorySnapshotStore();
+        var (restartedPipeline, writeThrough) = BuildBatchPipeline(
+            checkpointStore,
+            (partition, _) =>
+            {
+                restartedFetches.Add(partition.DatasetKey);
+                return Task.FromResult(MakeEnvelope(new TestRecord(partition.DatasetKey, 1m)));
+            },
+            snapshotStore: snapshotStore);
+
+        var result = await restartedPipeline
+            .ExecuteAsync<BatchTestRequest, TestRecord>(request)
+            .ConfigureAwait(true);
+
+        restartedFetches.Should().Equal("AAPL", "MSFT", "GOOG");
+        result.Payload.Select(record => record.Symbol).Should().Equal("AAPL", "MSFT", "GOOG");
+        result.Provenance.Should().HaveCount(3);
+        result.Issues.Should().BeEmpty();
+        result.Coverage.ReturnedPoints.Should().Be(3);
+        result.Coverage.CoverageRatio.Should().Be(1.0m);
+
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange(
+            "pipeline-v2/TestRecord/Daily",
+            request.DatasetKey,
+            request.Range.From,
+            request.Range.To);
+        var persisted = await writeThrough!.TryReadAsync(cacheKey).ConfigureAwait(true);
+        persisted.Should().NotBeNull();
+        persisted!.Payload.Select(record => record.Symbol).Should().Equal("AAPL", "MSFT", "GOOG");
+        persisted.Metadata.Provenance.Should().HaveCount(3);
+        persisted.Metadata.Issues.Should().BeEmpty();
+        persisted.Metadata.Coverage!.ReturnedPoints.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task Batch_checkpoint_advances_only_through_contiguous_successes()
+    {
+        var checkpointStoreInner = new RecordingCheckpointStore();
+        var checkpointStore = new IngestionCheckpointStore(checkpointStoreInner);
+        var request = new BatchTestRequest(["AAPL", "MSFT", "GOOG"], s_range);
+        var (pipeline, _) = BuildBatchPipeline(
+            checkpointStore,
+            (partition, _) => partition.DatasetKey == "MSFT"
+                ? throw new InvalidOperationException("simulated partition failure")
+                : Task.FromResult(MakeEnvelope(new TestRecord(partition.DatasetKey, 1m))),
+            new DataPipelineOptions { ContinueOnPartitionFailure = true });
+
+        var result = await pipeline
+            .ExecuteAsync<BatchTestRequest, TestRecord>(request)
+            .ConfigureAwait(true);
+
+        result.Payload.Select(record => record.Symbol).Should().Equal("AAPL", "GOOG");
+        checkpointStoreInner.ProcessorIds.Should().ContainSingle();
+        var processorId = checkpointStoreInner.ProcessorIds.Single();
+        var checkpoint = await checkpointStore.LoadAsync(processorId).ConfigureAwait(true);
+        checkpoint!.SymbolIndex.Should().Be(0,
+            "a success after the failed index is not a contiguous committed prefix");
+    }
+
+    [Fact]
+    public async Task Checkpoint_identity_is_collision_resistant_and_range_specific()
+    {
+        var checkpointStoreInner = new RecordingCheckpointStore();
+        var checkpointStore = new IngestionCheckpointStore(checkpointStoreInner);
+        var requests = new[]
+        {
+            new BatchTestRequest(["A//B"], s_range),
+            new BatchTestRequest(["A__B"], s_range),
+            new BatchTestRequest(
+                ["A//B"],
+                new DateRange(s_range.From.AddDays(1), s_range.To.AddDays(1))),
+        };
+
+        foreach (var request in requests)
+        {
+            var (pipeline, _) = BuildBatchPipeline(
+                checkpointStore,
+                (partition, _) => Task.FromResult(
+                    MakeEnvelope(new TestRecord(partition.DatasetKey, 1m))));
+            await pipeline.ExecuteAsync<BatchTestRequest, TestRecord>(request).ConfigureAwait(true);
+        }
+
+        checkpointStoreInner.ProcessorIds.Should().HaveCount(3,
+            "hostile logical keys and distinct ranges must not consume one another's checkpoint");
+        checkpointStoreInner.ProcessorIds.Should().OnlyContain(
+            id => id.All(c => char.IsAsciiLetterOrDigit(c) || c == '.' || c == '_' || c == '-'));
+    }
+
+    [Fact]
+    public async Task Checkpoint_identity_uses_named_bounded_stack_allocation_policy()
+    {
+        var source = ReadDataPipelineSource();
+        source.Should().Contain("MaxStackAllocatedCheckpointIdentityBytes");
+        source.Should().Contain("utf8ByteCount <= MaxStackAllocatedCheckpointIdentityBytes");
+        source.Should().Contain(
+            "stackalloc byte[MaxStackAllocatedCheckpointIdentityBytes]",
+            "only the named bounded branch may allocate the identity buffer on the stack");
+        source.Should().Contain(
+            "HashCheckpointIdentity(Encoding.UTF8.GetBytes(canonicalIdentity))",
+            "above-threshold identities must use the heap-backed encoder overload");
+        source.Should().NotContain("raw.Length <= 256 ? stackalloc");
+
+        var checkpointStoreInner = new RecordingCheckpointStore();
+        var checkpointStore = new IngestionCheckpointStore(checkpointStoreInner);
+        var largeLogicalKey = new string('X', 16_384);
+        var request = new BatchTestRequest([largeLogicalKey], s_range);
+        var (pipeline, _) = BuildBatchPipeline(
+            checkpointStore,
+            (partition, _) => Task.FromResult(
+                MakeEnvelope(new TestRecord(partition.DatasetKey, 1m))));
+
+        await pipeline.ExecuteAsync<BatchTestRequest, TestRecord>(request).ConfigureAwait(true);
+
+        checkpointStoreInner.ProcessorIds.Should().ContainSingle();
+        checkpointStoreInner.ProcessorIds.Single().Length.Should().BeLessThan(128,
+            "large logical identities must be digested after using the heap-backed encoding path");
     }
 
     // Test 8
@@ -507,6 +742,90 @@ public sealed class DataPipelineTests
         result.Issues.Should().Contain(i => i.Code == IssueCode.PartitionFailed);
     }
 
+    private static string ReadDataPipelineSource()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(
+                directory.FullName,
+                "src",
+                "Boutquin.MarketData.Orchestration",
+                "Pipeline",
+                "DataPipeline.cs");
+            if (File.Exists(candidate))
+            {
+                return File.ReadAllText(candidate);
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException("Could not locate DataPipeline.cs from the test output path.");
+    }
+
+    [Fact]
+    public async Task Public_partition_failure_does_not_disclose_adapter_exception_details()
+    {
+        const string sentinel = "credential file /Users/pierre/private/api-key.txt failed";
+        var (pipeline, _, _, _, _, _) = BuildPipeline(svc =>
+        {
+            svc.AddSingleton<IDataSourceAdapter<TestRequest, TestRecord>>(
+                new FakeAdapter("private-provider", 100, (_, _) =>
+                    throw new InvalidOperationException(sentinel)));
+        });
+
+        var result = await pipeline.ExecuteAsync<TestRequest, TestRecord>(
+            new TestRequest("AAPL", s_range)).ConfigureAwait(true);
+
+        result.Issues.Should().ContainSingle(issue => issue.Code == IssueCode.PartitionFailed);
+        result.Issues.Should().NotContain(issue => issue.Message.Contains(sentinel, StringComparison.Ordinal));
+        result.Issues.Should().OnlyContain(issue =>
+            issue.Message == "Partition fetch failed; see provider diagnostics for details.");
+    }
+
+    [Fact]
+    public async Task Public_recoverable_provider_failure_returns_an_issue_bearing_missing_envelope()
+    {
+        var (pipeline, _, _, _, _, _) = BuildPipeline(svc =>
+        {
+            svc.AddSingleton<IDataSourceAdapter<TestRequest, TestRecord>>(
+                new FakeAdapter("temporarily-unavailable", 100, (_, _) =>
+                    throw new HttpRequestException("provider is temporarily unavailable")));
+        });
+
+        var result = await pipeline.ExecuteAsync<TestRequest, TestRecord>(
+            new TestRequest("AAPL", s_range)).ConfigureAwait(true);
+
+        result.Payload.Should().BeEmpty();
+        result.Coverage.Status.Should().Be(CompletenessStatus.Missing);
+        result.Issues.Should().ContainSingle(issue => issue.Code == IssueCode.PartitionFailed);
+    }
+
+    [Fact]
+    public async Task Public_execute_async_null_request_throws_argument_null_exception_before_resolution()
+    {
+        var (pipeline, _, _, _, _, _) = BuildPipeline();
+
+        var act = async () => await pipeline.ExecuteAsync<TestRequest, TestRecord>(null!).ConfigureAwait(true);
+
+        var exception = await act.Should().ThrowAsync<ArgumentNullException>().ConfigureAwait(true);
+        exception.Which.ParamName.Should().Be("request");
+    }
+
+    [Fact]
+    public async Task Public_execute_async_preserves_cancellation()
+    {
+        var (pipeline, _, _, _, _, _) = BuildPipeline();
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        var act = async () => await pipeline.ExecuteAsync<TestRequest, TestRecord>(
+            new TestRequest("AAPL", s_range), cancellation.Token).ConfigureAwait(true);
+
+        await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(true);
+    }
+
     // Test 9
     [Fact]
     public async Task No_serializer_skips_L2()
@@ -526,7 +845,7 @@ public sealed class DataPipelineTests
         // Assert — should work fine with L1 only
         result.Payload.Should().HaveCount(1);
 
-        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("TestRecord", "AAPL", s_range.From, s_range.To);
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("pipeline-v2/TestRecord/Daily", "AAPL", s_range.From, s_range.To);
         var cached = await l1.GetAsync<DataEnvelope<IReadOnlyList<TestRecord>>>(cacheKey).ConfigureAwait(true);
         cached.Should().NotBeNull();
     }
@@ -603,6 +922,29 @@ public sealed class DataPipelineTests
         events[1].Action.Should().Be(IngestionAction.Normalized);
     }
 
+    [Fact]
+    public async Task Adapter_originated_cancellation_propagates_without_trying_fallback()
+    {
+        var fallbackCalls = 0;
+        var (pipeline, _, _, _, _, _) = BuildPipeline(svc =>
+        {
+            svc.AddSingleton<IDataSourceAdapter<TestRequest, TestRecord>>(
+                new FakeAdapter("cancelled", 100, (_, _) =>
+                    throw new OperationCanceledException("adapter operation cancelled")));
+            svc.AddSingleton<IDataSourceAdapter<TestRequest, TestRecord>>(
+                new FakeAdapter("fallback", 0, (_, _) =>
+                {
+                    fallbackCalls++;
+                    return Task.FromResult(MakeEnvelope(new TestRecord("AAPL", 100m)));
+                }));
+        });
+
+        await FluentActions.Invoking(() => pipeline.ExecuteAsync<TestRequest, TestRecord>(
+                new TestRequest("AAPL", s_range)))
+            .Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(true);
+        fallbackCalls.Should().Be(0);
+    }
+
     // Test 13
     [Fact]
     public async Task Cancellation_propagates()
@@ -635,6 +977,34 @@ public sealed class DataPipelineTests
         }
 
         events.Should().NotContain(e => e.Action == IngestionAction.Failed);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Failed_partitions_remain_incomplete_and_retryable(bool continueOnFailure)
+    {
+        var failing = true;
+        var partitions = new[] { new TestRequest("P1", s_range), new TestRequest("P2", s_range), new TestRequest("P3", s_range) };
+        var (pipeline, _, _, _, _, _) = BuildPipeline(services =>
+        {
+            services.AddSingleton<IDataSourceAdapter<TestRequest, TestRecord>>(
+                new FakeAdapter("test", 100, (request, _) => failing && request.DatasetKey == "P2"
+                    ? throw new IOException("unavailable")
+                    : Task.FromResult(MakeEnvelope(new TestRecord(request.DatasetKey, 1m)))));
+            services.AddSingleton<IRequestPartitioner<TestRequest>>(new TestPartitioner(partitions));
+        }, new DataPipelineOptions { ContinueOnPartitionFailure = continueOnFailure });
+        var request = new TestRequest("all", s_range);
+
+        var failed = await pipeline.ExecuteAsync<TestRequest, TestRecord>(request).ConfigureAwait(true);
+
+        failed.Coverage.Status.Should().Be(CompletenessStatus.Partial);
+        failed.Coverage.MissingPoints.Should().BeGreaterThanOrEqualTo(continueOnFailure ? 1 : 2);
+        failing = false;
+        var repaired = await pipeline.ExecuteAsync<TestRequest, TestRecord>(request).ConfigureAwait(true);
+        repaired.Payload.Select(record => record.Symbol).Should().Equal("P1", "P2", "P3");
+        repaired.Coverage.Status.Should().Be(CompletenessStatus.Complete);
+        repaired.Issues.Should().BeEmpty();
     }
 
     // Test 14
@@ -761,7 +1131,7 @@ public sealed class DataPipelineTests
         await pipeline.ExecuteAsync<TestRequest, TestRecord>(request).ConfigureAwait(true);
 
         // Assert — snapshot should now exist in L2
-        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("TestRecord", "AAPL", s_range.From, s_range.To);
+        var cacheKey = Cache.Keys.CacheKeyBuilder.FromDateRange("pipeline-v2/TestRecord/Daily", "AAPL", s_range.From, s_range.To);
         var exists = await sharedSnapshotStore.ExistsAsync(cacheKey).ConfigureAwait(true);
         exists.Should().BeTrue();
     }

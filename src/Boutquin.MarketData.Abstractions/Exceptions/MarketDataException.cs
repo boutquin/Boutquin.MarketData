@@ -17,7 +17,7 @@
 namespace Boutquin.MarketData.Abstractions.Exceptions;
 
 /// <summary>
-/// Base class for every failure mode exposed by the MarketData kernel.
+/// Base class for the MarketData exception family.
 /// </summary>
 /// <remarks>
 /// <para>

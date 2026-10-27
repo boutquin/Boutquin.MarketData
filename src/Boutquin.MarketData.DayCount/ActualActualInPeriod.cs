@@ -26,17 +26,15 @@ namespace Boutquin.MarketData.DayCount;
 /// Reference: ICMA Rule 251 — for a coupon period running from <c>t₀</c> to <c>t₁</c>
 /// with coupon frequency <c>m</c>, the year fraction from <c>t₀</c> to <c>t</c> is
 /// <c>(t − t₀) / (m · (t₁ − t₀))</c>. A half-period accrues exactly <c>1/(2m)</c>; a
-/// full period accrues exactly <c>1/m</c>. Spans across multiple coupon periods are
-/// decomposed into a sum of per-period fractions, each computed against that period's
-/// own <c>(periodStart, periodEnd)</c>.
+/// full period accrues exactly <c>1/m</c>. Callers must split spans across multiple coupon
+/// periods and sum the per-period fractions. Each call requires dates within its supplied
+/// <c>(periodStart, periodEnd)</c>; this implementation does not split schedules.
 /// </para>
 /// <para>
 /// <strong>Fallback behaviour.</strong> Callers that do not know the coupon schedule
-/// (the 2-argument overload) get an ICMA-compatible approximation: days / 365.25.
-/// This matches the ICMA fallback used when coupon context is unavailable — it is a
-/// correct and widely-used approximation for short horizons but is not a substitute
-/// for the coupon-aware overload when accruing across coupon dates matters (Treasury
-/// bond pricing, OAS decomposition, etc.).
+/// (the 2-argument overload) get a schedule-free approximation: days / 365.25.
+/// This does not implement the coupon-aware ICMA convention and is not a substitute
+/// for the coupon-aware overload when the accrual schedule matters.
 /// </para>
 /// <para>
 /// Conventions used by this implementation:
@@ -62,8 +60,9 @@ public sealed class ActualActualInPeriod : IYearFractionCalculator
 
     /// <inheritdoc />
     /// <remarks>
-    /// ICMA fallback (ACT/365.25) for callers without coupon context. Prefer the
-    /// five-argument overload for any bond that accrues across coupon dates.
+    /// Schedule-free ACT/365.25 approximation for callers without coupon context.
+    /// This is not the ICMA convention. Use the five-argument overload for each
+    /// regular or notional coupon period and sum the fractions across periods.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when <paramref name="endDate"/> is earlier than <paramref name="startDate"/>.
@@ -95,7 +94,8 @@ public sealed class ActualActualInPeriod : IYearFractionCalculator
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// When <paramref name="couponFrequency"/> is not positive, or when <paramref name="end"/>
-    /// is earlier than <paramref name="start"/>.
+    /// is earlier than <paramref name="start"/>, <paramref name="start"/> is earlier than
+    /// <paramref name="periodStart"/>, or <paramref name="end"/> is later than <paramref name="periodEnd"/>.
     /// </exception>
     /// <exception cref="ArgumentException">
     /// When <paramref name="periodEnd"/> is not strictly later than
@@ -125,7 +125,10 @@ public sealed class ActualActualInPeriod : IYearFractionCalculator
                 nameof(periodEnd));
         }
 
+        ArgumentOutOfRangeException.ThrowIfLessThan(start, periodStart);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(end, periodEnd);
+
         var intervalDays = end.DayNumber - start.DayNumber;
-        return intervalDays / (double)(couponFrequency * periodDays);
+        return intervalDays / ((double)couponFrequency * periodDays);
     }
 }

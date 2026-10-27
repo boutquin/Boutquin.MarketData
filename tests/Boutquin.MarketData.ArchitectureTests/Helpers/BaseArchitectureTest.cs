@@ -62,6 +62,7 @@ public abstract class BaseArchitectureTest
         CatalogAssembly,
         DayCountAssembly,
         CalendarsAssembly,
+        ConventionsAssembly,
     ];
 
     protected static IEnumerable<Assembly> AllSourceAssemblies =>

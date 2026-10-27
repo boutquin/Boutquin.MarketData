@@ -14,8 +14,8 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.Records;
-using Boutquin.MarketData.Abstractions.ReferenceData;
 
 using FluentAssertions;
 
@@ -28,7 +28,7 @@ public sealed class FxPairTests
     [Fact]
     public void ToString_ReturnsBaseSlashQuote()
     {
-        var pair = new FxPair(CurrencyCode.EUR, CurrencyCode.USD);
+        var pair = new FxPair(Currency.EUR, Currency.USD);
 
         pair.ToString().Should().Be("EUR/USD");
     }
@@ -36,52 +36,52 @@ public sealed class FxPairTests
     [Fact]
     public void Invert_SwapsBaseAndQuote()
     {
-        var pair = new FxPair(CurrencyCode.EUR, CurrencyCode.USD);
+        var pair = new FxPair(Currency.EUR, Currency.USD);
 
         var inverted = pair.Invert();
 
-        inverted.BaseCurrency.Should().Be(CurrencyCode.USD);
-        inverted.QuoteCurrency.Should().Be(CurrencyCode.EUR);
+        inverted.BaseCurrency.Should().Be(Currency.USD);
+        inverted.QuoteCurrency.Should().Be(Currency.EUR);
     }
 
     [Fact]
     public void MarketConvention_EurAlwaysBase()
     {
-        var pair = new FxPair(CurrencyCode.USD, CurrencyCode.EUR);
+        var pair = new FxPair(Currency.USD, Currency.EUR);
 
-        pair.MarketConvention().Should().Be(new FxPair(CurrencyCode.EUR, CurrencyCode.USD));
+        pair.MarketConvention().Should().Be(new FxPair(Currency.EUR, Currency.USD));
     }
 
     [Fact]
     public void StandardSettlementDays_SameCurrency_T0()
     {
-        new FxPair(CurrencyCode.USD, CurrencyCode.USD).StandardSettlementDays.Should().Be(0);
+        new FxPair(Currency.USD, Currency.USD).StandardSettlementDays.Should().Be(0);
     }
 
     [Fact]
     public void StandardSettlementDays_UsdCad_T1()
     {
-        new FxPair(CurrencyCode.USD, CurrencyCode.CAD).StandardSettlementDays.Should().Be(1);
+        new FxPair(Currency.USD, Currency.CAD).StandardSettlementDays.Should().Be(1);
     }
 
     [Fact]
     public void StandardSettlementDays_CadUsd_T1()
     {
         // Reversed order should still resolve to USD/CAD convention.
-        new FxPair(CurrencyCode.CAD, CurrencyCode.USD).StandardSettlementDays.Should().Be(1);
+        new FxPair(Currency.CAD, Currency.USD).StandardSettlementDays.Should().Be(1);
     }
 
     [Fact]
     public void StandardSettlementDays_Default_T2()
     {
-        new FxPair(CurrencyCode.EUR, CurrencyCode.USD).StandardSettlementDays.Should().Be(2);
+        new FxPair(Currency.EUR, Currency.USD).StandardSettlementDays.Should().Be(2);
     }
 
     [Fact]
     public void Equality_SameValues_AreEqual()
     {
-        var pair1 = new FxPair(CurrencyCode.GBP, CurrencyCode.JPY);
-        var pair2 = new FxPair(CurrencyCode.GBP, CurrencyCode.JPY);
+        var pair1 = new FxPair(Currency.GBP, Currency.JPY);
+        var pair2 = new FxPair(Currency.GBP, Currency.JPY);
 
         pair1.Should().Be(pair2);
     }

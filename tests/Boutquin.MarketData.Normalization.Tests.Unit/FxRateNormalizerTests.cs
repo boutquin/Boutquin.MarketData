@@ -15,7 +15,6 @@
 //
 
 using Boutquin.MarketData.Abstractions.Records;
-using Boutquin.MarketData.Abstractions.ReferenceData;
 using Boutquin.MarketData.Normalization.Normalizers;
 
 using FluentAssertions;
@@ -29,20 +28,19 @@ public sealed class FxRateNormalizerTests
     private readonly FxRateNormalizer _sut = new();
 
     [Fact]
-    public void Preserves_currency_codes()
+    public void Default_record_is_valid_under_required_string_policy()
     {
-        var rate = new FxRate(new DateOnly(2024, 1, 1), CurrencyCode.EUR, CurrencyCode.USD, 1.0850m);
+        var result = _sut.Normalize(default);
 
-        var result = _sut.Normalize(rate);
-
-        result.BaseCurrency.Should().Be(CurrencyCode.EUR);
-        result.QuoteCurrency.Should().Be(CurrencyCode.USD);
+        result.Should().Be(default(FxRate));
     }
 
     [Fact]
     public void Rounds_rate_to_configured_precision()
     {
-        var rate = new FxRate(new DateOnly(2024, 1, 1), CurrencyCode.EUR, CurrencyCode.USD, 1.08501234567m);
+        // FxRate slimmed to (Date, Rate) per M-2.6 (§2.5.1 / Q15) — the pair lives in
+        // FxRateDatasetKey, so the normalizer no longer carries currencies on the body.
+        var rate = new FxRate(new DateOnly(2024, 1, 1), 1.08501234567m);
 
         var result = _sut.Normalize(rate);
 
@@ -54,7 +52,7 @@ public sealed class FxRateNormalizerTests
     public void Preserves_date()
     {
         var date = new DateOnly(2024, 6, 15);
-        var rate = new FxRate(date, CurrencyCode.GBP, CurrencyCode.JPY, 198.45m);
+        var rate = new FxRate(date, 198.45m);
 
         var result = _sut.Normalize(rate);
 
@@ -64,12 +62,10 @@ public sealed class FxRateNormalizerTests
     [Fact]
     public void Exact_rate_unchanged()
     {
-        var rate = new FxRate(new DateOnly(2024, 1, 1), CurrencyCode.USD, CurrencyCode.CAD, 1.3500m);
+        var rate = new FxRate(new DateOnly(2024, 1, 1), 1.3500m);
 
         var result = _sut.Normalize(rate);
 
-        result.BaseCurrency.Should().Be(CurrencyCode.USD);
-        result.QuoteCurrency.Should().Be(CurrencyCode.CAD);
         result.Rate.Should().Be(1.3500m);
     }
 
@@ -77,7 +73,7 @@ public sealed class FxRateNormalizerTests
     public void Custom_precision_rounds_to_specified_decimals()
     {
         var normalizer = new FxRateNormalizer(decimalPlaces: 4);
-        var rate = new FxRate(new DateOnly(2024, 1, 1), CurrencyCode.EUR, CurrencyCode.USD, 1.08505m);
+        var rate = new FxRate(new DateOnly(2024, 1, 1), 1.08505m);
 
         var result = normalizer.Normalize(rate);
 

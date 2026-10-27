@@ -13,14 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
+using System.Collections.Concurrent;
 using Boutquin.MarketData.Abstractions.Contracts;
-using Boutquin.Storage.Infrastructure.KeyValueStore;
 
 namespace Boutquin.MarketData.Cache.Memory;
 
 /// <summary>
-/// Thread-safe in-memory L1 cache with per-entry TTL, backed by
-/// <see cref="ConcurrentKeyValueStore{TKey,TValue}"/> for exact-once write semantics.
+/// Thread-safe in-memory L1 cache with per-entry TTL and unconditional last-write-wins overwrites.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -29,10 +28,9 @@ namespace Boutquin.MarketData.Cache.Memory;
 /// window return without touching disk or network.
 /// </para>
 /// <para>
-/// Eviction: expired entries are reclaimed lazily on the next read for that key rather than by
-/// a background sweeper. This keeps the cache allocation-free at idle at the cost of retaining
-/// memory for expired entries that are never read again. For workloads with many short-lived
-/// keys, schedule a periodic external sweep.
+/// Eviction: reads reclaim the expired entry they observe. Reads and writes also sweep expired
+/// entries across the cache at most once per minute of activity, including reads for missing keys.
+/// No background timer is allocated; an idle cache retains its entries until activity resumes.
 /// </para>
 /// <para>
 /// Concurrency: two concurrent readers of an expired key both observe the miss, both trigger
@@ -48,44 +46,82 @@ namespace Boutquin.MarketData.Cache.Memory;
 /// </remarks>
 public sealed class ExactOnceMemoryCache : ILocalCache
 {
-    private readonly ConcurrentKeyValueStore<string, CacheEntry> _store = new();
+    private readonly ConcurrentDictionary<string, CacheEntry> _store = new(StringComparer.Ordinal);
+    private readonly TimeProvider _timeProvider;
+    private long _nextSweepUtcTicks;
+
+    /// <summary>Creates a cache using the system clock.</summary>
+    public ExactOnceMemoryCache() : this(TimeProvider.System) { }
+
+    /// <summary>Creates a cache using the supplied clock for expiration.</summary>
+    /// <param name="timeProvider">Clock used to measure entry expiration and cleanup intervals.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="timeProvider"/> is null.</exception>
+    public ExactOnceMemoryCache(TimeProvider timeProvider)
+        => _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
     /// <inheritdoc />
-    public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+    public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
-        var (entry, found) = await _store.TryGetValueAsync(key, cancellationToken).ConfigureAwait(false);
-        if (!found)
+        ArgumentNullException.ThrowIfNull(key);
+        cancellationToken.ThrowIfCancellationRequested();
+        _store.TryGetValue(key, out var entry);
+        var now = _timeProvider.GetUtcNow();
+        SweepExpiredEntries(now);
+        if (entry is null)
         {
-            // Miss: nothing to remove. Avoid a redundant RemoveAsync that would also race
-            // with a concurrent SetAsync installing a fresh entry.
-            return default;
+            return Task.FromResult<T?>(default);
         }
 
-        if (entry.ExpiresAtUtc > DateTimeOffset.UtcNow)
+        if (entry.ExpiresAtUtc > now)
         {
-            // Type-mismatch safety: the cache is weakly typed (CacheEntry.Value is object?),
-            // so a caller retrieving under a different T than was stored would otherwise hit
-            // an InvalidCastException. Treat mismatch as a miss rather than crashing the
-            // consumer — the caller can then refetch with the correct type.
-            return entry.Value is T typed ? typed : default;
+            // The cache is weakly typed: a different requested type is a miss.
+            return Task.FromResult(entry.Value is T typed ? typed : default);
         }
 
-        // Expired — best-effort reclaim. This is a TOCTOU race by construction: between our
-        // read and the remove, a concurrent SetAsync could install a new entry under the
-        // same key. That write would be lost. Accepted trade-off because the underlying
-        // ConcurrentKeyValueStore does not expose a conditional "remove-if-equals" primitive.
-        // Consumers requiring exact-once write semantics through this race must compose with
-        // LazyAsyncCache which coalesces cold misses.
-        await _store.RemoveAsync(key, cancellationToken).ConfigureAwait(false);
-        return default;
+        // Reference identity ensures a concurrent replacement survives expiration of this entry.
+        _store.TryRemove(new KeyValuePair<string, CacheEntry>(key, entry));
+        return Task.FromResult<T?>(default);
     }
 
     /// <inheritdoc />
-    public async Task SetAsync<T>(string key, T value, TimeSpan ttl, CancellationToken cancellationToken = default)
+    public Task SetAsync<T>(string key, T value, TimeSpan ttl, CancellationToken cancellationToken = default)
     {
-        var entry = new CacheEntry(value, DateTimeOffset.UtcNow.Add(ttl));
-        await _store.SetAsync(key, entry, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(key);
+        cancellationToken.ThrowIfCancellationRequested();
+        var now = _timeProvider.GetUtcNow();
+        var entry = new CacheEntry(value, now.Add(ttl));
+        SweepExpiredEntries(now);
+        _store[key] = entry;
+        return Task.CompletedTask;
     }
 
-    private sealed record CacheEntry(object? Value, DateTimeOffset ExpiresAtUtc);
+    private void SweepExpiredEntries(DateTimeOffset now)
+    {
+        var scheduled = Volatile.Read(ref _nextSweepUtcTicks);
+        if (now.UtcTicks < scheduled)
+        {
+            return;
+        }
+
+        var next = Math.Min(now.UtcTicks, DateTimeOffset.MaxValue.UtcTicks - TimeSpan.TicksPerMinute)
+            + TimeSpan.TicksPerMinute;
+        if (Interlocked.CompareExchange(ref _nextSweepUtcTicks, next, scheduled) != scheduled)
+        {
+            return;
+        }
+
+        foreach (var entry in _store)
+        {
+            if (entry.Value.ExpiresAtUtc <= now)
+            {
+                _store.TryRemove(entry);
+            }
+        }
+    }
+
+    private sealed class CacheEntry(object? value, DateTimeOffset expiresAtUtc)
+    {
+        public object? Value { get; } = value;
+        public DateTimeOffset ExpiresAtUtc { get; } = expiresAtUtc;
+    }
 }

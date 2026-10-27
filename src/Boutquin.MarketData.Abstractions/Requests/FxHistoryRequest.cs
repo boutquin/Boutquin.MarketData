@@ -16,6 +16,7 @@
 
 using Boutquin.MarketData.Abstractions.Contracts;
 using Boutquin.MarketData.Abstractions.Records;
+using Boutquin.MarketData.Abstractions.ReferenceData;
 
 namespace Boutquin.MarketData.Abstractions.Requests;
 
@@ -34,12 +35,71 @@ public sealed record FxHistoryRequest(
     /// The currency pairs being requested, stored as a defensive copy so mutation of the
     /// caller's collection cannot change <see cref="DatasetKey"/> stability or record equality.
     /// </summary>
-    public IReadOnlyList<FxPair> Pairs { get; init; } = [.. Pairs];
+    public IReadOnlyList<FxPair> Pairs
+    {
+        get;
+        init => field = CopyAndValidate(value);
+    } = CopyAndValidate(Pairs);
+
+    /// <summary>
+    /// Optional regional hint — FX is OTC and venue-neutral at the data level, but the hint
+    /// lets adapter orchestration bias toward a regional source (Bank of Canada for CAD pairs,
+    /// ECB for EUR pairs, Frankfurter for ad-hoc lookups). When <see langword="null"/> any
+    /// adapter may serve the request. Also scopes <see cref="DatasetKey"/>.
+    /// </summary>
+    /// <remarks>
+    /// Exposed as an <c>init</c> property for 1.1.0 binary compatibility with 1.0.x consumers
+    /// (notably <c>Boutquin.Trading.Recipes.BacktestDatasetBuilder</c> which constructs
+    /// FxHistoryRequest via the 2/3-arg positional signature).
+    /// </remarks>
+    public ExchangeCode? Exchange { get; init; }
 
     /// <inheritdoc />
-    public string DatasetKey =>
-        string.Join("+", Pairs.OrderBy(p => p.ToString(), StringComparer.OrdinalIgnoreCase));
+    /// <remarks>
+    /// Pairs are joined with <c>_</c> because the resulting string flows into
+    /// <c>FileSystemObjectStore</c> keys, whose validator only accepts
+    /// <c>[a-zA-Z0-9._\-/]</c>. <c>+</c> (the intuitive join character) is rejected
+    /// there and collapses the L2 write-through on multi-pair batches.
+    /// When <see cref="Exchange"/> is non-null the code is suffixed via <c>/</c> so the
+    /// L2 cache naturally partitions into a sub-directory per venue; when null the key
+    /// is unchanged so existing snapshots remain reachable.
+    /// </remarks>
+    public string DatasetKey
+    {
+        get
+        {
+            var pairsKey = string.Join("_", Pairs.OrderBy(p => p.ToString(), StringComparer.OrdinalIgnoreCase));
+            return Exchange is null ? pairsKey : $"{pairsKey}/{Exchange.Value}";
+        }
+    }
 
     /// <inheritdoc />
     public IReadOnlyList<FxPair> PartitionKeys => Pairs;
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Preserves the currency-pair set, the optional <see cref="Exchange"/> venue hint, and the
+    /// <see cref="DataFrequency"/>; only <see cref="IDataRequest.Range"/> is narrowed to the gap.
+    /// Used by the time-series gap-fill to fetch just a missing sub-range.
+    /// </remarks>
+    public IDataRequest WithRange(DateRange range) =>
+        new FxHistoryRequest(Pairs, range, Frequency) { Exchange = Exchange };
+
+    private static IReadOnlyList<FxPair> CopyAndValidate(IReadOnlyList<FxPair> pairs)
+    {
+        ArgumentNullException.ThrowIfNull(pairs);
+        ArgumentOutOfRangeException.ThrowIfZero(pairs.Count);
+
+        if (pairs.Any(pair => pair is null))
+        {
+            throw new ArgumentException("FX history pairs must not contain null elements.", nameof(pairs));
+        }
+
+        if (pairs.Distinct().Count() != pairs.Count)
+        {
+            throw new ArgumentException("FX history pairs must be unique.", nameof(pairs));
+        }
+
+        return [.. pairs];
+    }
 }

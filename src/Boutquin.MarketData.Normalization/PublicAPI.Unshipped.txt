@@ -1,1 +1,18 @@
 #nullable enable
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.BarNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.Bar! raw) -> Boutquin.MarketData.Abstractions.Records.Bar!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.DividendPaymentNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.DividendPayment! raw) -> Boutquin.MarketData.Abstractions.Records.DividendPayment!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.FactorObservationNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FactorObservation! raw) -> Boutquin.MarketData.Abstractions.Records.FactorObservation!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.FuturesSettlementNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FuturesSettlement! raw) -> Boutquin.MarketData.Abstractions.Records.FuturesSettlement!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.FxRateNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FxRate! raw) -> Boutquin.MarketData.Abstractions.Records.FxRate!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.OptionQuoteNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.OptionQuote! raw) -> Boutquin.MarketData.Abstractions.Records.OptionQuote!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.ScalarObservationNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.ScalarObservation! raw) -> Boutquin.MarketData.Abstractions.Records.ScalarObservation!
+*REMOVED*Boutquin.MarketData.Normalization.Normalizers.YieldCurveQuoteNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.YieldCurveQuote! raw) -> Boutquin.MarketData.Abstractions.Records.YieldCurveQuote!
+Boutquin.MarketData.Normalization.Normalizers.BarNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.Bar raw) -> Boutquin.MarketData.Abstractions.Records.Bar
+Boutquin.MarketData.Normalization.Normalizers.DividendPaymentNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.DividendPayment raw) -> Boutquin.MarketData.Abstractions.Records.DividendPayment
+Boutquin.MarketData.Normalization.Normalizers.FactorObservationNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FactorObservation raw) -> Boutquin.MarketData.Abstractions.Records.FactorObservation
+Boutquin.MarketData.Normalization.Normalizers.FuturesSettlementNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FuturesSettlement raw) -> Boutquin.MarketData.Abstractions.Records.FuturesSettlement
+Boutquin.MarketData.Normalization.Normalizers.FxRateNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.FxRate raw) -> Boutquin.MarketData.Abstractions.Records.FxRate
+Boutquin.MarketData.Normalization.Normalizers.OptionQuoteNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.OptionQuote raw) -> Boutquin.MarketData.Abstractions.Records.OptionQuote
+Boutquin.MarketData.Normalization.Normalizers.ScalarObservationNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.ScalarObservation raw) -> Boutquin.MarketData.Abstractions.Records.ScalarObservation
+Boutquin.MarketData.Normalization.Normalizers.YieldCurveQuoteNormalizer.Normalize(Boutquin.MarketData.Abstractions.Records.YieldCurveQuote raw) -> Boutquin.MarketData.Abstractions.Records.YieldCurveQuote
+const Boutquin.MarketData.Normalization.Normalizers.ScalarObservationNormalizer.CanonicalDecimalUnits = "decimal" -> string!

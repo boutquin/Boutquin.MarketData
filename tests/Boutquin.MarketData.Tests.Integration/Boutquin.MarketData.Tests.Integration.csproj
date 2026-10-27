@@ -22,5 +22,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Boutquin.MarketData.DependencyInjection/Boutquin.MarketData.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/Boutquin.MarketData.Testing/Boutquin.MarketData.Testing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Boutquin.MarketData.DayCount/Boutquin.MarketData.DayCount.csproj" />
+    <None Update="Fixtures/financial-oracle.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures/easter-oracle.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

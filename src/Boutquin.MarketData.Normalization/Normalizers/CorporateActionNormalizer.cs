@@ -24,21 +24,20 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// factors and trimming descriptions.
 /// </summary>
 /// <remarks>
-/// Symbol and Currency are strongly-typed after the reference-data consolidation
-/// spec — typed enums cannot be "uppercased" or "trimmed" (invalid characters are
-/// already rejected at construction time), so only amount clamping and description
-/// trimming remain.
+/// Symbol and Currency are strongly typed, so invalid values are rejected at their
+/// construction boundaries. This normalizer therefore limits its work to amount
+/// clamping and description trimming.
 /// </remarks>
 public sealed class CorporateActionNormalizer : INormalizer<CorporateAction, CorporateAction>
 {
     /// <inheritdoc />
     public CorporateAction Normalize(CorporateAction raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
 
         var description = raw.Description?.Trim();
 
-        // Clamp: dividend amounts must be non-negative, split factors must be positive
+        // Clamp negative dividend amounts and take the magnitude of split factors; zero is preserved.
         var amount = raw.Amount.HasValue ? Math.Max(0m, raw.Amount.Value) : (decimal?)null;
         var factor = raw.Factor.HasValue ? Math.Abs(raw.Factor.Value) : (decimal?)null;
 

@@ -25,14 +25,19 @@ namespace Boutquin.MarketData.Abstractions.Tests.Unit.Provenance;
 public sealed class RetrievalModeTests
 {
     [Fact]
-    public void MemberSet_IsExactlyFiveValues_InFixedOrdinalOrder()
+    public void MemberSet_IsExactlySevenValues_InFixedOrdinalOrder()
     {
+        // M-7 (§2.3 step 8) appends Live (5) and Partial (6) to describe the time-series
+        // gap-fill outcomes — the pre-existing 0..4 members and their ordinals are unchanged
+        // (append-only ordinal contract).
         Enum.GetValues<RetrievalMode>().Should().Equal(
             RetrievalMode.Api,
             RetrievalMode.Cache,
             RetrievalMode.Snapshot,
             RetrievalMode.Derived,
-            RetrievalMode.Fixture);
+            RetrievalMode.Fixture,
+            RetrievalMode.Live,
+            RetrievalMode.Partial);
     }
 
     [Theory]
@@ -41,6 +46,8 @@ public sealed class RetrievalModeTests
     [InlineData(RetrievalMode.Snapshot, 2)]
     [InlineData(RetrievalMode.Derived, 3)]
     [InlineData(RetrievalMode.Fixture, 4)]
+    [InlineData(RetrievalMode.Live, 5)]
+    [InlineData(RetrievalMode.Partial, 6)]
     public void Members_HaveStableOrdinalValues(RetrievalMode value, int expectedOrdinal)
     {
         ((int)value).Should().Be(expectedOrdinal);

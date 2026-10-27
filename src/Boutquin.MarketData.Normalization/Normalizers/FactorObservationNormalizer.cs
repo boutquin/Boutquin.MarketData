@@ -15,49 +15,45 @@
 //
 
 using Boutquin.MarketData.Abstractions.Contracts;
+using Boutquin.MarketData.Abstractions.Keys;
 using Boutquin.MarketData.Abstractions.Records;
 
 namespace Boutquin.MarketData.Normalization.Normalizers;
 
 /// <summary>
-/// Normalizes <see cref="FactorObservation"/> records by converting Fama-French percent-form
-/// factor returns to decimal form and standardizing factor names to canonical casing.
+/// Normalizes a <see cref="FactorObservation"/> by converting its Fama-French percent-form factor
+/// return to decimal form and standardizing the factor name to canonical casing.
 /// </summary>
 /// <remarks>
 /// Fama-French CSV files publish returns in percent (e.g., 0.39 means 0.39%). This normalizer
-/// divides all factor values by 100. Factor names are mapped to canonical casing where known
-/// ("Mkt-RF", "SMB", "HML", "RMW", "CMA", "RF"); unknown names are uppercased.
+/// divides the factor value by 100. The factor name is trimmed first — surrounding whitespace never
+/// selects a different branch — and then mapped to canonical casing where known ("Mkt-RF", "SMB",
+/// "HML", "RMW", "CMA", "RF", "Mom", "WML"); a trimmed name that is not in that set is uppercased.
+/// The per-factor canonicalisation rules are unchanged from the prior dictionary-keyed
+/// shape — they now apply to the record's single <see cref="FactorObservation.FactorName"/> /
+/// <see cref="FactorObservation.Value"/> pair.
+/// <para>The name rule itself is <b>not</b> owned here:
+/// <see cref="FactorObservation.FactorName"/> is the discriminant column of
+/// <see cref="FactorObservationDatasetKey"/>, so the canonical spelling is defined once by
+/// <see cref="FactorObservationDatasetKey.CanonicalFactorName"/> and applied both to the projected
+/// key (by <c>FactorObservationFanOut</c>, unconditionally) and to the record body here. Encoding
+/// that one identity relation in two places is what let the persisted key disagree with the
+/// persisted body across a <c>RegisterDefaultNormalizers</c> flip.</para>
 /// </remarks>
 public sealed class FactorObservationNormalizer : INormalizer<FactorObservation, FactorObservation>
 {
-    private static readonly Dictionary<string, string> s_canonicalNames = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["Mkt-RF"] = "Mkt-RF",
-        ["SMB"] = "SMB",
-        ["HML"] = "HML",
-        ["RMW"] = "RMW",
-        ["CMA"] = "CMA",
-        ["RF"] = "RF",
-        ["Mom"] = "Mom",
-        ["WML"] = "WML",
-    };
-
     /// <inheritdoc />
     public FactorObservation Normalize(FactorObservation raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfRequiredStringIsNull(
+            raw.FactorName,
+            nameof(FactorObservation.FactorName),
+            nameof(raw));
 
-        var normalized = new Dictionary<string, decimal>(raw.Factors.Count, StringComparer.Ordinal);
-
-        foreach (var (name, value) in raw.Factors)
-        {
-            var canonicalName = s_canonicalNames.TryGetValue(name, out var mapped)
-                ? mapped
-                : name.Trim().ToUpperInvariant();
-
-            normalized[canonicalName] = value / 100m;
-        }
-
-        return new FactorObservation(raw.Date, normalized);
+        return new(
+            raw.Date,
+            FactorObservationDatasetKey.CanonicalFactorName(raw.FactorName),
+            raw.Value / 100m);
     }
 }

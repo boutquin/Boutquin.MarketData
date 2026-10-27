@@ -14,7 +14,7 @@
 //   limitations under the License.
 //
 
-using System.Text.Json.Serialization;
+using Boutquin.Storage.Domain.Attributes;
 
 namespace Boutquin.MarketData.Abstractions.ReferenceData;
 
@@ -23,6 +23,11 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// for E-mini S&amp;P 500, <c>"SR3"</c> for 3-month SOFR futures, <c>"ZQ"</c> for
 /// Fed Funds futures).
 /// </summary>
+/// <param name="Value">
+/// The futures product / contract root code. Must be non-null and contain at least one
+/// non-whitespace character; validated on construction (including generator round-trip,
+/// which reconstructs via this positional constructor).
+/// </param>
 /// <remarks>
 /// <para>
 /// Replaces the bare <c>string ProductCode</c> on
@@ -31,30 +36,44 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// wishing to canonicalise to upper-case should do so at the adapter boundary before
 /// constructing the value, because some venues distinguish case-sensitive product codes.
 /// </para>
+/// <para>
+/// Annotated <c>[StorageSerializable]</c> (positional <c>partial record struct</c> with a
+/// tagged constructor parameter) so it round-trips on the Boutquin.Storage 2.0 tagged wire
+/// and may be nested inside a serializable record such as
+/// <see cref="Records.FuturesSettlement"/>. The Storage generator emits
+/// <c>Serialize</c>/<c>Deserialize</c>; deserialization reconstructs through this same
+/// validating constructor, so the null/whitespace guard holds on every read path.
+/// </para>
+/// <para>
+/// Initialization and property access enforce the same validation. A default value is invalid
+/// for serialization: the generated writer reads the guarded property while staging its payload,
+/// before emitting any bytes to the destination stream. The diagnostic <see cref="ToString"/>
+/// representation of a default value remains the empty string.
+/// </para>
 /// </remarks>
-public readonly record struct FuturesProductCode : IComparable<FuturesProductCode>
+[StorageSerializable]
+public partial record struct FuturesProductCode(string Value)
+    : IComparable<FuturesProductCode>
 {
-    /// <summary>
-    /// The futures product / contract root code.
-    /// </summary>
-    public string Value { get; }
+    private string _value = ValidateValue(Value);
 
     /// <summary>
-    /// Initializes a new <see cref="FuturesProductCode"/>.
+    /// The futures product / contract root code, validated on initialization and access.
     /// </summary>
-    /// <param name="value">
-    /// The product code. Must be non-null and contain at least one non-whitespace
-    /// character.
-    /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="value"/> is <see langword="null"/>, empty, or
-    /// whitespace.
+    /// The assigned code is null or whitespace, or an uninitialized default code is accessed.
     /// </exception>
-    [JsonConstructor]
-    public FuturesProductCode(string value)
+    [Tag(1)]
+    public string Value
+    {
+        get => ValidateValue(_value);
+        init => _value = ValidateValue(value);
+    }
+
+    private static string ValidateValue(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
-        Value = value;
+        return value;
     }
 
     /// <summary>
@@ -66,5 +85,5 @@ public readonly record struct FuturesProductCode : IComparable<FuturesProductCod
         string.CompareOrdinal(Value, other.Value);
 
     /// <inheritdoc />
-    public override string ToString() => Value ?? string.Empty;
+    public override string ToString() => _value ?? string.Empty;
 }

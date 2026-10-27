@@ -89,16 +89,16 @@ Open an issue describing:
 
 - Follow the conventions documented in `CLAUDE.md` and `.editorconfig` at the repository root.
 - Public types are `sealed` unless they are interfaces, abstract base classes, or records (enforced by architecture tests).
-- MarketData has **zero** dependencies on Analytics, Trading, or OptionPricing — this is enforced by `Boutquin.MarketData.ArchitectureTests`. Do not add a reference to any domain-layer package.
-- Concrete adapters (Tiingo, Frankfurter, FRED, etc.) live in the separate `Boutquin.MarketData.Adapter` repository, not here. The kernel ships contracts and infrastructure only.
-- Litmus test for any new type: "Could this be used by both Analytics and Trading without dragging in domain concepts?" If it carries domain-specific semantics, it does not belong in MarketData.
+- MarketData has **zero** dependencies on [Curves](https://github.com/boutquin/Boutquin.Curves), [Trading](https://github.com/boutquin/Boutquin.Trading), or [OptionPricing](https://github.com/boutquin/Boutquin.OptionPricing) — this is enforced by `Boutquin.MarketData.ArchitectureTests`. Do not add a reference to any domain-layer package.
+- Concrete adapters (Tiingo, Frankfurter, FRED, etc.) live in the separate [Boutquin.MarketData.Adapter](https://github.com/boutquin/Boutquin.MarketData.Adapter) repository, not here. The kernel ships contracts and infrastructure only.
+- Litmus test for any new type: "Could this be used by both Curves and Trading without dragging in domain concepts?" If it carries domain-specific semantics, it does not belong in MarketData.
 
 ### Documentation Style Guide
 
 All public API additions must satisfy the in-code documentation bar:
 
 - `<summary>` on every public type, constructor, method, property, and enum member.
-- `<param>`, `<returns>`, and `<remarks>` per the required-elements checklist in `specs/documentation-style.md`.
+- `<param>` for every parameter, `<returns>` describing the result and completion semantics, and `<remarks>` explaining nontrivial behavior, ownership, and failure modes.
 - No banned boilerplate phrases ("Provides the ... functionality", "Executes the ... operation", "Gets or sets the ... for this instance", "Input value for ...", "/// Executes ...", "Operation result.", "/// Gets the ...").
 - Specification references: name the standard, section, and (where applicable) the ISDA rule or ISO clause number.
 - Contracts and invariants must be explicit — rejection conditions, null behaviour, and calendar/day-count edge cases belong in `<remarks>`, not in the summary or left implicit.

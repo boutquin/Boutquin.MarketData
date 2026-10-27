@@ -15,6 +15,7 @@
 //
 
 using Boutquin.MarketData.Abstractions.Contracts;
+using Boutquin.MarketData.Abstractions.Keys;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 namespace Boutquin.MarketData.Abstractions.Requests;
@@ -35,11 +36,41 @@ public sealed record InstrumentMetadataRequest(
     /// The ticker symbols being requested, stored as a defensive copy so mutation of the
     /// caller's collection cannot change <see cref="DatasetKey"/> stability or record equality.
     /// </summary>
-    public IReadOnlyList<Symbol> Symbols { get; init; } = [.. Symbols];
+    public IReadOnlyList<Symbol> Symbols
+    {
+        get;
+        init => field = CopyAndValidate(value);
+    } = CopyAndValidate(Symbols);
+
+    /// <summary>
+    /// Optional listing venue hint — when set, adapter-selection orchestrators can filter to
+    /// sources that cover the specified exchange (e.g. Tiingo for XNYS/XNAS, TwelveData for
+    /// XTSE). When <see langword="null"/> the request is venue-neutral and any adapter may
+    /// serve it. Also scopes <see cref="DatasetKey"/>.
+    /// </summary>
+    /// <remarks>
+    /// Exposed as an <c>init</c> property for 1.1.0 binary compatibility with 1.0.x consumers.
+    /// </remarks>
+    public ExchangeCode? Exchange { get; init; }
 
     /// <inheritdoc />
-    public string DatasetKey =>
-        string.Join("+", Symbols.Select(s => s.Ticker).OrderBy(t => t, StringComparer.OrdinalIgnoreCase));
+    /// <remarks>
+    /// Tickers are ordered case-insensitively, then ordinally to break ties. Separator-free
+    /// singletons retain their legacy text; lists and tickers containing <c>_</c> use a
+    /// count-prefixed UTF-16 encoding. Ticker slashes are doubled before the optional
+    /// <c>/</c> plus <see cref="Exchange"/> suffix, keeping opaque symbols distinct from venues.
+    /// Upgrade using a fresh snapshot directory and restart to discard old L1 entries: legacy
+    /// keys can contain aliased data even at an unchanged venue-qualified key. Re-fetch the data;
+    /// no automatic migration or legacy-key fallback is performed. Existing files are left untouched.
+    /// </remarks>
+    public string DatasetKey
+    {
+        get
+        {
+            var symbolsKey = DividendDatasetIdentity.EncodeSymbolList(Symbols.Select(symbol => symbol.Ticker));
+            return Exchange is null ? symbolsKey : $"{symbolsKey}/{Exchange.Value}";
+        }
+    }
 
     /// <inheritdoc />
     /// <remarks>
@@ -47,7 +78,7 @@ public sealed record InstrumentMetadataRequest(
     /// spans the full <see cref="DateOnly"/> representable range so that any
     /// caller asking "is date X covered?" gets an affirmative answer. Coverage calculators
     /// that enumerate this range (for example, per-day business-day counts) should special-case
-    /// <see cref="InstrumentMetadataRequest"/> to avoid multi-billion-iteration loops.
+    /// <see cref="InstrumentMetadataRequest"/> to avoid multi-million-iteration loops.
     /// </remarks>
     public DateRange Range => new(DateOnly.MinValue, DateOnly.MaxValue);
 
@@ -56,4 +87,30 @@ public sealed record InstrumentMetadataRequest(
 
     /// <inheritdoc />
     public IReadOnlyList<Symbol> PartitionKeys => Symbols;
+
+    private static IReadOnlyList<Symbol> CopyAndValidate(IReadOnlyList<Symbol> symbols)
+    {
+        ArgumentNullException.ThrowIfNull(symbols);
+        ArgumentOutOfRangeException.ThrowIfZero(symbols.Count);
+
+        var distinctSymbols = new HashSet<Symbol>();
+        foreach (var symbol in symbols)
+        {
+            if (symbol.Ticker is null)
+            {
+                throw new ArgumentException(
+                    "Instrument metadata symbols cannot contain a default or null-ticker symbol.",
+                    nameof(symbols));
+            }
+
+            if (!distinctSymbols.Add(symbol))
+            {
+                throw new ArgumentException(
+                    $"Instrument metadata symbols must be unique; ticker '{symbol.Ticker}' appears more than once.",
+                    nameof(symbols));
+            }
+        }
+
+        return [.. symbols];
+    }
 }

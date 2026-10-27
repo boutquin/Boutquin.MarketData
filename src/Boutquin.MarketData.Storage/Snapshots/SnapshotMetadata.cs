@@ -49,4 +49,42 @@ namespace Boutquin.MarketData.Storage.Snapshots;
 public sealed record SnapshotMetadata(
     DateTimeOffset StoredAtUtc,
     IReadOnlyList<DataProvenance> Provenance,
-    IReadOnlyList<DataIssue> Issues);
+    IReadOnlyList<DataIssue> Issues)
+{
+    /// <summary>
+    /// Ordered provenance entries, copied on construction and initialization and exposed read-only.
+    /// </summary>
+    public IReadOnlyList<DataProvenance> Provenance
+    {
+        get;
+        init => field = CopyAuditCollection(value);
+    } = CopyAuditCollection(Provenance);
+
+    /// <summary>
+    /// Data-quality issues, copied on construction and initialization and exposed read-only.
+    /// </summary>
+    public IReadOnlyList<DataIssue> Issues
+    {
+        get;
+        init => field = CopyAuditCollection(value);
+    } = CopyAuditCollection(Issues);
+
+    /// <summary>
+    /// Source-authoritative coverage accepted for the stored payload when the
+    /// snapshot writer recorded it. Older snapshots omit this additive field; readers must
+    /// retain their dataset-specific reconstruction policy for that legacy shape.
+    /// </summary>
+    public DataCoverage? Coverage { get; init; }
+
+    private static IReadOnlyList<T> CopyAuditCollection<T>(IReadOnlyList<T> values)
+    {
+        // Preserve missing-collection detection at the serializer boundary, including legacy JSON.
+        if (values is null)
+        {
+            return null!;
+        }
+
+        // An empty array has no mutable elements and preserves empty-record equality.
+        return values.Count == 0 ? Array.Empty<T>() : Array.AsReadOnly(values.ToArray());
+    }
+}

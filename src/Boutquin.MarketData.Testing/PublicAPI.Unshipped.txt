@@ -18,3 +18,10 @@ Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.FakeHttpMessageHandler(
 Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.LastRequest.get -> System.Net.Http.HttpRequestMessage?
 Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.RespondTo(string! urlKey, string! content, System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK) -> Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler!
 Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler.RespondToWithBytes(string! urlKey, byte[]! bytes, string! mediaType = "application/octet-stream", System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK) -> Boutquin.MarketData.Testing.Fakes.FakeHttpMessageHandler!
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter.FakeOptionChainAdapter(System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Records.OptionChainRow!>! rows, Boutquin.MarketData.Abstractions.Provenance.ProviderCode? provider = null) -> void
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter.FetchCount.get -> int
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter.ProviderKey.get -> Boutquin.MarketData.Abstractions.Provenance.ProviderCode
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter.Priority.get -> int
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter.CanHandle(Boutquin.MarketData.Abstractions.Requests.OptionChainRequest! request) -> bool
+Boutquin.MarketData.Testing.Fakes.FakeOptionChainAdapter.FetchAsync(Boutquin.MarketData.Abstractions.Requests.OptionChainRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Records.OptionChainRow!>!>!>!

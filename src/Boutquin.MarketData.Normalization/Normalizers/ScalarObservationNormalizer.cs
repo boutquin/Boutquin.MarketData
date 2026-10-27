@@ -40,13 +40,9 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// unchanged.
 /// </para>
 /// <para>
-/// Idempotency: the normalizer is safe to apply once. It is NOT idempotent under repeated
-/// application because applying it twice to a matched-unit input would divide by 100 a
-/// second time — however the second pass sees <c>units="decimal"</c> which falls through
-/// the match set, so in practice repeated invocation produces the same result as a single
-/// invocation as long as the first one rewrote the units. Callers should not rewrap input
-/// units as <c>percent</c> after normalization, and pipelines should run this normalizer
-/// exactly once per record.
+/// Idempotency: normalizing an output again leaves it unchanged. Converted rates carry
+/// <c>units="decimal"</c>, which is not a percent-unit match. Other unit strings are already
+/// trimmed and lowercased. Callers must not relabel normalized values as <c>percent</c>.
 /// </para>
 /// <para>
 /// Common mistake: feeding already-decimal values with units like <c>Percent</c> (because
@@ -75,7 +71,11 @@ public sealed class ScalarObservationNormalizer : INormalizer<ScalarObservation,
     /// <inheritdoc />
     public ScalarObservation Normalize(ScalarObservation raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfRequiredStringIsNull(
+            raw.Units,
+            nameof(ScalarObservation.Units),
+            nameof(raw));
 
         var units = raw.Units.Trim();
 

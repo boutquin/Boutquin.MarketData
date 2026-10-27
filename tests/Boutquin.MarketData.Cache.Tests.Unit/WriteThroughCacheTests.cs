@@ -18,6 +18,7 @@ using System.Text.Json;
 using Boutquin.MarketData.Abstractions.Contracts;
 using Boutquin.MarketData.Cache.WriteThrough;
 using Boutquin.MarketData.Storage.InMemory;
+using Boutquin.MarketData.Storage.Serializers;
 
 using FluentAssertions;
 
@@ -27,6 +28,20 @@ namespace Boutquin.MarketData.Cache.Tests.Unit;
 
 public sealed class WriteThroughCacheTests
 {
+    [Fact]
+    public async Task Null_overwrite_rejects_and_preserves_previous_snapshot_for_a_fresh_reader()
+    {
+        var store = new InMemorySnapshotStore();
+        var cache = new WriteThroughCache<string, string?>(store, new JsonSnapshotSerializer<string?>(), key => key);
+        await cache.WriteAsync("preserved", "original");
+
+        var act = () => cache.WriteAsync("preserved", null);
+
+        await act.Should().ThrowAsync<ArgumentNullException>().WithParameterName("data");
+        var freshReader = new WriteThroughCache<string, string?>(store, new JsonSnapshotSerializer<string?>(), key => key);
+        (await freshReader.TryReadAsync("preserved")).Should().Be("original");
+    }
+
     [Fact]
     public async Task GetOrFetchAsync_on_miss_calls_factory_and_caches()
     {

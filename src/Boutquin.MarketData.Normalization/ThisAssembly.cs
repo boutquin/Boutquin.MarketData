@@ -14,7 +14,6 @@
 //  limitations under the License.
 //
 
-// This file ensures the assembly is not empty and the namespace is declared.
-// Real types will be added during the Market/Trading migration.
+// Grants the unit-test assembly access to internal normalization helpers.
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Boutquin.MarketData.Normalization.Tests.Unit")]

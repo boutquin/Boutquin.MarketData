@@ -7,9 +7,14 @@
 # Exclude private files from git archive (used for public repo squash push)
 ###############################################################################
 CLAUDE.md export-ignore
+AGENTS.md export-ignore
+.work-ledger/ export-ignore
+.work-ledger/** export-ignore
 CLAUDE.local.md export-ignore
 .claude/ export-ignore
 .claude/** export-ignore
+.code-arena/ export-ignore
+.code-arena/** export-ignore
 specs/ export-ignore
 specs/** export-ignore
 _local/ export-ignore

@@ -8,3 +8,20 @@ Boutquin.MarketData.DayCount.ThirtyE360
 Boutquin.MarketData.DayCount.ThirtyE360.Code.get -> string!
 Boutquin.MarketData.DayCount.ThirtyE360.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
 static readonly Boutquin.MarketData.DayCount.ThirtyE360.Instance -> Boutquin.MarketData.DayCount.ThirtyE360!
+Boutquin.MarketData.DayCount.Actual360
+Boutquin.MarketData.DayCount.Actual360.Code.get -> string!
+Boutquin.MarketData.DayCount.Actual360.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
+Boutquin.MarketData.DayCount.Actual365Fixed
+Boutquin.MarketData.DayCount.Actual365Fixed.Code.get -> string!
+Boutquin.MarketData.DayCount.Actual365Fixed.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
+Boutquin.MarketData.DayCount.DayCountResolver
+Boutquin.MarketData.DayCount.IYearFractionCalculator
+Boutquin.MarketData.DayCount.IYearFractionCalculator.Code.get -> string!
+Boutquin.MarketData.DayCount.IYearFractionCalculator.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
+Boutquin.MarketData.DayCount.Thirty360
+Boutquin.MarketData.DayCount.Thirty360.Code.get -> string!
+Boutquin.MarketData.DayCount.Thirty360.YearFraction(System.DateOnly startDate, System.DateOnly endDate) -> double
+static Boutquin.MarketData.DayCount.DayCountResolver.Resolve(string! code) -> Boutquin.MarketData.DayCount.IYearFractionCalculator!
+static readonly Boutquin.MarketData.DayCount.Actual360.Instance -> Boutquin.MarketData.DayCount.Actual360!
+static readonly Boutquin.MarketData.DayCount.Actual365Fixed.Instance -> Boutquin.MarketData.DayCount.Actual365Fixed!
+static readonly Boutquin.MarketData.DayCount.Thirty360.Instance -> Boutquin.MarketData.DayCount.Thirty360!

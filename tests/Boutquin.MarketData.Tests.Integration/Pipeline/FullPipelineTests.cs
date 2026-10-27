@@ -22,13 +22,10 @@ using Boutquin.MarketData.Abstractions.Requests;
 using Boutquin.MarketData.Abstractions.Results;
 using Boutquin.MarketData.DependencyInjection;
 using Boutquin.MarketData.Normalization.Normalizers;
-
 using FluentAssertions;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Tests.Integration.Pipeline;
@@ -206,13 +203,14 @@ public sealed class FullPipelineTests : IDisposable
     [Fact]
     public async Task Fetch_YieldCurveQuotes_end_to_end()
     {
-        // Arrange: fake adapter returns Treasury-like par yields
+        // Arrange: fake adapter returns Treasury-like par yields for a single as-of date
+        var asOf = new DateOnly(2026, 4, 10);
         var quotes = new List<YieldCurveQuote>
         {
-            new("2Y", 4.21m),
-            new("5Y", 3.98m),
-            new("10Y", 4.12m),
-            new("30Y", 4.45m),
+            new(asOf, "2Y", 4.21m),
+            new(asOf, "5Y", 3.98m),
+            new(asOf, "10Y", 4.12m),
+            new(asOf, "30Y", 4.45m),
         };
 
         var provenance = new DataProvenance(

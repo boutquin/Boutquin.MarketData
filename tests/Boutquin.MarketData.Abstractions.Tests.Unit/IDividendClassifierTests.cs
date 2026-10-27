@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 using FluentAssertions;
@@ -33,16 +34,16 @@ public sealed class IDividendClassifierTests
     private readonly IDividendClassifier _classifier = new BroadFallbackClassifier();
 
     [Theory]
-    [InlineData("AAPL", CurrencyCode.USD, CurrencyCode.USD, DividendType.UsOrdinary)]
-    [InlineData("AAPL", CurrencyCode.USD, CurrencyCode.CAD, DividendType.Foreign)]
-    [InlineData("RY.TO", CurrencyCode.CAD, CurrencyCode.CAD, DividendType.CanadianNonEligible)]
-    [InlineData("RY.TO", CurrencyCode.CAD, CurrencyCode.USD, DividendType.Foreign)]
-    [InlineData("VUSA", CurrencyCode.GBP, CurrencyCode.GBP, DividendType.Foreign)]
-    [InlineData("SAN.PA", CurrencyCode.EUR, CurrencyCode.USD, DividendType.Foreign)]
+    [InlineData("AAPL", Currency.USD, Currency.USD, DividendType.UsOrdinary)]
+    [InlineData("AAPL", Currency.USD, Currency.CAD, DividendType.Foreign)]
+    [InlineData("RY.TO", Currency.CAD, Currency.CAD, DividendType.CanadianNonEligible)]
+    [InlineData("RY.TO", Currency.CAD, Currency.USD, DividendType.Foreign)]
+    [InlineData("VUSA", Currency.GBP, Currency.GBP, DividendType.Foreign)]
+    [InlineData("SAN.PA", Currency.EUR, Currency.USD, DividendType.Foreign)]
     public void Broad_fallback_rules_return_expected_category(
         string ticker,
-        CurrencyCode assetCurrency,
-        CurrencyCode investorBase,
+        Currency assetCurrency,
+        Currency investorBase,
         DividendType expected)
     {
         _classifier.Classify(new Symbol(ticker), assetCurrency, investorBase)
@@ -54,9 +55,9 @@ public sealed class IDividendClassifierTests
     {
         // Spec §2.4: default(DividendType) cannot be used as an
         // "unclassifiable" sentinel. Every call must return an explicit member.
-        foreach (var asset in Enum.GetValues<CurrencyCode>())
+        foreach (var asset in Enum.GetValues<Currency>())
         {
-            foreach (var investorBase in Enum.GetValues<CurrencyCode>())
+            foreach (var investorBase in Enum.GetValues<Currency>())
             {
                 var result = _classifier.Classify(new Symbol("ANY"), asset, investorBase);
 
@@ -75,8 +76,8 @@ public sealed class IDividendClassifierTests
     {
         var symbol = new Symbol("AAPL");
 
-        var first = _classifier.Classify(symbol, CurrencyCode.USD, CurrencyCode.USD);
-        var second = _classifier.Classify(symbol, CurrencyCode.USD, CurrencyCode.USD);
+        var first = _classifier.Classify(symbol, Currency.USD, Currency.USD);
+        var second = _classifier.Classify(symbol, Currency.USD, Currency.USD);
 
         first.Should().Be(second);
     }
@@ -85,7 +86,7 @@ public sealed class IDividendClassifierTests
     public void Classify_does_not_throw_for_well_formed_inputs()
     {
         // Iterate a representative cross-product of inputs — none should throw.
-        var currencies = new[] { CurrencyCode.USD, CurrencyCode.CAD, CurrencyCode.EUR, CurrencyCode.JPY };
+        var currencies = new[] { Currency.USD, Currency.CAD, Currency.EUR, Currency.JPY };
         var symbols = new[] { new Symbol("AAPL"), new Symbol("RY.TO"), new Symbol("7203.T") };
 
         foreach (var sym in symbols)
@@ -106,7 +107,7 @@ public sealed class IDividendClassifierTests
     public void Classify_treats_mismatched_currencies_as_Foreign()
     {
         _classifier
-            .Classify(new Symbol("ANY"), CurrencyCode.JPY, CurrencyCode.USD)
+            .Classify(new Symbol("ANY"), Currency.JPY, Currency.USD)
             .Should().Be(DividendType.Foreign);
     }
 
@@ -118,7 +119,7 @@ public sealed class IDividendClassifierTests
     /// </summary>
     private sealed class BroadFallbackClassifier : IDividendClassifier
     {
-        public DividendType Classify(Symbol symbol, CurrencyCode assetCurrency, CurrencyCode investorBaseCurrency)
+        public DividendType Classify(Symbol symbol, Currency assetCurrency, Currency investorBaseCurrency)
         {
             if (assetCurrency != investorBaseCurrency)
             {
@@ -127,8 +128,8 @@ public sealed class IDividendClassifierTests
 
             return investorBaseCurrency switch
             {
-                CurrencyCode.USD => DividendType.UsOrdinary,
-                CurrencyCode.CAD => DividendType.CanadianNonEligible,
+                Currency.USD => DividendType.UsOrdinary,
+                Currency.CAD => DividendType.CanadianNonEligible,
                 _ => DividendType.Foreign,
             };
         }

@@ -53,13 +53,17 @@ public sealed class DesignRuleTests : BaseArchitectureTest
         var catalogIdTypes = CatalogAssembly
             .GetTypes()
             .Where(t => t.Namespace == "Boutquin.MarketData.Catalog.Identifiers"
-                && t.IsValueType
-                && t.IsPublic);
+                && t.IsPublic).ToArray();
+
+        catalogIdTypes.Should().NotBeEmpty();
 
         foreach (var type in catalogIdTypes)
         {
             type.IsValueType.Should().BeTrue(
                 because: $"{type.Name} should be a value type (struct)");
+
+            type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), inherit: false)
+                .Should().BeTrue(because: $"{type.Name} should be a readonly struct");
 
             var isRecord = type.GetMethod("PrintMembers", BindingFlags.NonPublic | BindingFlags.Instance) != null;
             isRecord.Should().BeTrue(

@@ -14,14 +14,17 @@
 //  limitations under the License.
 //
 
-using Boutquin.MarketData.Abstractions.Requests;
-
 using FluentAssertions;
 
 using Xunit;
 
 namespace Boutquin.MarketData.Abstractions.Tests.Unit.Requests;
 
+// Semantics note (2026-04-21): MarketData's previous `DateRange` (class, threw on
+// inverted ranges) was replaced by Storage's `DateRange` (readonly record struct,
+// treats from > to as the empty range). The InvertedRange_Throws test from the
+// previous generation was removed — the new contract is total over every
+// (From, To) pair, per `Boutquin.Storage.Domain.ValueObjects.DateRange`.
 public sealed class DateRangeTests
 {
     [Fact]
@@ -51,12 +54,12 @@ public sealed class DateRangeTests
     }
 
     [Fact]
-    public void InvertedRange_Throws()
+    public void InvertedRange_IsEmpty()
     {
-        var act = () => new DateRange(new DateOnly(2024, 6, 30), new DateOnly(2024, 1, 1));
+        var range = new DateRange(new DateOnly(2024, 6, 30), new DateOnly(2024, 1, 1));
 
-        act.Should().Throw<ArgumentOutOfRangeException>()
-            .WithParameterName("to");
+        range.IsEmpty.Should().BeTrue();
+        range.LengthInDays.Should().Be(0);
     }
 
     [Fact]

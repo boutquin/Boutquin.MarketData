@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 using System.Globalization;
+using System.Text;
 
 namespace Boutquin.MarketData.Cache.Keys;
 
@@ -21,9 +22,12 @@ namespace Boutquin.MarketData.Cache.Keys;
 /// Utility for building deterministic cache keys from collections and optional date ranges.
 /// </summary>
 /// <remarks>
-/// Keys are built by sorting elements lexicographically and joining with a pipe separator.
-/// This ensures that the same logical request (regardless of input ordering) always produces
-/// the same cache key, preventing duplicate entries for reordered parameters.
+/// Collection elements are sorted ordinally before encoding. Each string is encoded as UTF-16
+/// hexadecimal with an explicit field terminator, so delimiters, empty strings, case, and Unicode
+/// code units remain distinct even on case-insensitive filesystems. Physical path components are
+/// bounded to 192 characters. The versioned encoding replaces the ambiguous delimiter-only keys;
+/// use a fresh cache directory when upgrading and repopulate from source. No legacy-key lookup is
+/// attempted because the original field boundaries cannot be recovered reliably.
 /// </remarks>
 public static class CacheKeyBuilder
 {
@@ -34,7 +38,7 @@ public static class CacheKeyBuilder
     /// <param name="segments">The segments to sort and join. Order-independent.</param>
     /// <returns>A deterministic cache key string.</returns>
     public static string FromSegments(string prefix, IEnumerable<string> segments) =>
-        $"{prefix}/{string.Join("/", segments.OrderBy(s => s, StringComparer.Ordinal))}";
+        $"cache-v2/segments/{EncodeField(prefix)}/{string.Concat(segments.OrderBy(s => s, StringComparer.Ordinal).Select(s => EncodeField(s) + "/"))}end";
 
     /// <summary>
     /// Builds a cache key for a date-range query, using wildcards for unbounded endpoints.
@@ -49,5 +53,23 @@ public static class CacheKeyBuilder
     /// Date format is ISO 8601 (e.g., <c>2026-04-12</c>). Unbounded endpoints use <c>_</c>.
     /// </remarks>
     public static string FromDateRange(string prefix, string identifier, DateOnly? from, DateOnly? to) =>
-        $"{prefix}/{identifier}/{(from.HasValue ? from.Value.ToString("O", CultureInfo.InvariantCulture) : "_")}/{(to.HasValue ? to.Value.ToString("O", CultureInfo.InvariantCulture) : "_")}";
+        $"cache-v2/range/{EncodeField(prefix)}/{EncodeField(identifier)}/{(from.HasValue ? from.Value.ToString("O", CultureInfo.InvariantCulture) : "_")}/{(to.HasValue ? to.Value.ToString("O", CultureInfo.InvariantCulture) : "_")}";
+
+    private static string EncodeField(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var encoded = new StringBuilder();
+        for (var i = 0; i < value.Length; i++)
+        {
+            if (i > 0 && i % 48 == 0)
+            {
+                encoded.Append('/');
+            }
+
+            encoded.Append(((int)value[i]).ToString("x4", CultureInfo.InvariantCulture));
+        }
+
+        // 'z' cannot occur in hexadecimal; it terminates a field even when the field is empty.
+        return value.Length == 0 ? "z" : encoded.Append("/z").ToString();
+    }
 }

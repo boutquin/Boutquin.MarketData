@@ -14,9 +14,7 @@
 //  limitations under the License.
 //
 using Boutquin.MarketData.Normalization.Filters;
-
 using FluentAssertions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Normalization.Tests.Unit;

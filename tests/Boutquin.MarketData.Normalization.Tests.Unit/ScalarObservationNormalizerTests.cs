@@ -28,6 +28,16 @@ public sealed class ScalarObservationNormalizerTests
     private readonly ScalarObservationNormalizer _sut = new();
 
     [Fact]
+    public void Rejects_null_required_units_with_member_diagnostic()
+    {
+        var act = () => _sut.Normalize(default);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("raw")
+            .WithMessage("*Units*");
+    }
+
+    [Fact]
     public void Converts_percent_units_to_decimal()
     {
         // Arrange — FRED yields often come as "4.5" meaning 4.5%

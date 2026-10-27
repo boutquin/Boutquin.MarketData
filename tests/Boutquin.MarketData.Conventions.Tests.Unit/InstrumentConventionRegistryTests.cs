@@ -49,7 +49,7 @@ public sealed class InstrumentConventionRegistryTests
     }
 
     [Fact]
-    public void UsdSofr_default_matches_ARRC_convention()
+    public void UsdSofr_default_preserves_baseline_fields()
     {
         var registry = InstrumentConventionRegistry.CreateDefault();
 

@@ -34,4 +34,23 @@ public sealed record DataEnvelope<TPayload>(
     TPayload Payload,
     DataCoverage Coverage,
     IReadOnlyList<DataIssue> Issues,
-    IReadOnlyList<DataProvenance> Provenance);
+    IReadOnlyList<DataProvenance> Provenance)
+{
+    /// <summary>
+    /// Data quality issues, copied on construction and initialization and exposed read-only.
+    /// </summary>
+    public IReadOnlyList<DataIssue> Issues
+    {
+        get;
+        init => field = Array.AsReadOnly(value.ToArray());
+    } = Array.AsReadOnly(Issues.ToArray());
+
+    /// <summary>
+    /// Source and retrieval metadata, copied on construction and initialization and exposed read-only.
+    /// </summary>
+    public IReadOnlyList<DataProvenance> Provenance
+    {
+        get;
+        init => field = Array.AsReadOnly(value.ToArray());
+    } = Array.AsReadOnly(Provenance.ToArray());
+}

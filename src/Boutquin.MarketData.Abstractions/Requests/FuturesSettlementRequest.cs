@@ -15,6 +15,7 @@
 //
 
 using Boutquin.MarketData.Abstractions.Contracts;
+using Boutquin.MarketData.Abstractions.Keys;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 namespace Boutquin.MarketData.Abstractions.Requests;
@@ -30,6 +31,33 @@ public sealed record FuturesSettlementRequest(
     DateRange Range,
     DataFrequency Frequency = DataFrequency.Daily) : IDataRequest
 {
+    /// <summary>
+    /// Optional listing venue hint — when set, adapter-selection orchestrators can filter to
+    /// sources that cover the specified exchange (e.g. CME-family venues for SOFR/Fed Funds
+    /// futures, ICE for Brent futures). When <see langword="null"/> the request is venue-neutral.
+    /// </summary>
+    /// <remarks>
+    /// Exposed as an <c>init</c> property for 1.1.0 binary compatibility with 1.0.x consumers.
+    /// </remarks>
+    public ExchangeCode? Exchange { get; init; }
+
     /// <inheritdoc />
-    public string DatasetKey => ProductCode.Value;
+    /// <remarks>
+    /// Identifier slashes are doubled before appending an optional <c>/</c> plus
+    /// <see cref="Exchange"/> suffix. Slash-free identifiers retain their legacy keys.
+    /// Upgrade using a fresh snapshot directory and restart to discard old L1 entries: legacy
+    /// keys can contain aliased data even at an unchanged venue-qualified key. Re-fetch the data;
+    /// no automatic migration or legacy-key fallback is performed. Existing files are left untouched.
+    /// </remarks>
+    public string DatasetKey =>
+        DividendDatasetIdentity.EncodeTickerAndExchange(ProductCode.Value, Exchange);
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Preserves the <see cref="ProductCode"/>, the optional <see cref="Exchange"/> venue hint, and
+    /// the <see cref="DataFrequency"/>; only <see cref="IDataRequest.Range"/> is narrowed to the gap.
+    /// Used by the time-series gap-fill to fetch just a missing sub-range.
+    /// </remarks>
+    public IDataRequest WithRange(DateRange range) =>
+        new FuturesSettlementRequest(ProductCode, range, Frequency) { Exchange = Exchange };
 }

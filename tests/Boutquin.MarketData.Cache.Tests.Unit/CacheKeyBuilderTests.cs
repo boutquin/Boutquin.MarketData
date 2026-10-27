@@ -14,9 +14,7 @@
 //  limitations under the License.
 //
 using Boutquin.MarketData.Cache.Keys;
-
 using FluentAssertions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Cache.Tests.Unit;
@@ -24,11 +22,27 @@ namespace Boutquin.MarketData.Cache.Tests.Unit;
 public sealed class CacheKeyBuilderTests
 {
     [Fact]
+    public void Segment_boundaries_are_part_of_key_identity()
+    {
+        CacheKeyBuilder.FromSegments("p", ["a/b", "c"]).Should()
+            .NotBe(CacheKeyBuilder.FromSegments("p", ["a", "b/c"]));
+        CacheKeyBuilder.FromSegments("p", []).Should()
+            .NotBe(CacheKeyBuilder.FromSegments("p", [string.Empty]));
+    }
+
+    [Fact]
+    public void Prefix_and_identifier_boundaries_are_part_of_range_identity()
+    {
+        CacheKeyBuilder.FromDateRange("a/b", "c", null, null).Should()
+            .NotBe(CacheKeyBuilder.FromDateRange("a", "b/c", null, null));
+    }
+
+    [Fact]
     public void FromSegments_sorts_and_joins_segments()
     {
         var key = CacheKeyBuilder.FromSegments("market", new[] { "MSFT", "AAPL", "GOOG" });
 
-        key.Should().Be("market/AAPL/GOOG/MSFT");
+        key.Should().Be("cache-v2/segments/006d00610072006b00650074/z/004100410050004c/z/0047004f004f0047/z/004d005300460054/z/end");
     }
 
     [Fact]
@@ -45,7 +59,7 @@ public sealed class CacheKeyBuilderTests
     {
         var key = CacheKeyBuilder.FromSegments("data", new[] { "AAPL" });
 
-        key.Should().Be("data/AAPL");
+        key.Should().Be("cache-v2/segments/0064006100740061/z/004100410050004c/z/end");
     }
 
     [Fact]
@@ -53,7 +67,7 @@ public sealed class CacheKeyBuilderTests
     {
         var key = CacheKeyBuilder.FromSegments("data", Array.Empty<string>());
 
-        key.Should().Be("data/");
+        key.Should().Be("cache-v2/segments/0064006100740061/z/end");
     }
 
     [Fact]
@@ -64,7 +78,7 @@ public sealed class CacheKeyBuilderTests
 
         var key = CacheKeyBuilder.FromDateRange("fred", "DGS10", from, to);
 
-        key.Should().Be("fred/DGS10/2024-01-15/2024-12-31");
+        key.Should().Be("cache-v2/range/0066007200650064/z/00440047005300310030/z/2024-01-15/2024-12-31");
     }
 
     [Fact]
@@ -72,7 +86,7 @@ public sealed class CacheKeyBuilderTests
     {
         var key = CacheKeyBuilder.FromDateRange("fred", "DGS10", null, new DateOnly(2024, 12, 31));
 
-        key.Should().Be("fred/DGS10/_/2024-12-31");
+        key.Should().Be("cache-v2/range/0066007200650064/z/00440047005300310030/z/_/2024-12-31");
     }
 
     [Fact]
@@ -80,7 +94,7 @@ public sealed class CacheKeyBuilderTests
     {
         var key = CacheKeyBuilder.FromDateRange("fred", "DGS10", new DateOnly(2024, 1, 1), null);
 
-        key.Should().Be("fred/DGS10/2024-01-01/_");
+        key.Should().Be("cache-v2/range/0066007200650064/z/00440047005300310030/z/2024-01-01/_");
     }
 
     [Fact]
@@ -88,6 +102,6 @@ public sealed class CacheKeyBuilderTests
     {
         var key = CacheKeyBuilder.FromDateRange("fred", "DGS10", null, null);
 
-        key.Should().Be("fred/DGS10/_/_");
+        key.Should().Be("cache-v2/range/0066007200650064/z/00440047005300310030/z/_/_");
     }
 }

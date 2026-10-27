@@ -27,14 +27,21 @@ namespace Boutquin.MarketData.Calendars.Holidays;
 public static class HolidayDatasets
 {
     /// <summary>
-    /// Returns US SIFMA bond market holidays for 2020-2030.
+    /// Returns full-trading-closure dates for the US SIFMA bond market, covering 2020-2030.
     /// Covers: New Year's Day, MLK Day, Presidents' Day, Good Friday, Memorial Day,
-    /// Juneteenth (from 2021), Independence Day, Labor Day, Columbus Day, Veterans Day,
+    /// Juneteenth (from 2022), Independence Day, Labor Day, Columbus Day, Veterans Day,
     /// Thanksgiving Day, Christmas Day.
     /// </summary>
     /// <remarks>
-    /// This is the bond market calendar. For the NYSE equity calendar (which does not include
-    /// Columbus Day or Veterans Day), use <see cref="UsNyseCalendar"/>.
+    /// Early-close dates remain business days. Good Friday was an early close in 2021, 2023,
+    /// and 2026; Juneteenth was not observed in 2021, and Saturday Veterans Day did not close
+    /// the preceding Friday in 2023. This trading calendar is not a settlement calendar or
+    /// the SOFR publication calendar. Dates after 2026 are provisional and require checking
+    /// against subsequently published notices; exceptional closures are not comprehensively covered.
+    /// See the <see href="https://www.sifma.org/resources/general/us-holiday-archive">SIFMA archive</see>,
+    /// <see href="https://www.newyorkfed.org/markets/opolicy/operating_policy_210617">June 2021 notice</see>, and
+    /// <see href="https://www.sifma.org/news/press-releases/sifma-fixed-income-market-close-recommendations-in-the-u-s-the-u-k-and-japan-for-good-friday-easter-monday-holidays-2026">April 2026 notice</see>.
+    /// For the NYSE equity calendar, use <see cref="UsNyseCalendar"/>.
     /// </remarks>
     /// <returns>An array of observed holiday dates.</returns>
     public static DateOnly[] UsSifma() =>
@@ -56,9 +63,7 @@ public static class HolidayDatasets
         new(2021, 1, 1),   // New Year's Day
         new(2021, 1, 18),  // MLK Day
         new(2021, 2, 15),  // Presidents' Day
-        new(2021, 4, 2),   // Good Friday
         new(2021, 5, 31),  // Memorial Day
-        new(2021, 6, 18),  // Juneteenth (observed, Jun 19 is Saturday)
         new(2021, 7, 5),   // Independence Day (observed, Jul 4 is Sunday)
         new(2021, 9, 6),   // Labor Day
         new(2021, 10, 11), // Columbus Day
@@ -83,13 +88,11 @@ public static class HolidayDatasets
         new(2023, 1, 2),   // New Year's Day (observed, Jan 1 is Sunday)
         new(2023, 1, 16),  // MLK Day
         new(2023, 2, 20),  // Presidents' Day
-        new(2023, 4, 7),   // Good Friday
         new(2023, 5, 29),  // Memorial Day
         new(2023, 6, 19),  // Juneteenth
         new(2023, 7, 4),   // Independence Day
         new(2023, 9, 4),   // Labor Day
         new(2023, 10, 9),  // Columbus Day
-        new(2023, 11, 10), // Veterans Day (observed, Nov 11 is Saturday)
         new(2023, 11, 23), // Thanksgiving
         new(2023, 12, 25), // Christmas
 
@@ -125,7 +128,6 @@ public static class HolidayDatasets
         new(2026, 1, 1),   // New Year's Day
         new(2026, 1, 19),  // MLK Day
         new(2026, 2, 16),  // Presidents' Day
-        new(2026, 4, 3),   // Good Friday
         new(2026, 5, 25),  // Memorial Day
         new(2026, 6, 19),  // Juneteenth
         new(2026, 7, 3),   // Independence Day (observed, Jul 4 is Saturday)
@@ -318,7 +320,8 @@ public static class HolidayDatasets
     /// Covers: New Year's Day, Good Friday, Easter Monday, Labour Day (May 1),
     /// Christmas Day, 26 December.
     /// </summary>
-    /// <returns>An array of observed holiday dates.</returns>
+    /// <remarks>Fixed-date TARGET holidays are not moved when they fall on weekends.</remarks>
+    /// <returns>An array of holiday dates without substitute weekdays.</returns>
     public static DateOnly[] Target() =>
     [
         // --- 2020 ---
@@ -327,23 +330,26 @@ public static class HolidayDatasets
         new(2020, 4, 13),  // Easter Monday
         new(2020, 5, 1),   // Labour Day
         new(2020, 12, 25), // Christmas Day
-        new(2020, 12, 28), // 26 December (observed, Dec 26 is Saturday)
+        new(2020, 12, 26), // 26 December
 
         // --- 2021 ---
         new(2021, 1, 1),   // New Year's Day
         new(2021, 4, 2),   // Good Friday
         new(2021, 4, 5),   // Easter Monday
-        new(2021, 12, 27), // Christmas Day (observed, Dec 25 is Saturday)
-        new(2021, 12, 28), // 26 December (observed, Dec 26 is Sunday)
+        new(2021, 5, 1),   // Labour Day
+        new(2021, 12, 25), // Christmas Day
+        new(2021, 12, 26), // 26 December
 
         // --- 2022 ---
+        new(2022, 1, 1),   // New Year's Day
         new(2022, 4, 15),  // Good Friday
         new(2022, 4, 18),  // Easter Monday
+        new(2022, 5, 1),   // Labour Day
+        new(2022, 12, 25), // Christmas Day
         new(2022, 12, 26), // 26 December
-        new(2022, 12, 27), // Christmas Day (observed, Dec 25 is Sunday)
 
         // --- 2023 ---
-        new(2023, 1, 2),   // New Year's Day (observed, Jan 1 is Sunday)
+        new(2023, 1, 1),   // New Year's Day
         new(2023, 4, 7),   // Good Friday
         new(2023, 4, 10),  // Easter Monday
         new(2023, 5, 1),   // Labour Day
@@ -372,16 +378,18 @@ public static class HolidayDatasets
         new(2026, 4, 6),   // Easter Monday
         new(2026, 5, 1),   // Labour Day
         new(2026, 12, 25), // Christmas Day
-        new(2026, 12, 28), // 26 December (observed, Dec 26 is Saturday)
+        new(2026, 12, 26), // 26 December
 
         // --- 2027 ---
         new(2027, 1, 1),   // New Year's Day
         new(2027, 3, 26),  // Good Friday
         new(2027, 3, 29),  // Easter Monday
-        new(2027, 12, 27), // Christmas Day (observed, Dec 25 is Saturday)
-        new(2027, 12, 28), // 26 December (observed, Dec 26 is Sunday)
+        new(2027, 5, 1),   // Labour Day
+        new(2027, 12, 25), // Christmas Day
+        new(2027, 12, 26), // 26 December
 
         // --- 2028 ---
+        new(2028, 1, 1),   // New Year's Day
         new(2028, 4, 14),  // Good Friday
         new(2028, 4, 17),  // Easter Monday
         new(2028, 5, 1),   // Labour Day
@@ -406,15 +414,15 @@ public static class HolidayDatasets
     ];
 
     /// <summary>
-    /// Returns Canadian statutory holidays for 2020-2030.
+    /// Returns the built-in Canadian holiday date set for 2020-2030.
     /// Covers: New Year's Day, Family Day, Good Friday, Victoria Day, Canada Day,
     /// Civic Holiday, Labour Day, Truth and Reconciliation Day (from 2021),
     /// Thanksgiving Day, Remembrance Day, Christmas Day, Boxing Day.
     /// </summary>
     /// <remarks>
-    /// This is the statutory holiday calendar. The TSX does not close for Truth and
-    /// Reconciliation Day or Remembrance Day. For the TSX equity calendar, use
-    /// <see cref="CaTsxCalendar"/>.
+    /// This fixed selection is a baseline rather than a complete jurisdiction-specific legal,
+    /// bank, or benchmark publication calendar. For the supplied TSX equity calendar, use
+    /// <see cref="CaTsxCalendar"/>. Applications must select a calendar appropriate to their contract.
     /// </remarks>
     /// <returns>An array of observed holiday dates.</returns>
     public static DateOnly[] CaStatutory() =>
@@ -427,7 +435,6 @@ public static class HolidayDatasets
         new(2020, 7, 1),   // Canada Day
         new(2020, 8, 3),   // Civic Holiday
         new(2020, 9, 7),   // Labour Day
-        new(2020, 9, 30),  // Truth and Reconciliation Day
         new(2020, 10, 12), // Thanksgiving
         new(2020, 11, 11), // Remembrance Day
         new(2020, 12, 25), // Christmas Day
@@ -575,15 +582,13 @@ public static class HolidayDatasets
     ];
 
     /// <summary>
-    /// Returns CME Group full-closure holidays for 2020-2030.
-    /// Covers only days when no settlement prices are published: New Year's Day,
-    /// Good Friday, Christmas Day.
+    /// Returns the built-in XCME baseline dates for 2020-2030:
+    /// New Year's Day, Good Friday, and Christmas Day with the stored observance rules.
     /// </summary>
     /// <remarks>
-    /// CME remains open (with early halts) on MLK Day, Presidents' Day, Memorial Day,
-    /// Juneteenth, Independence Day, Labor Day, and Thanksgiving — settlement prices
-    /// are still published on those days. Columbus Day and Veterans Day are normal
-    /// trading days for CME (unlike SIFMA/NYSE).
+    /// This date-only baseline does not encode product-specific sessions, early halts,
+    /// settlement publication, or exceptional closures. Supply the relevant product calendar
+    /// when those distinctions affect ingestion; the baseline is not a complete exchange schedule.
     /// </remarks>
     /// <returns>An array of observed holiday dates.</returns>
     public static DateOnly[] CmeGroup() =>

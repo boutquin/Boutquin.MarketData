@@ -43,4 +43,24 @@ public interface IDataRequest
     /// Sampling frequency of the requested data (e.g., daily, weekly).
     /// </summary>
     DataFrequency Frequency { get; }
+
+    /// <summary>
+    /// Returns a copy of this request narrowed to <paramref name="range"/>, preserving every
+    /// other field (symbols, series id, venue, frequency). The time-series pipeline
+    /// uses this to dispatch an adapter for a single coverage <b>gap</b> rather than the whole
+    /// requested span, so only the missing sub-range is fetched.
+    /// </summary>
+    /// <param name="range">The gap sub-range to fetch.</param>
+    /// <returns>A request identical to this one except for its <see cref="Range"/>.</returns>
+    /// <remarks>
+    /// The default implementation throws — a request type has to opt into the time-series
+    /// gap-fill path by overriding this to return a range-narrowed copy of itself. Returning
+    /// <c>this</c> unchanged would silently re-fetch the full range for every gap, defeating the
+    /// gap-fill guarantee; throwing makes an un-migrated request type fail loudly under
+    /// <c>UseTimeSeriesStore = true</c> instead.
+    /// </remarks>
+    IDataRequest WithRange(DateRange range)
+        => throw new NotSupportedException(
+            $"{GetType().Name} does not support time-series gap-fill: override IDataRequest.WithRange "
+            + "to return a range-narrowed copy before enabling UseTimeSeriesStore for this request type.");
 }

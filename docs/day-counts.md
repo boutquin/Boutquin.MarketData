@@ -57,6 +57,11 @@ var yf = ActualActualInPeriod.Instance.YearFraction(
 // => 0.5 exactly
 ```
 
+The interval must satisfy `periodStart <= start <= end <= periodEnd` and the
+coupon period must have positive length. Out-of-period endpoints are rejected;
+split an accrual spanning multiple coupon periods into contained intervals.
+Empty intervals at either coupon boundary return zero.
+
 The two-argument overload (no coupon context) falls back to ACT/365.25 — the
 ICMA fallback for short horizons. Prefer the five-argument version whenever
 accruing across coupon dates matters.

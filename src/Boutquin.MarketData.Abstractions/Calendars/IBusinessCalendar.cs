@@ -83,6 +83,11 @@ public interface IBusinessCalendar
             {
                 result.Add(d);
             }
+
+            if (d == end)
+            {
+                break;
+            }
         }
 
         return result;

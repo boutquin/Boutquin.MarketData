@@ -61,4 +61,10 @@ public enum LicenseType
     /// certain central-bank feeds).
     /// </summary>
     Redistribution = 4,
+
+    /// <summary>
+    /// Source license metadata is unavailable. Grants no redistribution permission; consumers
+    /// must establish the applicable provider terms before using or forwarding the data.
+    /// </summary>
+    Unknown = 5,
 }

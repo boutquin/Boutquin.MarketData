@@ -5,7 +5,11 @@
     <RootNamespace>Boutquin.MarketData.Calendars</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
+  <!-- Calendar-only compatibility packs can retain a consumer's existing abstractions ABI. -->
+  <ItemGroup Condition="'$(CalendarAbstractionsPackageVersion)' == ''">
     <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(CalendarAbstractionsPackageVersion)' != ''">
+    <PackageReference Include="Boutquin.MarketData.Abstractions" VersionOverride="$(CalendarAbstractionsPackageVersion)" />
   </ItemGroup>
 </Project>

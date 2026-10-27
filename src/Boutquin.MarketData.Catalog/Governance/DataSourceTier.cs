@@ -16,20 +16,19 @@
 namespace Boutquin.MarketData.Catalog.Governance;
 
 /// <summary>
-/// Classifies the reliability and governance posture of a data source, driving fallback
-/// ordering and production-readiness decisions.
+/// Classifies the reliability and governance posture of a data source for application-level
+/// source-selection decisions.
 /// </summary>
 /// <remarks>
-/// The pipeline uses tier ordering to select preferred sources and control fallback.
-/// In production mode, cross-tier fallback may be restricted (e.g., Tier 1 only).
-/// In research mode, lower-tier sources may substitute when primary sources lack coverage.
+/// These values are descriptive metadata. The kernel does not use them to order adapters
+/// or restrict fallback; applications must explicitly apply any tier-based policy.
 /// </remarks>
 public enum DataSourceTier
 {
     /// <summary>
     /// Official or regulatory-grade source providing free, authoritative data.
     /// Examples: central bank fixings (NY Fed SOFR, BoE SONIA), government bond yields (US Treasury).
-    /// Suitable for production use without licensing constraints.
+    /// Availability does not itself establish redistribution rights; verify the source license.
     /// </summary>
     Tier1OfficialPublic = 1,
 

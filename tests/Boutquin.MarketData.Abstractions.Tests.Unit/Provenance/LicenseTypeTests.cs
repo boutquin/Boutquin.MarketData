@@ -25,7 +25,7 @@ namespace Boutquin.MarketData.Abstractions.Tests.Unit.Provenance;
 public sealed class LicenseTypeTests
 {
     [Fact]
-    public void MemberSet_IsExactlyFiveValues_InFixedOrdinalOrder()
+    public void MemberSet_IsExactlySixValues_InFixedOrdinalOrder()
     {
         // Pin the append-only contract: reordering or removing members is a breaking change
         // that requires a spec amendment.
@@ -34,7 +34,8 @@ public sealed class LicenseTypeTests
             LicenseType.DelayedFifteenMin,
             LicenseType.Commercial,
             LicenseType.ResearchOnly,
-            LicenseType.Redistribution);
+            LicenseType.Redistribution,
+            LicenseType.Unknown);
     }
 
     [Theory]
@@ -43,6 +44,7 @@ public sealed class LicenseTypeTests
     [InlineData(LicenseType.Commercial, 2)]
     [InlineData(LicenseType.ResearchOnly, 3)]
     [InlineData(LicenseType.Redistribution, 4)]
+    [InlineData(LicenseType.Unknown, 5)]
     public void Members_HaveStableOrdinalValues(LicenseType value, int expectedOrdinal)
     {
         ((int)value).Should().Be(expectedOrdinal);
@@ -59,5 +61,6 @@ public sealed class LicenseTypeTests
         Enum.TryParse<LicenseType>("ResearchOnly", out _).Should().BeTrue();
         Enum.TryParse<LicenseType>("DelayedFifteenMin", out _).Should().BeTrue();
         Enum.TryParse<LicenseType>("Redistribution", out _).Should().BeTrue();
+        Enum.TryParse<LicenseType>("Unknown", out _).Should().BeTrue();
     }
 }

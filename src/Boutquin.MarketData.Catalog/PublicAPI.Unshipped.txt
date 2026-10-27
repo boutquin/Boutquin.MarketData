@@ -1,1 +1,39 @@
 #nullable enable
+*REMOVED*Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.GetRequired(string! providerKey) -> Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.<Clone>$() -> Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor!
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Deconstruct(out string! SourceId, out string! DisplayName, out Boutquin.MarketData.Catalog.Governance.DataSourceTier Tier, out Boutquin.MarketData.Catalog.Governance.DataLicenseFlag LicenseFlag, out Boutquin.MarketData.Abstractions.Requests.DataFrequency PrimaryFrequency, out bool SupportsHistorical, out bool SupportsEndOfDay, out bool SupportsIntraday, out bool SupportsRedistribution, out string? Notes) -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.DisplayName.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Equals(Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor? other) -> bool
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.LicenseFlag.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Notes.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.PrimaryFrequency.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SourceId.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsEndOfDay.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsHistorical.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsIntraday.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.SupportsRedistribution.init -> void
+Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Tier.init -> void
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey.DatasetKey() -> void
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey.DatasetKey(string! Value) -> void
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey.Deconstruct(out string! Value) -> void
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey.Equals(Boutquin.MarketData.Catalog.Identifiers.DatasetKey other) -> bool
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey.Value.get -> string!
+Boutquin.MarketData.Catalog.Identifiers.DatasetKey.Value.init -> void
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.All.get -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!>!
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.GetBy(System.Func<Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!, bool>! predicate) -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!>!
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.GetHandlers(TRequest request) -> System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!>!
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.GetRequired(Boutquin.MarketData.Abstractions.Provenance.ProviderCode providerKey) -> Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.SourceRegistry(System.Collections.Generic.IEnumerable<Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!>! adapters) -> void
+Boutquin.MarketData.Catalog.Registry.SourceRegistry<TRequest, TRecord>.TryGetByKey(Boutquin.MarketData.Abstractions.Provenance.ProviderCode providerKey, out Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>? adapter) -> bool
+override Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.Equals(object? obj) -> bool
+override Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.GetHashCode() -> int
+override Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.ToString() -> string!
+override Boutquin.MarketData.Catalog.Identifiers.DatasetKey.GetHashCode() -> int
+static Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.operator !=(Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor? left, Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor? right) -> bool
+static Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor.operator ==(Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor? left, Boutquin.MarketData.Catalog.Descriptors.SourceDescriptor? right) -> bool
+static Boutquin.MarketData.Catalog.Identifiers.DatasetKey.operator !=(Boutquin.MarketData.Catalog.Identifiers.DatasetKey left, Boutquin.MarketData.Catalog.Identifiers.DatasetKey right) -> bool
+static Boutquin.MarketData.Catalog.Identifiers.DatasetKey.operator ==(Boutquin.MarketData.Catalog.Identifiers.DatasetKey left, Boutquin.MarketData.Catalog.Identifiers.DatasetKey right) -> bool
+~override Boutquin.MarketData.Catalog.Identifiers.DatasetKey.Equals(object obj) -> bool
+~override Boutquin.MarketData.Catalog.Identifiers.DatasetKey.ToString() -> string

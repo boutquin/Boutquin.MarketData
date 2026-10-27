@@ -86,7 +86,7 @@ public sealed class FakeHttpMessageHandler : HttpMessageHandler
     /// Registers a binary response for a specific URL (e.g., ZIP files).
     /// </summary>
     /// <param name="urlKey">The URL or URL fragment to match against.</param>
-    /// <param name="bytes">The raw response bytes.</param>
+    /// <param name="bytes">The raw response bytes, copied when the response is registered.</param>
     /// <param name="mediaType">The content type. Defaults to "application/octet-stream".</param>
     /// <param name="statusCode">The HTTP status code. Defaults to <see cref="HttpStatusCode.OK"/>.</param>
     /// <returns>This handler, for fluent chaining.</returns>
@@ -94,11 +94,12 @@ public sealed class FakeHttpMessageHandler : HttpMessageHandler
         string urlKey, byte[] bytes, string mediaType = "application/octet-stream",
         HttpStatusCode statusCode = HttpStatusCode.OK)
     {
+        ArgumentNullException.ThrowIfNull(bytes);
+        var registeredBytes = bytes.ToArray();
         _responses[urlKey] = () =>
         {
-            // Copy so callers that mutate `bytes` after registration do not affect later responses.
-            var copy = new byte[bytes.Length];
-            Array.Copy(bytes, copy, bytes.Length);
+            // Each response owns its content independently of the registration and other responses.
+            var copy = registeredBytes.ToArray();
             var resp = new HttpResponseMessage(statusCode)
             {
                 Content = new ByteArrayContent(copy),

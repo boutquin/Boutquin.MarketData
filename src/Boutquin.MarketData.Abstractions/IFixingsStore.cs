@@ -16,7 +16,6 @@
 
 using Boutquin.MarketData.Abstractions.Primitives;
 using Boutquin.MarketData.Abstractions.ReferenceData;
-using Boutquin.MarketData.Abstractions.Requests;
 
 namespace Boutquin.MarketData.Abstractions;
 

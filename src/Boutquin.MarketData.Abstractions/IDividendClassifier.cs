@@ -14,6 +14,7 @@
 //   limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 namespace Boutquin.MarketData.Abstractions;
@@ -82,9 +83,10 @@ public interface IDividendClassifier
     /// <param name="assetCurrency">The ISO 4217 currency the dividend is paid in.</param>
     /// <param name="investorBaseCurrency">The ISO 4217 base currency of the portfolio receiving the dividend.</param>
     /// <returns>
-    /// An explicit <see cref="DividendType"/> member — never
-    /// <c>default(DividendType)</c>. See the "Unknown-input contract" in the
-    /// interface remarks for the broad-fallback rules.
+    /// An explicitly selected <see cref="DividendType"/> member, including a legitimate
+    /// zero-valued member when applicable. Do not use <c>default(DividendType)</c> as an
+    /// unclassified sentinel. See the "Unknown-input contract" in the interface remarks
+    /// for the broad-fallback rules.
     /// </returns>
-    DividendType Classify(Symbol symbol, CurrencyCode assetCurrency, CurrencyCode investorBaseCurrency);
+    DividendType Classify(Symbol symbol, Currency assetCurrency, Currency investorBaseCurrency);
 }

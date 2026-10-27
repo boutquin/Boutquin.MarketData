@@ -28,6 +28,14 @@ public sealed class BarNormalizerTests
     private readonly BarNormalizer _sut = new();
 
     [Fact]
+    public void Default_record_is_valid_under_required_string_policy()
+    {
+        var result = _sut.Normalize(default);
+
+        result.Should().Be(default(Bar));
+    }
+
+    [Fact]
     public void Rounds_prices_to_configured_precision()
     {
         // Arrange — prices with excess decimals

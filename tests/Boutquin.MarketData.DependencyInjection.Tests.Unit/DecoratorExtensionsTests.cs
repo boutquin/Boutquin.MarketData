@@ -68,6 +68,21 @@ public sealed class DecoratorExtensionsTests
         greeter.Greet("x").Should().Be("[2] [1] Hello, x!");
     }
 
+    [Fact]
+    public void Decorate_preserves_keyed_registration_and_wraps_unkeyed_registration()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IGreeter>(new PlainGreeter());
+        services.AddKeyedSingleton<IGreeter>("quiet", new PrefixGreeter("[keyed]", new PlainGreeter()));
+
+        services.Decorate<IGreeter>((inner, _) => new ShoutingGreeter(inner));
+
+        using var provider = services.BuildServiceProvider();
+        provider.GetRequiredService<IGreeter>().Greet("world").Should().Be("HELLO, WORLD!");
+        provider.GetRequiredKeyedService<IGreeter>("quiet").Greet("world")
+            .Should().Be("[keyed] Hello, world!");
+    }
+
     // --- Test helpers ---
 
     private interface IGreeter

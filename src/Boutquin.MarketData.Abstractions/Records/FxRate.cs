@@ -14,19 +14,27 @@
 //  limitations under the License.
 //
 
-using Boutquin.MarketData.Abstractions.ReferenceData;
+using Boutquin.Storage.Domain.Attributes;
+using Boutquin.Storage.Domain.Interfaces.TimeSeries;
 
 namespace Boutquin.MarketData.Abstractions.Records;
 
 /// <summary>
-/// A foreign-exchange spot rate observation for a single date and currency pair.
+/// A foreign-exchange spot rate observation for a single date. The currency pair that
+/// identifies the series is carried by <c>FxRateDatasetKey(Provider, BaseCurrency,
+/// QuoteCurrency, Frequency)</c>, not by the observation row.
 /// </summary>
 /// <param name="Date">The observation date.</param>
-/// <param name="BaseCurrency">The ISO 4217 base currency.</param>
-/// <param name="QuoteCurrency">The ISO 4217 quote currency.</param>
-/// <param name="Rate">The exchange rate: 1 unit of <paramref name="BaseCurrency"/> equals this many units of <paramref name="QuoteCurrency"/>.</param>
-public sealed record FxRate(
-    DateOnly Date,
-    CurrencyCode BaseCurrency,
-    CurrencyCode QuoteCurrency,
-    decimal Rate);
+/// <param name="Rate">The exchange rate for the series' pair: 1 unit of the key's base currency equals this many units of the key's quote currency.</param>
+/// <remarks>
+/// Stores <c>(Date, Rate)</c>; currency identity lives in
+/// <c>FxRateDatasetKey</c> as two <c>Currency</c> enum columns, removing the
+/// identity-in-payload denormalization. The record is now flat columnar-native (matching
+/// <see cref="ScalarObservation"/>) — both <c>[StorageSerializable]</c> (row tagged wire) and
+/// <c>[ColumnarStorable]</c> (column plan) apply with no encoding hazard.
+/// </remarks>
+[StorageSerializable]
+[ColumnarStorable]
+public partial record struct FxRate(
+    [property: Tag(1)] DateOnly Date,
+    [property: Tag(2)] decimal Rate) : IHasDate;

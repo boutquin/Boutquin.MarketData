@@ -24,6 +24,23 @@ namespace Boutquin.MarketData.Storage.Tests.Unit.Checkpointing;
 
 public sealed class IngestionCheckpointStoreTests
 {
+    [Theory]
+    [InlineData("", "daily", 2)]
+    [InlineData("provider", " ", 2)]
+    [InlineData("provider", "daily", -1)]
+    public async Task Invalid_save_preserves_previous_recoverable_checkpoint(string provider, string dataset, int index)
+    {
+        var backing = new InMemoryCheckpointStore();
+        var store = new IngestionCheckpointStore(backing);
+        var valid = new IngestionCheckpoint("provider", "daily", 3, DateTimeOffset.UnixEpoch);
+        await store.SaveAsync("pipeline", valid);
+        var invalid = new IngestionCheckpoint(provider, dataset, index, DateTimeOffset.UnixEpoch);
+
+        var save = () => store.SaveAsync("pipeline", invalid);
+        await save.Should().ThrowAsync<ArgumentException>("invalid input must be rejected before durable replacement");
+        (await new IngestionCheckpointStore(backing).LoadAsync("pipeline")).Should().Be(valid);
+    }
+
     private static IngestionCheckpointStore CreateStore() =>
         new(new InMemoryCheckpointStore());
 

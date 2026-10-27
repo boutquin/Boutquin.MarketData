@@ -14,6 +14,8 @@
 //   limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
+
 namespace Boutquin.MarketData.Abstractions.ReferenceData;
 
 /// <summary>
@@ -25,8 +27,8 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// in <see cref="StandardBenchmarks"/> and as the dataset key in data pipeline requests.
 /// </param>
 /// <param name="Currency">
-/// ISO-4217 currency the benchmark is quoted in (e.g., <see cref="CurrencyCode.USD"/>
-/// for SOFR, <see cref="CurrencyCode.GBP"/> for SONIA).
+/// ISO-4217 currency the benchmark is quoted in (e.g., <see cref="Currency.USD"/>
+/// for SOFR, <see cref="Currency.GBP"/> for SONIA).
 /// </param>
 /// <param name="Kind">
 /// Methodology classification. See <see cref="BenchmarkKind"/> for the full taxonomy.
@@ -45,12 +47,12 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// <param name="PublicationLagBusinessDays">
 /// Number of business days after the observation date before the administrator
 /// publishes the fixing. For example, SOFR and ESTR have a lag of 1 (published the
-/// following business day); SONIA and SARON publish on the same day (lag 0).
+/// following business day); SONIA also has lag 1, while SARON has lag 0.
 /// </param>
 /// <param name="PublicationCalendarCode">
 /// Free-form code identifying the publication holiday calendar, resolved via
 /// <c>HolidayCalendarFactory.Create</c>. Examples: <c>"USNY"</c>, <c>"GBLO"</c>,
-/// <c>"EUTA"</c>. Free-form because the calendar catalogue is an open set.
+/// <c>"TARGET"</c>. Free-form because the calendar catalogue is an open set.
 /// </param>
 /// <param name="AccrualDayCountCode">
 /// Free-form day-count code for interest accrual calculations, resolved via
@@ -71,7 +73,7 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// </remarks>
 public sealed record RateBenchmark(
     BenchmarkName Name,
-    CurrencyCode Currency,
+    Currency Currency,
     BenchmarkKind Kind,
     Tenor? Tenor,
     int FixingLagBusinessDays,

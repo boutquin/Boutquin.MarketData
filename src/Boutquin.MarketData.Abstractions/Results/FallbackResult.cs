@@ -33,4 +33,14 @@ namespace Boutquin.MarketData.Abstractions.Results;
 public sealed record FallbackResult<TResponse>(
     TResponse Response,
     ProviderCode SelectedProviderKey,
-    IReadOnlyList<FallbackAttempt> Attempts);
+    IReadOnlyList<FallbackAttempt> Attempts)
+{
+    /// <summary>
+    /// Adapter attempts, copied on construction and initialization and exposed read-only.
+    /// </summary>
+    public IReadOnlyList<FallbackAttempt> Attempts
+    {
+        get;
+        init => field = Array.AsReadOnly(value.ToArray());
+    } = Array.AsReadOnly(Attempts.ToArray());
+}

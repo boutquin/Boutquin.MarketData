@@ -1,1 +1,46 @@
 #nullable enable
+abstract Boutquin.MarketData.Calendars.BusinessCalendarBase.BusinessDaysPerYear.get -> int
+abstract Boutquin.MarketData.Calendars.BusinessCalendarBase.Code.get -> string!
+abstract Boutquin.MarketData.Calendars.BusinessCalendarBase.IsBusinessDay(System.DateOnly date) -> bool
+Boutquin.MarketData.Calendars.BusinessCalendarBase
+Boutquin.MarketData.Calendars.BusinessCalendarBase.Adjust(System.DateOnly date, Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment adjustment) -> System.DateOnly
+Boutquin.MarketData.Calendars.BusinessCalendarBase.Advance(System.DateOnly date, int businessDays) -> System.DateOnly
+Boutquin.MarketData.Calendars.BusinessCalendarBase.BusinessCalendarBase() -> void
+Boutquin.MarketData.Calendars.BusinessCalendarExtensions
+Boutquin.MarketData.Calendars.CompositeCalendar
+Boutquin.MarketData.Calendars.CompositeCalendar.CompositeCalendar(string! code, Boutquin.MarketData.Abstractions.Calendars.CalendarCompositionMode mode, params Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar![]! calendars) -> void
+Boutquin.MarketData.Calendars.CompositeCalendar.CompositeCalendar(string! code, params Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar![]! calendars) -> void
+Boutquin.MarketData.Calendars.HolidayCalendar
+Boutquin.MarketData.Calendars.HolidayCalendar.HolidayCalendar(string! code, System.Collections.Generic.IEnumerable<System.DateOnly>! holidays, int businessDaysPerYear = 252) -> void
+Boutquin.MarketData.Calendars.Holidays.CaTsxCalendar
+Boutquin.MarketData.Calendars.Holidays.CaTsxCalendar.CaTsxCalendar() -> void
+Boutquin.MarketData.Calendars.Holidays.HolidayCalendarFactory
+Boutquin.MarketData.Calendars.Holidays.HolidayDatasets
+Boutquin.MarketData.Calendars.Holidays.UsNyseCalendar
+Boutquin.MarketData.Calendars.Holidays.UsNyseCalendar.UsNyseCalendar() -> void
+Boutquin.MarketData.Calendars.WeekendOnlyCalendar
+Boutquin.MarketData.Calendars.WeekendOnlyCalendar.WeekendOnlyCalendar(string! code = "WEEKEND", int businessDaysPerYear = 260) -> void
+override Boutquin.MarketData.Calendars.CompositeCalendar.BusinessDaysPerYear.get -> int
+override Boutquin.MarketData.Calendars.CompositeCalendar.Code.get -> string!
+override Boutquin.MarketData.Calendars.CompositeCalendar.IsBusinessDay(System.DateOnly date) -> bool
+override Boutquin.MarketData.Calendars.HolidayCalendar.BusinessDaysPerYear.get -> int
+override Boutquin.MarketData.Calendars.HolidayCalendar.Code.get -> string!
+override Boutquin.MarketData.Calendars.HolidayCalendar.IsBusinessDay(System.DateOnly date) -> bool
+override Boutquin.MarketData.Calendars.Holidays.CaTsxCalendar.BusinessDaysPerYear.get -> int
+override Boutquin.MarketData.Calendars.Holidays.CaTsxCalendar.Code.get -> string!
+override Boutquin.MarketData.Calendars.Holidays.CaTsxCalendar.IsBusinessDay(System.DateOnly date) -> bool
+override Boutquin.MarketData.Calendars.Holidays.UsNyseCalendar.BusinessDaysPerYear.get -> int
+override Boutquin.MarketData.Calendars.Holidays.UsNyseCalendar.Code.get -> string!
+override Boutquin.MarketData.Calendars.Holidays.UsNyseCalendar.IsBusinessDay(System.DateOnly date) -> bool
+override Boutquin.MarketData.Calendars.WeekendOnlyCalendar.BusinessDaysPerYear.get -> int
+override Boutquin.MarketData.Calendars.WeekendOnlyCalendar.Code.get -> string!
+override Boutquin.MarketData.Calendars.WeekendOnlyCalendar.IsBusinessDay(System.DateOnly date) -> bool
+static Boutquin.MarketData.Calendars.BusinessCalendarExtensions.NextBusinessDay(this Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar! calendar, System.DateOnly date) -> System.DateOnly
+static Boutquin.MarketData.Calendars.BusinessCalendarExtensions.PreviousBusinessDay(this Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar! calendar, System.DateOnly date) -> System.DateOnly
+static Boutquin.MarketData.Calendars.Holidays.HolidayCalendarFactory.Create(string! code) -> Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar!
+static Boutquin.MarketData.Calendars.Holidays.HolidayCalendarFactory.SupportedCodes.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static Boutquin.MarketData.Calendars.Holidays.HolidayDatasets.CaStatutory() -> System.DateOnly[]!
+static Boutquin.MarketData.Calendars.Holidays.HolidayDatasets.CmeGroup() -> System.DateOnly[]!
+static Boutquin.MarketData.Calendars.Holidays.HolidayDatasets.GbLondon() -> System.DateOnly[]!
+static Boutquin.MarketData.Calendars.Holidays.HolidayDatasets.Target() -> System.DateOnly[]!
+static Boutquin.MarketData.Calendars.Holidays.HolidayDatasets.UsSifma() -> System.DateOnly[]!

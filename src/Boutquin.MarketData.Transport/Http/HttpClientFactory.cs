@@ -29,6 +29,8 @@ namespace Boutquin.MarketData.Transport.Http;
 /// <c>Microsoft.Extensions.Http</c> and configure named clients. This static factory
 /// is suitable for simple scripts, tests, and standalone adapters.
 /// </para>
+/// <para>Automatic redirects are disabled so callers can validate each new destination
+/// before dispatching another request.</para>
 /// </remarks>
 public static class HttpClientFactory
 {
@@ -43,7 +45,10 @@ public static class HttpClientFactory
     /// <returns>A configured <see cref="HttpClient"/> instance. The caller owns the lifetime.</returns>
     public static HttpClient Create(string productName, string? contactUrl = null, TimeSpan? timeout = null)
     {
-        var client = new HttpClient { Timeout = timeout ?? s_defaultTimeout };
+        var client = new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false }, disposeHandler: true)
+        {
+            Timeout = timeout ?? s_defaultTimeout,
+        };
 
         var userAgent = contactUrl is not null
             ? $"{productName}/0.1 (+{contactUrl})"

@@ -41,6 +41,8 @@ namespace Boutquin.MarketData.Storage.Snapshots;
 /// The version header is written as a fixed-width binary prefix so that readers can inspect
 /// the schema version without decoding metadata JSON or the payload. The metadata header is
 /// JSON; the payload format is determined by the inner serializer.
+/// Metadata is limited to 1 MiB of UTF-8 JSON on both write and read. An oversized
+/// metadata header is rejected before writing any bytes to the destination stream.
 /// </para>
 /// </remarks>
 public sealed class SnapshotEnvelopeSerializer<T> : ISnapshotSerializer<SnapshotEnvelope<T>>
@@ -64,13 +66,23 @@ public sealed class SnapshotEnvelopeSerializer<T> : ISnapshotSerializer<Snapshot
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentNullException">The envelope metadata is null.</exception>
+    /// <exception cref="InvalidDataException">A required metadata collection is null, or metadata exceeds the 1 MiB UTF-8 JSON limit.</exception>
     public async Task SerializeAsync(Stream stream, SnapshotEnvelope<T> data, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(data.Metadata);
+        ValidateMetadataCollections(data.Metadata);
+
+        var metaJson = JsonSerializer.SerializeToUtf8Bytes(data.Metadata);
+        if (metaJson.Length > MaxMetaJsonBytes)
+        {
+            throw new InvalidDataException($"Snapshot metadata length {metaJson.Length} exceeds {MaxMetaJsonBytes} bytes.");
+        }
+
         var versionBytes = new byte[4];
         BinaryPrimitives.WriteInt32LittleEndian(versionBytes, data.Version.Value);
         await stream.WriteAsync(versionBytes, cancellationToken).ConfigureAwait(false);
 
-        var metaJson = JsonSerializer.SerializeToUtf8Bytes(data.Metadata);
         var lengthBytes = new byte[4];
         BinaryPrimitives.WriteInt32LittleEndian(lengthBytes, metaJson.Length);
         await stream.WriteAsync(lengthBytes, cancellationToken).ConfigureAwait(false);
@@ -80,6 +92,7 @@ public sealed class SnapshotEnvelopeSerializer<T> : ISnapshotSerializer<Snapshot
     }
 
     /// <inheritdoc />
+    /// <exception cref="InvalidDataException">The metadata header has an invalid length, is null, or lacks a required collection.</exception>
     public async Task<SnapshotEnvelope<T>> DeserializeAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         var versionBytes = new byte[4];
@@ -101,8 +114,17 @@ public sealed class SnapshotEnvelopeSerializer<T> : ISnapshotSerializer<Snapshot
         await stream.ReadExactlyAsync(metaJson, cancellationToken).ConfigureAwait(false);
         var metadata = JsonSerializer.Deserialize<SnapshotMetadata>(metaJson)
             ?? throw new InvalidDataException("Snapshot metadata deserialized to null.");
+        ValidateMetadataCollections(metadata);
 
         var payload = await _innerSerializer.DeserializeAsync(stream, cancellationToken).ConfigureAwait(false);
         return new SnapshotEnvelope<T>(version, metadata, payload);
+    }
+
+    private static void ValidateMetadataCollections(SnapshotMetadata metadata)
+    {
+        if (metadata.Provenance is null || metadata.Issues is null)
+        {
+            throw new InvalidDataException("Snapshot metadata requires non-null Provenance and Issues collections.");
+        }
     }
 }

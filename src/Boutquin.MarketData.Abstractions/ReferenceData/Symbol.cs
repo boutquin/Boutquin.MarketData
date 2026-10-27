@@ -14,6 +14,8 @@
 //   limitations under the License.
 //
 
+using System.Text.Json.Serialization;
+
 namespace Boutquin.MarketData.Abstractions.ReferenceData;
 
 /// <summary>
@@ -61,6 +63,13 @@ public readonly record struct Symbol : IComparable<Symbol>
     /// Thrown when <paramref name="ticker"/> is <see langword="null"/>, empty, or
     /// consists only of whitespace characters.
     /// </exception>
+    /// <remarks>
+    /// Annotated <see cref="JsonConstructorAttribute"/> so <see cref="System.Text.Json.JsonSerializer"/>
+    /// invokes this constructor (populating <see cref="Ticker"/>) on round-trip rather than
+    /// defaulting to the implicit parameterless struct constructor, which would leave
+    /// <see cref="Ticker"/> <see langword="null"/> because the property is get-only.
+    /// </remarks>
+    [JsonConstructor]
     public Symbol(string ticker)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ticker);

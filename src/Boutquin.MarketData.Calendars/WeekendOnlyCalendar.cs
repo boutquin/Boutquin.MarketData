@@ -36,8 +36,11 @@ public sealed class WeekendOnlyCalendar : BusinessCalendarBase
     /// <param name="businessDaysPerYear">
     /// Conventional business days per year for annualization. Defaults to 260 (52 weeks x 5 days).
     /// </param>
+    /// <exception cref="ArgumentNullException">The calendar code is null.</exception>
     public WeekendOnlyCalendar(string code = "WEEKEND", int businessDaysPerYear = 260)
     {
+        ArgumentNullException.ThrowIfNull(code);
+
         Code = code;
         BusinessDaysPerYear = businessDaysPerYear;
     }

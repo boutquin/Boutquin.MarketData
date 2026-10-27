@@ -1,34 +1,46 @@
 # Reference data — benchmarks, conventions, taxonomies, and fixings
 
-> **Status:** shipped in the reference-data consolidation release. See
-> `specs/feature-reference-data-and-daycounts.md` (private Dev repo) for the
-> motivation, acceptance criteria, and out-of-scope list.
-
 Boutquin.MarketData is the shared data ingestion kernel for
-Boutquin.Analytics, Boutquin.Trading, and Boutquin.OptionPricing. This guide
-walks through the four reference-data surfaces that describe *what the market
-is* — independent of any single consumer's domain logic.
+[Boutquin.Curves](https://github.com/boutquin/Boutquin.Curves),
+[Boutquin.Trading](https://github.com/boutquin/Boutquin.Trading), and
+[Boutquin.OptionPricing](https://github.com/boutquin/Boutquin.OptionPricing). This
+guide walks through the four reference-data surfaces that describe *what the
+market is* — independent of any single consumer's domain logic.
 
 ## 1. Tier 1 reference-data enums
 
-All four are closed sets maintained by external standards bodies, so compile-time
-exhaustiveness on switch expressions is intentional and desirable. They live in
-`Boutquin.MarketData.Abstractions.ReferenceData`.
+These are closed sets maintained by external standards bodies, so compile-time
+exhaustiveness on switch expressions is intentional and desirable. `ExchangeCode`,
+`AssetClassCode`, and `SecuritySymbolStandard` live in
+`Boutquin.MarketData.Abstractions.ReferenceData`; currency identity is supplied by the
+ecosystem-wide `Currency` enum in `Boutquin.Domain.Enumerations` (the kernel's former
+14-member `CurrencyCode` enum was unified onto it, so the whole stack now speaks one
+ISO 4217 enum).
 
 | Enum | Standard | Example members |
 |------|----------|-----------------|
-| `CurrencyCode` | ISO 4217 (numeric ordinals pinned — `USD = 840`, `EUR = 978`) | USD, CAD, GBP, EUR, JPY, CHF … |
+| `Currency` (`Boutquin.Domain`) | ISO 4217, full 177-member catalogue (numeric ordinals pinned — `USD = 840`, `EUR = 978`; `Unspecified = 0` sentinel) | USD, CAD, GBP, EUR, JPY, CHF … |
 | `ExchangeCode` | ISO 10383 MIC | XNYS, XNAS, XLON, XPAR, XTSE, … |
 | `AssetClassCode` | Internal taxonomy | CashAndCashEquivalents, FixedIncome, Equities, Commodities, … |
 | `SecuritySymbolStandard` | Internal taxonomy | Cusip, Isin, Sedol, Ric, BloombergTicker |
 
 ### Drift policy
 
-These enums are mirrored on the Trading side during the migration window
-(see `Boutquin.Trading.Domain.Enums`). Adding a new member requires **lockstep**
-updates in both repos — the acceptance tests pin every numeric value with a
-snapshot (`CurrencyCodeTests.ISO_4217_numeric_values_are_pinned`) so any drift
-fails CI. Removals must go through a coordinated deprecation spec.
+Currency identity is no longer mirrored: the whole ecosystem shares the single
+`Boutquin.Domain.Currency` enum, so there is no second copy to keep in lockstep. The
+ISO 4217 numeric values the kernel persists are still pinned by a snapshot test
+(`CurrencyCodeTests.ISO_4217_numeric_values_are_pinned`) so any change to the upstream
+numeric backing — which would silently corrupt serialized currency columns — fails CI.
+The remaining `ReferenceData` enums (`ExchangeCode`, `AssetClassCode`,
+`SecuritySymbolStandard`) follow the same numeric-pinning discipline; removals go through
+a coordinated deprecation.
+
+### Moscow exchange identity
+
+`MISX` identifies Moscow Exchange (ordinal 11). `XMOS` retains ordinal 8 and now
+carries its ISO registry identity, Central Counterparty Clearing Center MFB.
+If older data used `XMOS` intending Moscow Exchange, migrate that meaning
+explicitly to `MISX`; neither integer nor string values are rewritten automatically.
 
 ## 1a. Tier 2 reference-data taxonomies
 
@@ -52,7 +64,8 @@ namespace and follow the same drift policy as Tier 1.
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 ExchangeMetadata.GetTimeZone(ExchangeCode.XNYS);  // TimeZoneCode.EST
-ExchangeMetadata.GetCountry(ExchangeCode.XTSE);   // CountryCode.JP
+ExchangeMetadata.GetCountry(ExchangeCode.XTSE);   // CountryCode.CA  (Toronto, per ISO 10383)
+ExchangeMetadata.GetCountry(ExchangeCode.XTKS);   // CountryCode.JP  (Tokyo)
 CountryMetadata.GetContinent(CountryCode.JP);     // ContinentCode.AS
 ```
 
@@ -79,11 +92,12 @@ engine, portfolio-income aggregator, reporting pipeline) reads it. The
 interface lives at `Boutquin.MarketData.Abstractions.IDividendClassifier`:
 
 ```csharp
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 IDividendClassifier classifier = /* your implementation */;
-var type = classifier.Classify(new Symbol("AAPL"), CurrencyCode.USD, CurrencyCode.CAD);
+var type = classifier.Classify(new Symbol("AAPL"), Currency.USD, Currency.CAD);
 // => DividendType.Foreign (asset in USD, investor base in CAD)
 ```
 
@@ -91,16 +105,25 @@ Implementations must honour the **unknown-input contract**:
 
 | Case | Behaviour |
 |------|-----------|
-| Precise match in metadata tables | Return the specific `DividendType` (e.g., `CanadianEligible`, `UsQualified`, `Reit`) |
+| Precise match in metadata tables | Return the specific `DividendType` (e.g., `CanadianEligible`, `UsQualified`, `CapitalGainDistribution`) |
 | Asset currency ≠ investor base currency, no precise match | Return `DividendType.Foreign` |
 | Asset currency = investor base currency (USD), no precise match | Return `DividendType.UsOrdinary` |
 | Asset currency = investor base currency (CAD), no precise match | Return `DividendType.CanadianNonEligible` |
 | Any well-formed input | Never throws, never returns `default(DividendType)` |
 | `default(Symbol)` | Implementations MAY throw `ArgumentException` — `Symbol`'s ctor rejects null/whitespace, so this only arises from explicit misuse |
 
-The classifier never reports "unclassifiable". There is no `Unknown` sentinel
-on `DividendType` — pushing ambiguity downstream produces exactly the
-inference burden the typed field removes.
+A classifier never reports "unclassifiable": every well-formed input resolves to
+a precise category or to one of the broad jurisdictional defaults above, and
+`default(DividendType)` is never returned — pushing that ambiguity downstream
+would produce exactly the inference burden the typed field removes.
+
+`DividendType` does carry an `Unclassified` member, but it is an **adapter**
+concession rather than a classifier outcome. An adapter stamps it when the
+provider reports a single blended cash figure per ex-date that mixes categories
+— Tiingo's `divCash` for an ETF routinely blends ordinary income, return of
+capital, and capital-gain components — and the inference is logged rather than
+applied silently. See [Dividend History and Trailing Income
+Yield](dividends.md) for the consumer-side consequences.
 
 ### `DividendPayment.Type`
 
@@ -114,7 +137,7 @@ using Boutquin.MarketData.Abstractions.ReferenceData;
 var dividend = new DividendPayment(
     new DateOnly(2024, 8, 15),
     Amount: 0.82m,
-    Currency: CurrencyCode.USD,
+    Currency: Currency.USD,
     Type: DividendType.UsQualified);
 ```
 
@@ -162,40 +185,66 @@ pipeline envelopes do. Key external collections explicitly:
 ```csharp
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
-var sofr  = StandardBenchmarks.UsdSofr;
-var saron = StandardBenchmarks.ChfSaron;
+var sofr = StandardBenchmarks.UsdSofr;
 
-Console.WriteLine(sofr.Name.Value);       // "USD-SOFR"
-Console.WriteLine(sofr.Currency);          // CurrencyCode.USD
-Console.WriteLine(sofr.Kind);              // BenchmarkKind.OvernightRiskFree
-Console.WriteLine(sofr.CalendarCode);      // "USNY"
-Console.WriteLine(sofr.DayCountCode);      // "ACT/360"
+Console.WriteLine(sofr.Name.Value);                // "USD-SOFR"
+Console.WriteLine(sofr.Currency);                  // Currency.USD
+Console.WriteLine(sofr.Kind);                      // BenchmarkKind.OvernightRiskFree
+Console.WriteLine(sofr.PublicationCalendarCode);   // "USSOFR"
+Console.WriteLine(sofr.AccrualDayCountCode);        // "ACT/360"
 
-StandardBenchmarks.All.Count;              // 6
-StandardBenchmarks.ByName("usd-sofr");     // case-insensitive; returns sofr
-StandardBenchmarks.ByName("USDSOFR");      // null — aliases not supported in v1
+StandardBenchmarks.All.Count;                     // 6
+StandardBenchmarks.ByName("usd-sofr");             // case-insensitive; returns sofr
+StandardBenchmarks.ByName("USDSOFR");              // null — aliases are not supported
 ```
 
-The catalogue ships six overnight benchmarks — the ones Hull 11e Ch 4 names
-explicitly as the post-LIBOR reference rate set:
+The catalogue supplies six overnight benchmarks. The table describes the shipped
+metadata; it does not certify every administrator's historical publication schedule.
 
 | Property | USD SOFR | GBP SONIA | EUR ESTR | CAD CORRA | CHF SARON | JPY TONA |
 |----------|----------|-----------|----------|-----------|-----------|----------|
 | Currency | USD | GBP | EUR | CAD | CHF | JPY |
-| Kind | OvernightRiskFree | OvernightRiskFree | OvernightRiskFree | OvernightIndexed | OvernightIndexed | OvernightIndexed |
-| Calendar | USNY | GBLO | TARGET | CATO | ZURH | TKYO |
-| Day count | ACT/360 | ACT/365F | ACT/360 | ACT/365F | ACT/360 | ACT/365F |
-| Observation lag (days) | 0 | 0 | 0 | 0 | 0 | 0 |
+| Kind | OvernightRiskFree | OvernightRiskFree | OvernightRiskFree | OvernightRiskFree | OvernightRiskFree | OvernightRiskFree |
+| Publication calendar | USSOFR | GBLO | TARGET | CATO | CHZU | JPTO |
+| Accrual day count | ACT/360 | ACT/365F | ACT/360 | ACT/365F | ACT/360 | ACT/365F |
+| Fixing lag (business days) | 0 | 0 | 0 | 0 | 0 | 0 |
+| Publication lag (business days) | 1 | 1 | 1 | 1 | 0 | 1 |
 
-`CalendarCode` and `DayCountCode` are free-form `string` — the catalogue is an
-open set that grows as new venues or conventions arrive. Resolve them with
-`HolidayCalendarFactory.Create(benchmark.CalendarCode)` and
-`DayCountResolver.Resolve(benchmark.DayCountCode)`.
+`PublicationCalendarCode` and `AccrualDayCountCode` are free-form strings.
+Resolve them with `HolidayCalendarFactory.Create(benchmark.PublicationCalendarCode)`
+and `DayCountResolver.Resolve(benchmark.AccrualDayCountCode)`.
+
+`USSF` represents SIFMA bond trading days, including early closes. `USSOFR`
+adds the Fed's explicit non-publication dates for Good Friday in
+[2021](https://www.newyorkfed.org/markets/opolicy/operating_policy_210303a),
+[2023](https://www.newyorkfed.org/markets/opolicy/operating_policy_230308a), and
+[2026](https://www.newyorkfed.org/markets/opolicy/operating_policy_260312a).
+Those were SIFMA trading days but SOFR was not published. Other early closes,
+such as [January 9, 2025](https://www.newyorkfed.org/markets/opolicy/operating_policy_250102),
+remain SOFR publication days. Neither code is a general settlement-calendar guarantee.
+
+The SIFMA dataset contains 2020–2030 dates; dates after 2026 are provisional,
+and future publication exceptions require updates. `CHZU` and `JPTO` currently
+resolve to weekend-only calendars. `CATO` is the supplied TSX calendar, not an
+independently certified complete CORRA publication schedule. Applications needing
+full administrator-specific coverage should provide the corresponding calendar.
+
+[SONIA is published on the following London business day](https://www.bankofengland.co.uk/markets/sonia-benchmark/sonia-key-features-and-policies),
+which is represented by its publication lag of one.
 
 `StandardBenchmarks.All` returns the same `IReadOnlyList<RateBenchmark>`
 instance on every call; callers may compare by reference.
 
+The `XCME` date-only baseline lists New Year's Day, Good Friday, and Christmas
+observances. It does not certify every product's trading sessions or settlement
+publication. `CaStatutory()` is a supplied selection rather than a complete
+jurisdiction-specific legal, bank, or benchmark calendar.
+
 ## 4. Instrument conventions
+
+Registry defaults are editable application baselines. Select the terms of the
+actual instrument, venue, and clearing agreement before constructing cash flows;
+the registry does not certify universal post-reform market conventions.
 
 Instrument-level structural records — OIS / FRA / swap-leg / futures /
 settlement — live in `Boutquin.MarketData.Conventions`. They were relocated
@@ -230,21 +279,20 @@ usdOis.ObservationShiftConvention;    // ObservationShiftConvention.Shifted
 - **`CreateDefault()` returns a fresh instance on every call.** Mutating a
   default registry does not leak into other callers.
 - **`GetRequired(code)` throws `KeyNotFoundException`** (not a bespoke
-  `MarketDataException`) when the key is absent. A non-throwing `TryGet`
-  overload is intentionally out of scope for v1; add it when a consumer
-  surfaces the need.
+  `MarketDataException`) when the key is absent. The registry has no
+  non-throwing `TryGet` overload.
 
 ### Supporting enums
 
 `PaymentFrequency`, `RollConvention`, `StubConvention`, and
-`ObservationShiftConvention` are all relocated verbatim from Curves with
-ordinals preserved — safe to `(int)` cast across the two enums during the
-migration window.
+`ObservationShiftConvention` are owned by MarketData. Consumers should reference
+these types directly; matching ordinals in a legacy assembly do not establish
+CLR type compatibility.
 
 ## 5. Fixings
 
 Fixings — the realised values of a benchmark on a given date — have a
-read-only contract (v1):
+read-only contract:
 
 ```csharp
 using Boutquin.MarketData.Abstractions;
@@ -269,9 +317,9 @@ var series = store.GetFixings(new BenchmarkName("USD-SOFR"), range);
 // => ordered ascending, inclusive at both ends
 ```
 
-`InMemoryFixingsStore` is suitable for tests and single-process workflows. A
-storage-backed implementation will arrive in a future spec — the write-side
-interface is intentionally deferred until that lands.
+`InMemoryFixingsStore` is suitable for tests and single-process workflows. The
+shipped fixings surface has no storage-backed implementation or write-side
+interface.
 
 Duplicate `(benchmark, date)` tuples in the constructor seed follow a
 last-in-wins rule silently. Callers that need strict uniqueness must validate
@@ -279,18 +327,24 @@ before construction.
 
 ## 6. Error handling
 
-Every MarketData failure surfaces as a `Boutquin.MarketData.Abstractions.Exceptions.MarketDataException`:
+Handle exceptions and issue-bearing results separately. Invalid arguments can throw
+`ArgumentException` (including `ArgumentNullException`); missing registry entries can
+throw `KeyNotFoundException`. Operations that use the kernel exception hierarchy throw
+a concrete `Boutquin.MarketData.Abstractions.Exceptions.MarketDataException` subtype.
+Cancellation propagates as `OperationCanceledException`.
+
+Recoverable provider or data failures can instead return `DataIssue` entries on a
+result envelope. For example, a Tiingo dividend transport failure returns a
+`FETCH_FAILED` warning and `Missing` completeness. Inspect `Issues` and `Coverage`
+before using the payload; a completed task alone does not establish usable data.
 
 ```csharp
 try
 {
-    var bars = await pipeline.FetchAsync(priceRequest, ct);
+    var result = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(priceRequest, ct);
+    // Inspect result.Issues and result.Coverage before consuming result.Payload.
 }
-catch (MarketDataNotFoundException) { /* provider returned empty */ }
-catch (MarketDataRetrievalException) { /* transport error */ }
-catch (MarketDataProcessingException) { /* normalizer rejection */ }
-catch (MarketDataStorageException) { /* snapshot persistence failed */ }
-catch (MarketDataException) { /* catch-all for the family */ }
+catch (MarketDataException) { /* Handle operations that throw this exception family. */ }
 ```
 
 `MarketDataException` is abstract; throw one of the five concrete subclasses.
@@ -311,11 +365,11 @@ public enum LicenseType { Free, DelayedFifteenMin, Commercial, ResearchOnly, Red
 public enum RetrievalMode { Api, Cache, Snapshot, Derived, Fixture }
 ```
 
-`ProviderCode` is constructed by each adapter package as a
-`public static readonly` field (the canonical spelling) and returned from
-`IDataSourceAdapter<TRequest, TRecord>.ProviderKey`. Case is normalised at
-construction, so `new ProviderCode("Tiingo")` and `new ProviderCode("TIINGO")`
-are equal. `LicenseType` and `RetrievalMode` are closed enums — new members are
+Each adapter returns a `ProviderCode` from
+`IDataSourceAdapter<TRequest, TRecord>.ProviderKey`. Provider identity uses
+value equality rather than object identity: case is normalised at construction,
+so `new ProviderCode("Tiingo")` and `new ProviderCode("TIINGO")` are equal.
+`LicenseType` and `RetrievalMode` are closed enums — new members are
 MarketData changes, not adapter changes, and consumers can exhaustively `switch`
 on them under `TreatWarningsAsErrors=true`.
 
@@ -392,22 +446,14 @@ serialise as `{"Value": "..."}` nested objects, and `LicenseType` /
 record structs support `[JsonConstructor]`-driven round-trip through
 `System.Text.Json`.
 
-## 7. Cross-repo coordination
+## 7. Dependency ownership
 
-- **Boutquin.Curves** keeps deprecated shims for the `RateBenchmark`,
-  fixings, and convention types for one release cycle. The Curves
-  modernization spec handles the removal.
-- **Boutquin.Trading** keeps `using` aliases for the four Tier 1 enums,
-  `Asset`, `ISecurityResolver`, the `MarketData*Exception` types, the four
-  Tier 2 taxonomies (`CountryCode`, `ContinentCode`, `TimeZoneCode`,
-  `DividendType`), and `IDividendClassifier`. The Trading cleanup spec handles
-  the removal.
-- **Drift in `CurrencyCode` / `ExchangeCode` / `AssetClassCode` /
-  `SecuritySymbolStandard` / `CountryCode` / `ContinentCode` / `TimeZoneCode` /
-  `DividendType`** between MarketData and Trading is not a supported state.
-  Additions land in both repos in the same release; removals go through a
-  coordinated deprecation spec.
-- **Boutquin.TaxEngine** consolidates its internal `DividendType` onto the
-  MarketData copy. Tax-treatment tables (gross-up factors, DTC eligibility,
-  withholding rates) stay in TaxEngine — those are tax rules, not market
-  facts. Tracked in `Boutquin.TaxEngine/specs/feature-dividend-income-classification.md`.
+Use the owning package's types at integration boundaries. `Currency` comes from
+`Boutquin.Domain`; the reference taxonomies, `RateBenchmark`, and
+`IDividendClassifier` described above come from `Boutquin.MarketData.Abstractions`.
+Instrument conventions come from `Boutquin.MarketData.Conventions`. A matching
+name or enum ordinal in another library does not make two CLR types interchangeable.
+
+Dividend classification describes the market event. Tax-treatment rules, such as
+gross-up factors, dividend tax credits, and withholding calculations, belong in
+the consuming tax engine rather than this reference-data layer.

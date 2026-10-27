@@ -52,9 +52,16 @@ namespace Boutquin.MarketData.Transport.Http;
 /// to prevent memory exhaustion from misbehaving or malicious servers.
 /// </para>
 /// <para>
-/// <strong>SSRF defense.</strong> By default, requests to loopback, link-local, and RFC-1918
-/// private-network addresses are rejected before any HTTP call is issued. Set
+/// <strong>SSRF preflight.</strong> The literal-IP and known-host checks reject loopback,
+/// link-local, RFC-1918 and other configured private targets before HTTP dispatch. The guard
+/// does not resolve DNS and does not prevent DNS rebinding; callers must restrict untrusted
+/// hostnames or enforce network-level egress controls. Set
 /// <see cref="TransportOptions.AllowPrivateNetworks"/> to opt into localhost testing.
+/// </para>
+/// <para>
+/// The default client does not follow redirects: non-success redirect responses fail the
+/// request. A caller-supplied client must also disable automatic redirects on its handler;
+/// this transport cannot inspect intermediate hops hidden inside an injected client.
 /// </para>
 /// </remarks>
 public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable, IAsyncDisposable
@@ -66,6 +73,8 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
     private readonly bool _ownsClient;
     private readonly bool _allowPrivateNetworks;
     private readonly long _maxResponseBytes;
+    private readonly TimeSpan _timeout;
+    private readonly string _userAgent;
     private readonly IReadOnlySet<string> _sensitiveQueryParameters;
     private int _disposed;
 
@@ -76,6 +85,7 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
     /// <param name="options">Transport configuration. If <see langword="null"/>, defaults are used.</param>
     /// <param name="logger">Logger for structured diagnostics.</param>
     /// <param name="ownsClient">Whether this instance owns and should dispose the HTTP client. Ignored when <paramref name="httpClient"/> is <see langword="null"/>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The configured response-size limit is negative.</exception>
     public ResilientHttpDataTransport(
         HttpClient? httpClient = null,
         TransportOptions? options = null,
@@ -83,11 +93,14 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
         bool ownsClient = false)
     {
         var opts = options ?? new TransportOptions();
+        ArgumentOutOfRangeException.ThrowIfNegative(opts.MaxResponseBytes);
         _logger = logger ?? NullLogger<ResilientHttpDataTransport>.Instance;
         _httpClient = httpClient ?? CreateDefaultClient(opts);
         _ownsClient = httpClient is null || ownsClient;
         _allowPrivateNetworks = opts.AllowPrivateNetworks;
         _maxResponseBytes = opts.MaxResponseBytes;
+        _timeout = opts.Timeout;
+        _userAgent = opts.UserAgent;
         _sensitiveQueryParameters = new HashSet<string>(
             opts.SensitiveQueryParameters,
             StringComparer.OrdinalIgnoreCase);
@@ -120,11 +133,15 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
         IReadOnlyDictionary<string, string>? headers = null,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         ArgumentNullException.ThrowIfNull(uri);
         ValidateUri(uri);
 
         return await _pipeline.ExecuteAsync(async ct =>
         {
+            using var attempt = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            attempt.CancelAfter(_timeout);
+            ct = attempt.Token;
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
 
             if (headers is not null)
@@ -133,6 +150,11 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
                 {
                     request.Headers.TryAddWithoutValidation(key, value);
                 }
+            }
+
+            if (!request.Headers.Contains("User-Agent"))
+            {
+                request.Headers.UserAgent.ParseAdd(_userAgent);
             }
 
             _logger.LogDebug("HTTP GET {Uri}", RedactUri(uri));
@@ -156,40 +178,50 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
                         $"Response body ({advertised:N0} bytes) exceeds configured maximum of {_maxResponseBytes:N0} bytes.");
                 }
 
+                // A wire length is only a hint: grow from one copy buffer rather than
+                // allocating the entire advertised body before reading any bytes.
                 var capacity = response.Content.Headers.ContentLength is { } len && len > 0 && len <= _maxResponseBytes
-                    ? (int)len
+                    ? (int)Math.Min(len, 81920L)
                     : 0;
                 var memoryStream = new MemoryStream(capacity);
 
-                var responseStream = await response.Content
-                    .ReadAsStreamAsync(ct)
-                    .ConfigureAwait(false);
-
-                await using (responseStream.ConfigureAwait(false))
+                try
                 {
-                    var buffer = new byte[81920];
-                    var total = 0L;
-                    int read;
-                    while ((read = await responseStream.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+                    var responseStream = await response.Content
+                        .ReadAsStreamAsync(ct)
+                        .ConfigureAwait(false);
+
+                    await using (responseStream.ConfigureAwait(false))
                     {
-                        total += read;
-                        if (_maxResponseBytes > 0 && total > _maxResponseBytes)
+                        var buffer = new byte[81920];
+                        var total = 0L;
+                        int read;
+                        while ((read = await responseStream.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
                         {
-                            await memoryStream.DisposeAsync().ConfigureAwait(false);
-                            throw new HttpRequestException(
-                                $"Response body exceeded configured maximum of {_maxResponseBytes:N0} bytes while streaming.");
+                            total += read;
+                            if (_maxResponseBytes > 0 && total > _maxResponseBytes)
+                            {
+                                await memoryStream.DisposeAsync().ConfigureAwait(false);
+                                throw new HttpRequestException(
+                                    $"Response body exceeded configured maximum of {_maxResponseBytes:N0} bytes while streaming.");
+                            }
+
+                            await memoryStream.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
                         }
-
-                        await memoryStream.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
                     }
+
+                    memoryStream.Position = 0;
+
+                    _logger.LogDebug("HTTP GET {Uri} completed ({StatusCode}, {Bytes} bytes)",
+                        RedactUri(uri), (int)response.StatusCode, memoryStream.Length);
+
+                    return (Stream)memoryStream;
                 }
-
-                memoryStream.Position = 0;
-
-                _logger.LogDebug("HTTP GET {Uri} completed ({StatusCode}, {Bytes} bytes)",
-                    RedactUri(uri), (int)response.StatusCode, memoryStream.Length);
-
-                return (Stream)memoryStream;
+                catch
+                {
+                    await memoryStream.DisposeAsync().ConfigureAwait(false);
+                    throw;
+                }
             }
         }, cancellationToken).ConfigureAwait(false);
     }
@@ -275,6 +307,11 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
 
     private static bool IsPrivateOrLoopback(IPAddress address)
     {
+        if (address.IsIPv4MappedToIPv6)
+        {
+            address = address.MapToIPv4();
+        }
+
         if (IPAddress.IsLoopback(address))
         {
             return true;
@@ -307,11 +344,12 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
     }
 
     /// <summary>
-    /// Returns a log-safe rendition of <paramref name="uri"/> with sensitive query-parameter
-    /// values replaced by <c>***</c>.
+    /// Returns a log-safe rendition of <paramref name="uri"/> with user-info removed and
+    /// sensitive query-parameter values replaced by <c>***</c>.
     /// </summary>
     private string RedactUri(Uri uri)
     {
+        uri = new UriBuilder(uri) { UserName = string.Empty, Password = string.Empty }.Uri;
         if (string.IsNullOrEmpty(uri.Query))
         {
             return uri.ToString();
@@ -347,11 +385,6 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
     {
         var builder = new ResiliencePipelineBuilder<Stream>();
 
-        if (opts.EnableRateLimiting && _rateLimiter is not null)
-        {
-            builder.AddRateLimiter(_rateLimiter);
-        }
-
         if (opts.EnableRetry)
         {
             builder.AddRetry(new RetryStrategyOptions<Stream>
@@ -364,13 +397,23 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
                     .Handle<HttpRequestException>(IsTransientHttpException),
                 OnRetry = args =>
                 {
+                    // Exception messages can contain untrusted HTTP reason phrases or URI echoes.
+                    var exception = args.Outcome.Exception;
+                    var statusCode = exception is HttpRequestException httpException
+                        ? (int?)httpException.StatusCode
+                        : null;
                     _logger.LogWarning(
-                        "Retry attempt {AttemptNumber}/{MaxRetries} after {Delay:N0}ms for HTTP request (reason: {Exception})",
+                        "Retry attempt {AttemptNumber}/{MaxRetries} after {Delay:N0}ms for HTTP request (exception: {ExceptionType}, status: {StatusCode})",
                         args.AttemptNumber, opts.MaxRetryAttempts, args.RetryDelay.TotalMilliseconds,
-                        args.Outcome.Exception?.Message ?? "non-success result");
+                        exception?.GetType().Name ?? "none", statusCode);
                     return ValueTask.CompletedTask;
                 },
             });
+        }
+
+        if (opts.EnableRateLimiting && _rateLimiter is not null)
+        {
+            builder.AddRateLimiter(_rateLimiter);
         }
 
         return builder.Build();
@@ -406,12 +449,13 @@ public sealed class ResilientHttpDataTransport : IHttpDataTransport, IDisposable
         // production footgun when data providers use DNS-based failover.
         var handler = new SocketsHttpHandler
         {
+            AllowAutoRedirect = false,
             PooledConnectionLifetime = opts.PooledConnectionLifetime,
         };
         var client = new HttpClient(handler, disposeHandler: true)
         {
             Timeout = opts.Timeout,
-            MaxResponseContentBufferSize = opts.MaxResponseBytes > 0 ? opts.MaxResponseBytes : int.MaxValue,
+            MaxResponseContentBufferSize = opts.MaxResponseBytes > 0 ? Math.Min(opts.MaxResponseBytes, int.MaxValue) : int.MaxValue,
         };
         client.DefaultRequestHeaders.UserAgent.ParseAdd(opts.UserAgent);
         return client;

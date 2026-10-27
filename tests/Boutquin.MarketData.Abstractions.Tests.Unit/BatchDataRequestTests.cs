@@ -14,13 +14,12 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.Contracts;
 using Boutquin.MarketData.Abstractions.Records;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 using Boutquin.MarketData.Abstractions.Requests;
-
 using FluentAssertions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Abstractions.Tests.Unit;
@@ -46,8 +45,8 @@ public sealed class BatchDataRequestTests
     {
         var pairs = new List<FxPair>
         {
-            new(CurrencyCode.EUR, CurrencyCode.USD),
-            new(CurrencyCode.GBP, CurrencyCode.USD),
+            new(Currency.EUR, Currency.USD),
+            new(Currency.GBP, Currency.USD),
         };
         var request = new FxHistoryRequest(pairs, s_range);
 

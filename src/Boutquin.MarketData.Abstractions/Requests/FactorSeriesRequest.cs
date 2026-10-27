@@ -15,6 +15,7 @@
 //
 
 using Boutquin.MarketData.Abstractions.Contracts;
+using Boutquin.MarketData.Abstractions.Keys;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 namespace Boutquin.MarketData.Abstractions.Requests;
@@ -30,6 +31,34 @@ public sealed record FactorSeriesRequest(
     DateRange Range,
     DataFrequency Frequency = DataFrequency.Daily) : IDataRequest
 {
+    /// <summary>
+    /// Optional regional hint — factor datasets are market-scoped (Fama-French US series,
+    /// Asness-Moskowitz global series, etc.). Multi-region portfolios can carry the Exchange
+    /// code to disambiguate which factor set applies to which sleeve. When
+    /// <see langword="null"/> the request is venue-neutral.
+    /// </summary>
+    /// <remarks>
+    /// Exposed as an <c>init</c> property for 1.1.0 binary compatibility with 1.0.x consumers.
+    /// </remarks>
+    public ExchangeCode? Exchange { get; init; }
+
     /// <inheritdoc />
-    public string DatasetKey => DatasetName.Value;
+    /// <remarks>
+    /// Identifier slashes are doubled before appending an optional <c>/</c> plus
+    /// <see cref="Exchange"/> suffix. Slash-free identifiers retain their legacy keys.
+    /// Upgrade using a fresh snapshot directory and restart to discard old L1 entries: legacy
+    /// keys can contain aliased data even at an unchanged venue-qualified key. Re-fetch the data;
+    /// no automatic migration or legacy-key fallback is performed. Existing files are left untouched.
+    /// </remarks>
+    public string DatasetKey =>
+        DividendDatasetIdentity.EncodeTickerAndExchange(DatasetName.Value, Exchange);
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Preserves the <see cref="DatasetName"/>, the optional <see cref="Exchange"/> venue hint, and
+    /// the <see cref="DataFrequency"/>; only <see cref="IDataRequest.Range"/> is narrowed to the gap.
+    /// Used by the time-series gap-fill to fetch just a missing sub-range.
+    /// </remarks>
+    public IDataRequest WithRange(DateRange range) =>
+        new FactorSeriesRequest(DatasetName, range, Frequency) { Exchange = Exchange };
 }

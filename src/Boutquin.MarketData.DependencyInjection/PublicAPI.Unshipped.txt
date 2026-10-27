@@ -1,1 +1,105 @@
 #nullable enable
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.TimeSeriesStoreBuilder(string! recordTypeToken) -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.SegmentFormat.get -> Boutquin.Storage.Domain.Enums.TimeSeriesSegmentFormat
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.CompactionStrategy.get -> Boutquin.MarketData.Abstractions.Enums.TimeSeriesCompactionStrategy
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.QuarantineBehavior.get -> Boutquin.MarketData.Abstractions.Enums.QuarantineBehavior
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.DataQualityIncidentSink.get -> Boutquin.MarketData.Abstractions.Observability.IDataQualityIncidentSink?
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.UseColumnarFormat() -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.UseRowFormat() -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithBloomFilter(System.Func<Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions!, Boutquin.Storage.Domain.Interfaces.IBloomFilter<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>>!>! factory, Boutquin.Storage.Domain.Interfaces.IBloomFilterStateCodec<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>>! stateCodec) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithBloomFilterStateCodec(Boutquin.Storage.Domain.Interfaces.IBloomFilterStateCodec<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>>! stateCodec) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithSegmentRoot(string! segmentRoot) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithCoverageIndex(Boutquin.Storage.Domain.Interfaces.TimeSeries.IDatasetCoverageIndex<TDatasetKey>! coverageIndex) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithCompactionStrategy(Boutquin.MarketData.Abstractions.Enums.TimeSeriesCompactionStrategy strategy) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.CorruptSegmentRecovery.get -> Boutquin.Storage.Domain.Enums.CorruptSegmentRecoveryDisposition
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WriteAheadLogOptions.get -> Boutquin.Storage.Infrastructure.WriteAheadLog.WriteAheadLogOptions!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.BloomFilterOptions.get -> Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.ValueLogEnabled.get -> bool
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithCorruptSegmentRecovery(Boutquin.Storage.Domain.Enums.CorruptSegmentRecoveryDisposition disposition, System.Action<Boutquin.Storage.Domain.ValueObjects.LsmTree.CorruptSegmentExclusion!>? onCorruptSegmentExcluded = null) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithWriteAheadLogOptions(System.Action<Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder!>! configure) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithBloomFilter(Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions! options) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithBloomFilter(System.Func<Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions!, Boutquin.Storage.Domain.Interfaces.IBloomFilter<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>>!>! factory) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.UseValueLog(System.Action<Boutquin.MarketData.DependencyInjection.ValueLogOptionsBuilder!>! configure) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithQuarantineBehavior(Boutquin.MarketData.Abstractions.Enums.QuarantineBehavior behavior) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithDataQualityIncidentSink(Boutquin.MarketData.Abstractions.Observability.IDataQualityIncidentSink! sink) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.WithCompressionCodec(Boutquin.Storage.Domain.Interfaces.Compression.ICompressionCodec! codec) -> Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.ResolveCompactionStrategy() -> Boutquin.Storage.Domain.Interfaces.ICompactionStrategy<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.BuildBloomFilter() -> Boutquin.Storage.Domain.Interfaces.IBloomFilter<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.ResolveSegmentFolder() -> string!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.BuildAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.Storage.Infrastructure.TimeSeries.LsmTimeSeriesStore<TDatasetKey, TRecord>!>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>.BuildStackAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.TimeSeriesStack() -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.TimeSeriesStack(Boutquin.Storage.Infrastructure.TimeSeries.LsmTimeSeriesStore<TDatasetKey, TRecord>! Store, Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! Engine) -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Store.get -> Boutquin.Storage.Infrastructure.TimeSeries.LsmTimeSeriesStore<TDatasetKey, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Store.init -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Engine.get -> Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Engine.init -> void
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.WriteAheadLogOptionsBuilder(Boutquin.Storage.Infrastructure.WriteAheadLog.WriteAheadLogOptions! seed) -> void
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.GroupCommitBatchSize.get -> int
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.GroupCommitBatchSize.set -> void
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.GroupCommitLatencyMs.get -> int
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.GroupCommitLatencyMs.set -> void
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.SegmentMaxBytes.get -> long
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.SegmentMaxBytes.set -> void
+Boutquin.MarketData.DependencyInjection.WriteAheadLogOptionsBuilder.Build() -> Boutquin.Storage.Infrastructure.WriteAheadLog.WriteAheadLogOptions!
+Boutquin.MarketData.DependencyInjection.ValueLogOptionsBuilder
+Boutquin.MarketData.DependencyInjection.ValueLogOptionsBuilder.ValueLogOptionsBuilder(Boutquin.Storage.Domain.ValueObjects.ValueLog.ValueLogOptions! seed) -> void
+Boutquin.MarketData.DependencyInjection.ValueLogOptionsBuilder.ValueLogThresholdBytes.get -> int
+Boutquin.MarketData.DependencyInjection.ValueLogOptionsBuilder.ValueLogThresholdBytes.set -> void
+Boutquin.MarketData.DependencyInjection.ValueLogOptionsBuilder.Build() -> Boutquin.Storage.Domain.ValueObjects.ValueLog.ValueLogOptions!
+Boutquin.MarketData.DependencyInjection.ITimeSeriesStoreRegistration
+Boutquin.MarketData.DependencyInjection.ITimeSeriesStoreRegistration.ApplyTo(Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry! registry) -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreRegistration<TDatasetKey, TRecord>
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreRegistration<TDatasetKey, TRecord>.TimeSeriesStoreRegistration(Boutquin.Storage.Domain.Interfaces.TimeSeries.ITimeSeriesStore<TDatasetKey, TRecord>! store, Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! engine) -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreRegistration<TDatasetKey, TRecord>.ApplyTo(Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry! registry) -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreRegistration<TDatasetKey, TRecord>.Dispose() -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStoreRegistration<TDatasetKey, TRecord>.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Boutquin.MarketData.DependencyInjection.DataQualityIncidentSinkExtensions
+static Boutquin.MarketData.DependencyInjection.DataQualityIncidentSinkExtensions.ReportOrLog(this Boutquin.MarketData.Abstractions.Observability.IDataQualityIncidentSink? sink, Boutquin.MarketData.Abstractions.Observability.DataQualityIncident! incident, Microsoft.Extensions.Logging.ILogger! logger) -> void
+static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.AddTimeSeriesStore<TDatasetKey, TRecord>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<Boutquin.MarketData.DependencyInjection.TimeSeriesStoreBuilder<TDatasetKey, TRecord>!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.AddRowTimeSeriesStore<TDatasetKey, TRecord>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.ConfigureTimeSeriesStore<TDatasetKey, TRecord>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<Boutquin.MarketData.DependencyInjection.RowStoreConfigurator!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.RowTimeSeriesStoreOptions() -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.SegmentRoot.get -> string!
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.SegmentRoot.set -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.CompactionStrategy.get -> Boutquin.MarketData.Abstractions.Enums.TimeSeriesCompactionStrategy
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.CompactionStrategy.set -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.WriteAheadLog.get -> Boutquin.Storage.Infrastructure.WriteAheadLog.WriteAheadLogOptions!
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.WriteAheadLog.set -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.ValueLog.get -> Boutquin.Storage.Domain.ValueObjects.ValueLog.ValueLogOptions?
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.ValueLog.set -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.CompressionCodec.get -> Boutquin.Storage.Domain.Interfaces.Compression.ICompressionCodec?
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.CompressionCodec.set -> void
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator.RowStoreConfigurator() -> void
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator.UseRowFormat() -> Boutquin.MarketData.DependencyInjection.RowStoreConfigurator!
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator.WithSegmentRoot(string! segmentRoot) -> Boutquin.MarketData.DependencyInjection.RowStoreConfigurator!
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator.WithCompactionStrategy(Boutquin.MarketData.Abstractions.Enums.TimeSeriesCompactionStrategy strategy) -> Boutquin.MarketData.DependencyInjection.RowStoreConfigurator!
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator.UseValueLog(Boutquin.Storage.Domain.ValueObjects.ValueLog.ValueLogOptions! valueLog) -> Boutquin.MarketData.DependencyInjection.RowStoreConfigurator!
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreFactory
+static Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreFactory.BuildStackAsync<TDatasetKey, TRecord>(string! recordTypeToken, Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>>!
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreRegistration<TDatasetKey, TRecord>
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreRegistration<TDatasetKey, TRecord>.RowTimeSeriesStoreRegistration(Boutquin.Storage.Domain.Interfaces.TimeSeries.ITimeSeriesStore<TDatasetKey, TRecord>! store, Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! engine) -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreRegistration<TDatasetKey, TRecord>.ApplyTo(Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry! registry) -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreRegistration<TDatasetKey, TRecord>.Dispose() -> void
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreRegistration<TDatasetKey, TRecord>.DisposeAsync() -> System.Threading.Tasks.ValueTask
+*REMOVED*static Boutquin.MarketData.DependencyInjection.DecoratorExtensions.Decorate<TService>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<TService, System.IServiceProvider!, TService>! decoratorFactory) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+*REMOVED*static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.AddMarketDataKernel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string? snapshotDirectory = null, string? rawDocumentDirectory = null, string? checkpointDirectory = null, string? eventLogDirectory = null, System.Action<Boutquin.MarketData.Transport.Http.TransportOptions!>? configureTransport = null, System.Action<Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions!>? configurePipeline = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Deconstruct(out Boutquin.Storage.Infrastructure.TimeSeries.LsmTimeSeriesStore<TDatasetKey, TRecord>! Store, out Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! Engine) -> void
+Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Equals(Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord> other) -> bool
+override Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.GetHashCode() -> int
+static Boutquin.MarketData.DependencyInjection.DecoratorExtensions.Decorate<TService>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<TService!, System.IServiceProvider!, TService!>! decoratorFactory) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Boutquin.MarketData.DependencyInjection.DecoratorExtensions.Decorate<TService>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<TService!, System.IServiceProvider!, TService!>! decoratorFactory, bool decoratorOwnsInner) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.AddMarketDataKernel(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string? snapshotDirectory = null, string? rawDocumentDirectory = null, string? checkpointDirectory = null, string? eventLogDirectory = null, string? timeSeriesDirectory = null, System.Action<Boutquin.MarketData.Transport.Http.TransportOptions!>? configureTransport = null, System.Action<Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions!>? configurePipeline = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Boutquin.MarketData.DependencyInjection.ServiceCollectionExtensions.AddMarketDataWriteThroughFor<TRecord>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.operator !=(Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord> left, Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord> right) -> bool
+static Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.operator ==(Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord> left, Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord> right) -> bool
+~override Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.Equals(object obj) -> bool
+~override Boutquin.MarketData.DependencyInjection.TimeSeriesStack<TDatasetKey, TRecord>.ToString() -> string
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.BloomFilter.get -> Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions!
+Boutquin.MarketData.DependencyInjection.RowTimeSeriesStoreOptions.BloomFilter.set -> void
+Boutquin.MarketData.DependencyInjection.RowStoreConfigurator.WithBloomFilter(Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions! options) -> Boutquin.MarketData.DependencyInjection.RowStoreConfigurator!

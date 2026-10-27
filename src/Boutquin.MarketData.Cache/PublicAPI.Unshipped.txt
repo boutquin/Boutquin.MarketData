@@ -1,1 +1,228 @@
 #nullable enable
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.FuturesSettlementFanOut(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.Project(Boutquin.MarketData.Abstractions.Requests.FuturesSettlementRequest! request, Boutquin.MarketData.Abstractions.Records.FuturesSettlement row) -> (Boutquin.MarketData.Abstractions.Keys.FuturesSettlementDatasetKey Key, Boutquin.MarketData.Abstractions.Records.FuturesSettlement Record)
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.PrefixBounds(Boutquin.MarketData.Abstractions.Requests.FuturesSettlementRequest! request) -> (Boutquin.MarketData.Abstractions.Keys.FuturesSettlementDatasetKey Lo, Boutquin.MarketData.Abstractions.Keys.FuturesSettlementDatasetKey Hi)
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.KeyMatchesRequest(Boutquin.MarketData.Abstractions.Requests.FuturesSettlementRequest! request, Boutquin.MarketData.Abstractions.Keys.FuturesSettlementDatasetKey key) -> bool
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut!
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.Equals(Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut? other) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.ToString() -> string!
+static Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.operator !=(Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut? left, Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut.operator ==(Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut? left, Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementFanOut? right) -> bool
+Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry.RegisterEngine<TDatasetKey, TRecord>(Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! engine) -> void
+Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry.ResolveEngine<TDatasetKey, TRecord>() -> Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>!
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.RegisterEngine<TDatasetKey, TRecord>(Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! engine) -> void
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.ResolveEngine<TDatasetKey, TRecord>() -> Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>!
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.PriceBarDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.PriceHistoryRequest! request) -> Boutquin.MarketData.Abstractions.Keys.PriceBarDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyBuilderCatalog
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyBuilderCatalog.RegisteredBuilderInterfaces.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+Boutquin.MarketData.Cache.TimeSeries.DatasetKeyBuilderCatalog
+Boutquin.MarketData.Cache.TimeSeries.DatasetKeyBuilderCatalog.DatasetKeyBuilderCatalog(System.Collections.Generic.IReadOnlyList<System.Type!>! registeredBuilderInterfaces) -> void
+Boutquin.MarketData.Cache.TimeSeries.DatasetKeyBuilderCatalog.RegisteredBuilderInterfaces.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+Boutquin.MarketData.Cache.TimeSeries.IProviderAwareDatasetKeyBuilder<TRequest, TDatasetKey>
+Boutquin.MarketData.Cache.TimeSeries.IProviderAwareDatasetKeyBuilder<TRequest, TDatasetKey>.Build(TRequest request, Boutquin.MarketData.Abstractions.Provenance.ProviderCode provider) -> TDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.IAttemptedRangeIndex
+Boutquin.MarketData.Cache.TimeSeries.InMemoryAttemptedRangeIndex
+Boutquin.MarketData.Cache.TimeSeries.InMemoryAttemptedRangeIndex.InMemoryAttemptedRangeIndex() -> void
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyFanOut<TRequest, TDatasetKey, TFetched, TStored>
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyFanOut<TRequest, TDatasetKey, TFetched, TStored>.Project(TRequest request, TFetched row) -> (TDatasetKey Key, TStored Record)
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyFanOut<TRequest, TDatasetKey, TFetched, TStored>.PrefixBounds(TRequest request) -> (TDatasetKey Lo, TDatasetKey Hi)
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyFanOut<TRequest, TDatasetKey, TFetched, TStored>.KeyMatchesRequest(TRequest request, TDatasetKey key) -> bool
+Boutquin.MarketData.Cache.TimeSeries.ICrossKeyScan<TDatasetKey, TRecord>
+Boutquin.MarketData.Cache.TimeSeries.ICrossKeyScan<TDatasetKey, TRecord>.ScanAsync(TDatasetKey lo, System.DateOnly loDate, TDatasetKey hi, System.DateOnly hiDate, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<(TDatasetKey Dataset, TRecord Record)>!
+Boutquin.MarketData.Cache.TimeSeries.LsmCrossKeyScan<TDatasetKey, TRecord>
+Boutquin.MarketData.Cache.TimeSeries.LsmCrossKeyScan<TDatasetKey, TRecord>.LsmCrossKeyScan(Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry! registry) -> void
+Boutquin.MarketData.Cache.TimeSeries.LsmCrossKeyScan<TDatasetKey, TRecord>.ScanAsync(TDatasetKey lo, System.DateOnly loDate, TDatasetKey hi, System.DateOnly hiDate, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<(TDatasetKey Dataset, TRecord Record)>!
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.YieldCurveQuoteFanOut(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.Project(Boutquin.MarketData.Abstractions.Requests.YieldCurveQuoteRequest! request, Boutquin.MarketData.Abstractions.Records.YieldCurveQuote row) -> (Boutquin.MarketData.Abstractions.Keys.YieldCurveQuoteDatasetKey Key, Boutquin.MarketData.Abstractions.Records.YieldCurveQuote Record)
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.PrefixBounds(Boutquin.MarketData.Abstractions.Requests.YieldCurveQuoteRequest! request) -> (Boutquin.MarketData.Abstractions.Keys.YieldCurveQuoteDatasetKey Lo, Boutquin.MarketData.Abstractions.Keys.YieldCurveQuoteDatasetKey Hi)
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.KeyMatchesRequest(Boutquin.MarketData.Abstractions.Requests.YieldCurveQuoteRequest! request, Boutquin.MarketData.Abstractions.Keys.YieldCurveQuoteDatasetKey key) -> bool
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.FactorObservationFanOut(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.Project(Boutquin.MarketData.Abstractions.Requests.FactorSeriesRequest! request, Boutquin.MarketData.Abstractions.Records.FactorObservation row) -> (Boutquin.MarketData.Abstractions.Keys.FactorObservationDatasetKey Key, Boutquin.MarketData.Abstractions.Records.FactorObservation Record)
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.PrefixBounds(Boutquin.MarketData.Abstractions.Requests.FactorSeriesRequest! request) -> (Boutquin.MarketData.Abstractions.Keys.FactorObservationDatasetKey Lo, Boutquin.MarketData.Abstractions.Keys.FactorObservationDatasetKey Hi)
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.KeyMatchesRequest(Boutquin.MarketData.Abstractions.Requests.FactorSeriesRequest! request, Boutquin.MarketData.Abstractions.Keys.FactorObservationDatasetKey key) -> bool
+Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry.ResolveScanEngine<TDatasetKey, TRecord>() -> Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>?
+Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry.RegisterScanEngine<TDatasetKey, TRecord>(Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! engine) -> void
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.ResolveScanEngine<TDatasetKey, TRecord>() -> Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>?
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.RegisterScanEngine<TDatasetKey, TRecord>(Boutquin.Storage.Domain.Interfaces.ILsmStorageEngine<Boutquin.Storage.Domain.ValueObjects.TimeSeries.TimeSeriesKey<TDatasetKey>, TRecord>! engine) -> void
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyFanOutCatalog
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyFanOutCatalog.RegisteredFanOutInterfaces.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+Boutquin.MarketData.Cache.TimeSeries.DatasetKeyFanOutCatalog
+Boutquin.MarketData.Cache.TimeSeries.DatasetKeyFanOutCatalog.DatasetKeyFanOutCatalog(System.Collections.Generic.IReadOnlyList<System.Type!>! registeredFanOutInterfaces) -> void
+Boutquin.MarketData.Cache.TimeSeries.DatasetKeyFanOutCatalog.RegisteredFanOutInterfaces.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.OptionChainRowFanOut(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.Project(Boutquin.MarketData.Abstractions.Requests.OptionChainRequest! request, Boutquin.MarketData.Abstractions.Records.OptionChainRow! row) -> (Boutquin.MarketData.Abstractions.Keys.OptionQuoteDatasetKey Key, Boutquin.MarketData.Abstractions.Records.OptionQuote Record)
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.PrefixBounds(Boutquin.MarketData.Abstractions.Requests.OptionChainRequest! request) -> (Boutquin.MarketData.Abstractions.Keys.OptionQuoteDatasetKey Lo, Boutquin.MarketData.Abstractions.Keys.OptionQuoteDatasetKey Hi)
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.KeyMatchesRequest(Boutquin.MarketData.Abstractions.Requests.OptionChainRequest! request, Boutquin.MarketData.Abstractions.Keys.OptionQuoteDatasetKey key) -> bool
+Boutquin.MarketData.Cache.TimeSeries.RowLsmCrossKeyScan<TDatasetKey, TRecord>
+Boutquin.MarketData.Cache.TimeSeries.RowLsmCrossKeyScan<TDatasetKey, TRecord>.RowLsmCrossKeyScan(Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry! registry) -> void
+Boutquin.MarketData.Cache.TimeSeries.RowLsmCrossKeyScan<TDatasetKey, TRecord>.ScanAsync(TDatasetKey lo, System.DateOnly loDate, TDatasetKey hi, System.DateOnly hiDate, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<(TDatasetKey Dataset, TRecord Record)>!
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.DividendPaymentDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.DividendHistoryRequest! request) -> Boutquin.MarketData.Abstractions.Keys.DividendPaymentDatasetKey
+*REMOVED*Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.GetOrAddAsync(TKey key, System.Func<TKey, System.Threading.CancellationToken, System.Threading.Tasks.Task<TValue>>! factory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TValue>!
+Boutquin.MarketData.Cache.Concurrent.LazyAsyncCache<TKey, TValue>.GetOrAddAsync(TKey key, System.Func<TKey, System.Threading.CancellationToken, System.Threading.Tasks.Task<TValue>!>! factory, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TValue>!
+Boutquin.MarketData.Cache.Memory.ExactOnceMemoryCache
+Boutquin.MarketData.Cache.Memory.ExactOnceMemoryCache.ExactOnceMemoryCache() -> void
+Boutquin.MarketData.Cache.Memory.ExactOnceMemoryCache.ExactOnceMemoryCache(System.TimeProvider! timeProvider) -> void
+Boutquin.MarketData.Cache.Memory.ExactOnceMemoryCache.GetAsync<T>(string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T?>!
+Boutquin.MarketData.Cache.Memory.ExactOnceMemoryCache.SetAsync<T>(string! key, T value, System.TimeSpan ttl, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Boutquin.MarketData.Cache.Policies.SnapshotStalenessPolicy
+Boutquin.MarketData.Cache.Policies.SnapshotStalenessPolicy.CheckStaleness(string! snapshotKey, System.DateTimeOffset storedAtUtc) -> Boutquin.MarketData.Abstractions.Results.DataIssue?
+Boutquin.MarketData.Cache.Policies.SnapshotStalenessPolicy.IsStale(System.DateTimeOffset storedAtUtc) -> bool
+Boutquin.MarketData.Cache.Policies.SnapshotStalenessPolicy.MaxAge.get -> System.TimeSpan
+Boutquin.MarketData.Cache.Policies.SnapshotStalenessPolicy.SnapshotStalenessPolicy(System.TimeSpan? maxAge = null) -> void
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.DefaultTimeSeriesStoreRegistry() -> void
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.Register<TDatasetKey, TRecord>(Boutquin.Storage.Domain.Interfaces.TimeSeries.ITimeSeriesStore<TDatasetKey, TRecord>! store) -> void
+Boutquin.MarketData.Cache.TimeSeries.DefaultTimeSeriesStoreRegistry.Resolve<TDatasetKey, TRecord>() -> Boutquin.Storage.Domain.Interfaces.TimeSeries.ITimeSeriesStore<TDatasetKey, TRecord>?
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.EconomicSeriesRequest! request) -> Boutquin.MarketData.Abstractions.Keys.ScalarObservationDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.EconomicSeriesDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut!
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.Equals(Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.FactorSeriesRequest! request) -> Boutquin.MarketData.Abstractions.Keys.FactorObservationDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.FactorSeriesDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.FuturesSettlementRequest! request) -> Boutquin.MarketData.Abstractions.Keys.FuturesSettlementDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.FuturesSettlementDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.FxHistoryRequest! request) -> Boutquin.MarketData.Abstractions.Keys.FxRateDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.BuildForPair(Boutquin.MarketData.Abstractions.Requests.FxHistoryRequest! request, Boutquin.MarketData.Abstractions.Records.FxPair! pair) -> Boutquin.MarketData.Abstractions.Keys.FxRateDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.FxRateDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.IAttemptedRangeIndex.GetAttemptedRanges(string! datasetIdentity) -> System.Collections.Generic.IReadOnlyList<(System.DateOnly From, System.DateOnly To)>!
+Boutquin.MarketData.Cache.TimeSeries.IAttemptedRangeIndex.RecordAttempt(string! datasetIdentity, System.DateOnly from, System.DateOnly to) -> void
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyBuilder<TRequest, TDatasetKey>
+Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyBuilder<TRequest, TDatasetKey>.Build(TRequest request) -> TDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry
+Boutquin.MarketData.Cache.TimeSeries.IMutableTimeSeriesStoreRegistry.Register<TDatasetKey, TRecord>(Boutquin.Storage.Domain.Interfaces.TimeSeries.ITimeSeriesStore<TDatasetKey, TRecord>! store) -> void
+Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry
+Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry.Resolve<TDatasetKey, TRecord>() -> Boutquin.Storage.Domain.Interfaces.TimeSeries.ITimeSeriesStore<TDatasetKey, TRecord>?
+Boutquin.MarketData.Cache.TimeSeries.InMemoryAttemptedRangeIndex.GetAttemptedRanges(string! datasetIdentity) -> System.Collections.Generic.IReadOnlyList<(System.DateOnly From, System.DateOnly To)>!
+Boutquin.MarketData.Cache.TimeSeries.InMemoryAttemptedRangeIndex.RecordAttempt(string! datasetIdentity, System.DateOnly from, System.DateOnly to) -> void
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut!
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.Equals(Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.OptionChainRequest! request) -> Boutquin.MarketData.Abstractions.Keys.OptionQuoteDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.OptionQuoteDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder!
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.Build(Boutquin.MarketData.Abstractions.Requests.YieldCurveQuoteRequest! request) -> Boutquin.MarketData.Abstractions.Keys.YieldCurveQuoteDatasetKey
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.Equals(Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder? other) -> bool
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.ProviderName.get -> string!
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.ProviderName.init -> void
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.YieldCurveQuoteDatasetKeyBuilder(string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.<Clone>$() -> Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut!
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.Deconstruct(out string! ProviderName) -> void
+Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.Equals(Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut? other) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.ToString() -> string!
+override Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.Equals(object? obj) -> bool
+override Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.GetHashCode() -> int
+override Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.ToString() -> string!
+static Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.DividendPaymentDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.EconomicSeriesDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.operator !=(Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut? left, Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut.operator ==(Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut? left, Boutquin.MarketData.Cache.TimeSeries.FactorObservationFanOut? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.FactorSeriesDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.FuturesSettlementDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.FxRateDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.operator !=(Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut? left, Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut.operator ==(Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut? left, Boutquin.MarketData.Cache.TimeSeries.OptionChainRowFanOut? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.OptionQuoteDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.PriceBarDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.operator !=(Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder.operator ==(Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder? left, Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteDatasetKeyBuilder? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.operator !=(Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut? left, Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut? right) -> bool
+static Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut.operator ==(Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut? left, Boutquin.MarketData.Cache.TimeSeries.YieldCurveQuoteFanOut? right) -> bool
+Boutquin.MarketData.Cache.TimeSeries.InMemoryAttemptedRangeIndex.InMemoryAttemptedRangeIndex(int capacity, System.TimeSpan ttl, Boutquin.MarketData.Abstractions.Contracts.IClock! clock) -> void

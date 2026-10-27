@@ -38,10 +38,9 @@ public interface IDataSourceAdapter<in TRequest, TRecord>
     /// Unique key identifying the data provider (e.g., <c>new ProviderCode("tiingo")</c>).
     /// </summary>
     /// <remarks>
-    /// Implementations should expose their canonical <see cref="ProviderCode"/> as a
-    /// <c>public static readonly</c> field on an adapter-package-local <c>KnownProviders</c>
-    /// class and return that same instance here so the value is identical across
-    /// registrations, lookups, and provenance.
+    /// Provider identity uses <see cref="ProviderCode"/> value equality. Implementations may
+    /// construct the value when this property is read; registrations, lookups, and provenance
+    /// agree when their normalized provider-code values are equal.
     /// </remarks>
     ProviderCode ProviderKey { get; }
 

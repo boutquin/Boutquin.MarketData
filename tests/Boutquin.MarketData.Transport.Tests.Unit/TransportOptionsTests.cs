@@ -24,6 +24,16 @@ namespace Boutquin.MarketData.Transport.Tests.Unit;
 public sealed class TransportOptionsTests
 {
     [Fact]
+    public void PrivateNetworkDocumentation_DisclosesLiteralOnlyBoundary()
+    {
+        var xml = System.Xml.Linq.XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Boutquin.MarketData.Transport.xml"));
+        var text = xml.Descendants("member").Single(member =>
+            (string?)member.Attribute("name") == "P:Boutquin.MarketData.Transport.Http.TransportOptions.AllowPrivateNetworks").Value;
+
+        text.Should().Contain("literal").And.Contain("does not resolve DNS").And.Contain("rebinding");
+    }
+
+    [Fact]
     public void Default_UserAgent_is_correct()
     {
         var opts = new TransportOptions();

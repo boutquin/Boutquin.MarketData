@@ -59,4 +59,21 @@ public enum RetrievalMode
     /// Produced by a synthetic test fixture — not from any real provider.
     /// </summary>
     Fixture = 4,
+
+    /// <summary>
+    /// Served by the time-series cache tier after a live adapter fetch that fully filled the
+    /// requested range (every requested day fell in a gap and was fetched fresh).
+    /// Distinct from <see cref="Api"/>, which is the legacy-path live-fetch marker; a time-series
+    /// gap-fill that covered the whole request reports <see cref="Live"/>.
+    /// </summary>
+    Live = 5,
+
+    /// <summary>
+    /// Served by the time-series cache tier from a mix of cached coverage and a partial live
+    /// gap-fill — the request spanned both already-covered dates and one or more gaps that were
+    /// fetched from the adapter. Also carried when a gap-fill adapter dispatch failed
+    /// after at least one gap was durably appended, so the returned range is
+    /// known to be incompletely filled.
+    /// </summary>
+    Partial = 6,
 }

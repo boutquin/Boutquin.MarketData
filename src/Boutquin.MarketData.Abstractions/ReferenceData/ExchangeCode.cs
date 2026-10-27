@@ -22,11 +22,22 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// Represents the ISO 10383 market identifier codes for the major exchanges.
 /// </summary>
 /// <remarks>
-/// Relocated from <c>Boutquin.Trading.Domain.Enums.ExchangeCode</c>. Member names
-/// match the ISO 10383 MIC tokens exactly; numeric ordinals are left to the compiler
-/// (the Trading origin does not pin them), so the two enums compare equal when
-/// round-tripped through a numeric cast only when <em>no</em> new members are inserted
-/// in the middle — additions should always append.
+/// <para>
+/// Member names are ISO 10383 MIC tokens. Numeric ordinals are stable — inserting new
+/// members in the middle would shift every subsequent serialized value, so additions
+/// always append at the end.
+/// </para>
+/// <para>
+/// <b>2026-04-20 rename:</b> the enum previously carried the non-ISO labels
+/// <c>XTSE</c> for Tokyo and <c>XTOR</c> for Toronto, which inverted the ISO 10383
+/// assignments (`XTSE` is Toronto, `XTKS` is Tokyo). The rename is a breaking change
+/// to the string form of the enum (<c>ToString()</c>, JSON string-serialized values)
+/// but preserves every numeric ordinal, so integer-serialized data is unaffected.
+/// Downstream: anything keying on the string "XTSE" now means Toronto, not Tokyo; any
+/// string persisted as "XTOR" is no longer a recognized member. No portfolio or
+/// benchmark in the ETFWealthIQ universe referenced Tokyo-listed instruments at the
+/// time of the rename, so no persisted data was migrated.
+/// </para>
 /// </remarks>
 public enum ExchangeCode
 {
@@ -43,10 +54,14 @@ public enum ExchangeCode
     XNAS,
 
     /// <summary>
-    /// Tokyo Stock Exchange.
+    /// Tokyo Stock Exchange (operating MIC within Japan Exchange Group).
     /// </summary>
+    /// <remarks>
+    /// Ordinal pinned to slot 2 to preserve backward compatibility with numerically
+    /// serialized data that was written before the 2026-04-20 rename (was <c>XTSE</c>).
+    /// </remarks>
     [Description("Tokyo Stock Exchange")]
-    XTSE,
+    XTKS,
 
     /// <summary>
     /// Shanghai Stock Exchange.
@@ -79,20 +94,34 @@ public enum ExchangeCode
     XETR,
 
     /// <summary>
-    /// Moscow Exchange.
+    /// Central Counterparty Clearing Center MFB, a Russian clearing organization.
     /// </summary>
-    [Description("Moscow Exchange")]
+    /// <remarks>
+    /// ISO 10383 assigns this MIC to the clearing organization. Use <see cref="MISX"/>
+    /// for Moscow Exchange; the existing numeric value of XMOS remains unchanged.
+    /// </remarks>
+    [Description("Central Counterparty Clearing Center MFB")]
     XMOS,
 
     /// <summary>
-    /// Toronto Stock Exchange.
+    /// Toronto Stock Exchange (TMX Group).
     /// </summary>
+    /// <remarks>
+    /// Ordinal pinned to slot 9 to preserve backward compatibility with numerically
+    /// serialized data that was written before the 2026-04-20 rename (was <c>XTOR</c>).
+    /// </remarks>
     [Description("Toronto Stock Exchange")]
-    XTOR,
+    XTSE,
 
     /// <summary>
-    /// NEO Exchange (formerly Aequitas NEO Exchange), Toronto.
+    /// Cboe Canada NEO-L market, formerly Aequitas NEO Exchange, Toronto.
     /// </summary>
-    [Description("NEO Exchange")]
-    NEOE
+    [Description("Cboe Canada NEO-L")]
+    NEOE,
+
+    /// <summary>
+    /// Moscow Exchange, all markets (ISO 10383 operating MIC MISX).
+    /// </summary>
+    [Description("Moscow Exchange")]
+    MISX
 }

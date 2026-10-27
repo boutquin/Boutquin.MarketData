@@ -29,7 +29,8 @@ namespace Boutquin.MarketData.Storage.Serializers;
 /// <remarks>
 /// Uses camelCase property naming and compact (non-indented) output. The serializer is
 /// stateless and thread-safe. Deserialization throws <see cref="InvalidOperationException"/>
-/// if the stream contains a JSON <c>null</c> literal.
+/// if the stream contains a JSON <c>null</c> literal. Null payloads are rejected before
+/// serialization writes any bytes, including empty nullable value types.
 /// </remarks>
 public sealed class JsonSnapshotSerializer<T> : ISnapshotSerializer<T>
 {
@@ -40,8 +41,14 @@ public sealed class JsonSnapshotSerializer<T> : ISnapshotSerializer<T>
     };
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null"/>.</exception>
+    /// <remarks>
+    /// Null payloads cannot round-trip through this serializer and are rejected before changing
+    /// <paramref name="stream"/>. The caller retains ownership of the stream.
+    /// </remarks>
     public async Task SerializeAsync(Stream stream, T data, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(data);
         await JsonSerializer.SerializeAsync(stream, data, s_options, cancellationToken).ConfigureAwait(false);
     }
 

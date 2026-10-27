@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.Records;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 using Boutquin.MarketData.Normalization.Normalizers;
@@ -27,6 +28,32 @@ namespace Boutquin.MarketData.Normalization.Tests.Unit;
 public sealed class CorporateActionNormalizerTests
 {
     private readonly CorporateActionNormalizer _sut = new();
+
+    [Fact]
+    public void Rejects_null_record_with_shared_raw_parameter_contract()
+    {
+        var act = () => _sut.Normalize(null!);
+
+        act.Should().Throw<ArgumentNullException>()
+            .WithParameterName("raw");
+    }
+
+    [Fact]
+    public void Preserves_null_optional_description()
+    {
+        var action = new CorporateAction(
+            new DateOnly(2024, 8, 9),
+            new Symbol("NVDA"),
+            CorporateActionType.Split,
+            4.0m,
+            null,
+            null,
+            null);
+
+        var result = _sut.Normalize(action);
+
+        result.Description.Should().BeNull();
+    }
 
     [Fact]
     public void Preserves_symbol()
@@ -45,11 +72,11 @@ public sealed class CorporateActionNormalizerTests
     {
         var action = new CorporateAction(
             new DateOnly(2024, 8, 15), new Symbol("AAPL"), CorporateActionType.CashDividend,
-            null, 0.82m, CurrencyCode.USD, null);
+            null, 0.82m, Currency.USD, null);
 
         var result = _sut.Normalize(action);
 
-        result.Currency.Should().Be(CurrencyCode.USD);
+        result.Currency.Should().Be(Currency.USD);
     }
 
     [Fact]
@@ -69,7 +96,7 @@ public sealed class CorporateActionNormalizerTests
     {
         var action = new CorporateAction(
             new DateOnly(2024, 8, 15), new Symbol("AAPL"), CorporateActionType.CashDividend,
-            null, -0.50m, CurrencyCode.USD, null);
+            null, -0.50m, Currency.USD, null);
 
         var result = _sut.Normalize(action);
 

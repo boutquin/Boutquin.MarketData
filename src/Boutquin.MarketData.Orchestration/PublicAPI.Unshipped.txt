@@ -1,1 +1,96 @@
 #nullable enable
+Boutquin.MarketData.Orchestration.Snapshots.DataSnapshot
+Boutquin.MarketData.Orchestration.Snapshots.DataSnapshot.DataSnapshot(Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry! registry, System.Func<System.Type!, object?>! bindingResolver) -> void
+Boutquin.MarketData.Orchestration.Snapshots.DataSnapshot.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Boutquin.MarketData.Orchestration.Snapshots.DataSnapshot.ExecuteAsync<TRecord>(Boutquin.MarketData.Abstractions.Contracts.IDataRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>!
+Boutquin.MarketData.Orchestration.Snapshots.ISnapshotReadBinding<TRecord>
+Boutquin.MarketData.Orchestration.Snapshots.ISnapshotReadBinding<TRecord>.CaptureAsync(Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry! registry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.IAsyncDisposable!>!
+Boutquin.MarketData.Orchestration.Snapshots.ISnapshotReadBinding<TRecord>.ReadAsync(System.IAsyncDisposable! snapshot, Boutquin.MarketData.Abstractions.Contracts.IDataRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>>!
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.SnapshotReadResult() -> void
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.SnapshotReadResult(System.Collections.Generic.IReadOnlyList<TRecord>! Records, bool HasGap) -> void
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.Records.get -> System.Collections.Generic.IReadOnlyList<TRecord>!
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.Records.init -> void
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.HasGap.get -> bool
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.HasGap.init -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.RegisterDefaultNormalizers.get -> bool
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.RegisterDefaultNormalizers.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesStalenessMaxAge.get -> System.TimeSpan?
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesStalenessMaxAge.set -> void
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.LegacyL2Snapshot(TRequest Request, System.Collections.Generic.IReadOnlyList<TRecord>! Records) -> void
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Request.get -> TRequest
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Request.init -> void
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Records.get -> System.Collections.Generic.IReadOnlyList<TRecord>!
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Records.init -> void
+Boutquin.MarketData.Orchestration.Commands.ILegacyL2SnapshotSource<TRequest, TRecord>
+Boutquin.MarketData.Orchestration.Commands.ILegacyL2SnapshotSource<TRequest, TRecord>.EnumerateAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>>!
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.ImportLegacyL2SnapshotsResult(int SnapshotsRead, int AppendCallCount) -> void
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.SnapshotsRead.get -> int
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.SnapshotsRead.init -> void
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.AppendCallCount.get -> int
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.AppendCallCount.init -> void
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsCommand<TRequest, TRecord, TDatasetKey>
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsCommand<TRequest, TRecord, TDatasetKey>.ImportLegacyL2SnapshotsCommand(Boutquin.MarketData.Cache.TimeSeries.ITimeSeriesStoreRegistry! registry, Boutquin.MarketData.Cache.TimeSeries.IDatasetKeyBuilder<TRequest, TDatasetKey>! keyBuilder, Boutquin.MarketData.Orchestration.Commands.ILegacyL2SnapshotSource<TRequest, TRecord>! source) -> void
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsCommand<TRequest, TRecord, TDatasetKey>.ExecuteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult>!
+*REMOVED*Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.Compute(Boutquin.MarketData.Abstractions.Requests.DateRange! range, Boutquin.MarketData.Abstractions.Requests.DataFrequency frequency, int returnedPoints) -> Boutquin.MarketData.Abstractions.Results.DataCoverage!
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.Deconstruct(out int SnapshotsRead, out int AppendCallCount) -> void
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.Equals(Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult other) -> bool
+Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.ImportLegacyL2SnapshotsResult() -> void
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Deconstruct(out TRequest Request, out System.Collections.Generic.IReadOnlyList<TRecord>! Records) -> void
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Equals(Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord> other) -> bool
+Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.LegacyL2Snapshot() -> void
+Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.Compute(Boutquin.Domain.ValueObjects.DateRange range, Boutquin.MarketData.Abstractions.Requests.DataFrequency frequency, int returnedPoints) -> Boutquin.MarketData.Abstractions.Results.DataCoverage!
+Boutquin.MarketData.Orchestration.Fallback.CoverageResponseEvaluator<TRecord>
+Boutquin.MarketData.Orchestration.Fallback.CoverageResponseEvaluator<TRecord>.CoverageResponseEvaluator() -> void
+Boutquin.MarketData.Orchestration.Fallback.CoverageResponseEvaluator<TRecord>.CoverageResponseEvaluator(decimal minimumCoverageRatio) -> void
+Boutquin.MarketData.Orchestration.Fallback.CoverageResponseEvaluator<TRecord>.IsUsable(Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>! response, out string? reason) -> bool
+Boutquin.MarketData.Orchestration.Fallback.CoverageResponseEvaluator<TRecord>.MinimumCoverageRatio.get -> decimal
+Boutquin.MarketData.Orchestration.Fallback.FallbackOrchestrator<TRequest, TRecord>
+Boutquin.MarketData.Orchestration.Fallback.FallbackOrchestrator<TRequest, TRecord>.ExecuteAsync(TRequest request, System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Contracts.IDataSourceAdapter<TRequest, TRecord>!>! adapters, Boutquin.MarketData.Abstractions.Contracts.IFallbackResponseEvaluator<Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>! evaluator, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Abstractions.Results.FallbackResult<Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>!>!
+Boutquin.MarketData.Orchestration.Fallback.FallbackOrchestrator<TRequest, TRecord>.FallbackOrchestrator(Microsoft.Extensions.Logging.ILogger<Boutquin.MarketData.Orchestration.Fallback.FallbackOrchestrator<TRequest, TRecord>!>! logger) -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipeline.AcquireReadSnapshotAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Boutquin.MarketData.Abstractions.Snapshots.IDataSnapshot!>!
+Boutquin.MarketData.Orchestration.Pipeline.DataPipeline.ExecutePartitionedAsync<TRequest, TRecord, TPartitionKey, TDatasetKey>(TRequest request, System.Func<TRequest, TPartitionKey, TRequest>! splitForPartition, System.Func<TRequest, TPartitionKey, TDatasetKey>! buildDatasetKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyDictionary<TDatasetKey, Boutquin.MarketData.Abstractions.Results.DataEnvelope<System.Collections.Generic.IReadOnlyList<TRecord>!>!>!>!
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.DataQualityIncidentSink.get -> Boutquin.MarketData.Abstractions.Observability.IDataQualityIncidentSink?
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.DataQualityIncidentSink.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.QuarantineBehavior.get -> Boutquin.MarketData.Abstractions.Enums.QuarantineBehavior
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.QuarantineBehavior.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesBloomFilter.get -> Boutquin.MarketData.Abstractions.Observability.TimeSeriesBloomFilterOptions!
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesBloomFilter.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesCompactionStrategy.get -> Boutquin.MarketData.Abstractions.Enums.TimeSeriesCompactionStrategy
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesCompactionStrategy.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesSegmentFormat.get -> Boutquin.Storage.Domain.Enums.TimeSeriesSegmentFormat
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesSegmentFormat.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesSegmentRootPath.get -> string!
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesSegmentRootPath.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesValueLog.get -> Boutquin.Storage.Domain.ValueObjects.ValueLog.ValueLogOptions?
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesValueLog.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesWriteAheadLog.get -> Boutquin.Storage.Infrastructure.WriteAheadLog.WriteAheadLogOptions!
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesWriteAheadLog.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.UseTimeSeriesStore.get -> bool
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.UseTimeSeriesStore.set -> void
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.Deconstruct(out System.Collections.Generic.IReadOnlyList<TRecord>! Records, out bool HasGap) -> void
+Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.Equals(Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord> other) -> bool
+override Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.GetHashCode() -> int
+override Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.GetHashCode() -> int
+override Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.GetHashCode() -> int
+static Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.operator !=(Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult left, Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult right) -> bool
+static Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.operator ==(Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult left, Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult right) -> bool
+static Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.operator !=(Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord> left, Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord> right) -> bool
+static Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.operator ==(Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord> left, Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord> right) -> bool
+static Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.Aggregate(System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataCoverage!>! coverages) -> Boutquin.MarketData.Abstractions.Results.DataCoverage!
+static Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.Compute(Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar! calendar, Boutquin.Domain.ValueObjects.DateRange range, Boutquin.MarketData.Abstractions.Requests.DataFrequency frequency, int returnedPoints) -> Boutquin.MarketData.Abstractions.Results.DataCoverage!
+static Boutquin.MarketData.Orchestration.Coverage.CoverageCalculator.ComputeWithGaps(Boutquin.MarketData.Abstractions.Calendars.IBusinessCalendar! calendar, Boutquin.Domain.ValueObjects.DateRange range, Boutquin.MarketData.Abstractions.Requests.DataFrequency frequency, System.Collections.Generic.IReadOnlySet<System.DateOnly>! returnedDates) -> (Boutquin.MarketData.Abstractions.Results.DataCoverage! Coverage, System.Collections.Generic.IReadOnlyList<Boutquin.MarketData.Abstractions.Results.DataIssue!>! GapIssues)
+static Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.operator !=(Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord> left, Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord> right) -> bool
+static Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.operator ==(Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord> left, Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord> right) -> bool
+~override Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.Equals(object obj) -> bool
+~override Boutquin.MarketData.Orchestration.Commands.ImportLegacyL2SnapshotsResult.ToString() -> string
+~override Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.Equals(object obj) -> bool
+~override Boutquin.MarketData.Orchestration.Commands.LegacyL2Snapshot<TRequest, TRecord>.ToString() -> string
+~override Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.Equals(object obj) -> bool
+~override Boutquin.MarketData.Orchestration.Snapshots.SnapshotReadResult<TRecord>.ToString() -> string
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexCapacity.get -> int
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexCapacity.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexTtl.get -> System.TimeSpan
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexTtl.set -> void

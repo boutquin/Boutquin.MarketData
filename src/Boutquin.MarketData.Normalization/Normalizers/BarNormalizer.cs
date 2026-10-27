@@ -21,8 +21,8 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 
 /// <summary>
 /// Produces a canonical <see cref="Bar"/> by rounding OHLC prices to a configurable precision,
-/// clamping negative volume to zero, and swapping inverted high/low values so downstream
-/// consumers see well-formed bars regardless of upstream data quality.
+/// clamping negative volume to zero, and swapping inverted high/low values.
+/// Open and close are not constrained to the resulting high/low interval.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -39,9 +39,8 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 ///   so a vendor-supplied 0.05 always rounds to 0.1, not alternately to 0.0 / 0.1 depending
 ///   on the preceding digit — important for reproducibility across runs.</description></item>
 ///   <item><description>Swap <c>High</c> and <c>Low</c> when <c>High &lt; Low</c>. Several
-///   historical providers occasionally emit inverted pairs due to upstream merge bugs;
-///   forwarding them would break every technical-analysis calculator that assumes
-///   <c>Low ≤ Open/Close ≤ High</c>.</description></item>
+///   historical providers occasionally emit inverted pairs due to upstream merge bugs.
+///   This ensures <c>Low ≤ High</c> but does not validate open or close against that interval.</description></item>
 ///   <item><description>Clamp <c>Volume</c> to <c>[0, +∞)</c>. Negative volumes are data
 ///   defects, usually from signed deltas leaking into cumulative fields.</description></item>
 /// </list>
@@ -70,15 +69,18 @@ public sealed class BarNormalizer : INormalizer<Bar, Bar>
     /// cash equities and ETF NAVs). Raise to 5-6 for FX majors quoted in pips; lower to 2 for
     /// futures settlement prices.
     /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">Precision is outside the decimal rounding range of 0 through 28.</exception>
     public BarNormalizer(int decimalPlaces = 4)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(decimalPlaces);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(decimalPlaces, 28);
         _decimalPlaces = decimalPlaces;
     }
 
     /// <inheritdoc />
     public Bar Normalize(Bar raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
 
         var open = Math.Round(raw.Open, _decimalPlaces, MidpointRounding.AwayFromZero);
         var high = Math.Round(raw.High, _decimalPlaces, MidpointRounding.AwayFromZero);

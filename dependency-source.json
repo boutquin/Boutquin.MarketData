@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "publishedPackages": [
+    {
+      "id": "Boutquin.Storage.Domain",
+      "version": "2.0.0",
+      "file": "Boutquin.Storage.Domain.2.0.0.nupkg",
+      "sha256": "6238b34ee345cc179d07b7d4872776a8daa2f583d916edd2ea4d0bf7469f1f70",
+      "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
+      "sourceCommit": "b64aaff6426babca4bbc588da877a6008154b873",
+      "packageSource": "https://api.nuget.org/v3/index.json",
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.domain/2.0.0/boutquin.storage.domain.2.0.0.nupkg",
+      "contentHash": "fwZk9FtOuQpTT/MSuOFgJSHK9mTvMA/Z33TM4BvyPyMx0fcAzZv/rEHGMyoeW1mUqHX8ftpx+edRZcix3g7pOw=="
+    },
+    {
+      "id": "Boutquin.Storage.Infrastructure",
+      "version": "2.0.0",
+      "file": "Boutquin.Storage.Infrastructure.2.0.0.nupkg",
+      "sha256": "718b58eb040fec8b26a9e80c765052b8a26c0636d30afae408a0c421774a334c",
+      "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
+      "sourceCommit": "b64aaff6426babca4bbc588da877a6008154b873",
+      "packageSource": "https://api.nuget.org/v3/index.json",
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.infrastructure/2.0.0/boutquin.storage.infrastructure.2.0.0.nupkg",
+      "contentHash": "hse+IHLQ3Cz/zzV1S+Addd/s48Atf3FkmfUKVQoEK3Ac+rl3yr6RqD3gKqkAvMk1ynZTyyjBgrDKLrhgE0iMHA=="
+    },
+    {
+      "id": "Boutquin.Storage.SourceGenerator",
+      "version": "2.0.0",
+      "file": "Boutquin.Storage.SourceGenerator.2.0.0.nupkg",
+      "sha256": "9d381a558c000ba50221b1a3695e0a14da608ff5ead3a8d32a791dafd88b8cf9",
+      "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
+      "sourceCommit": "b64aaff6426babca4bbc588da877a6008154b873",
+      "packageSource": "https://api.nuget.org/v3/index.json",
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.sourcegenerator/2.0.0/boutquin.storage.sourcegenerator.2.0.0.nupkg",
+      "contentHash": "RB0JI3kw/vJa/yrojpbdw9l1z8asc+PzgIE1wA90bh0JCFfs342NPK2Vj1XG6f5T/uuLfhnGN3kz7EMTq1h1bQ=="
+    }
+  ],
+  "packages": []
+}

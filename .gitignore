@@ -380,10 +380,38 @@ FodyWeavers.xsd
 # Claude Code
 sessions/
 CLAUDE.local.md
-specs/
 
 # JetBrains Rider
 .idea/
 
 # macOS
 .DS_Store
+
+# build-arena run artifacts (per-run, gitignored)
+.build-arena/
+
+# Arena run EVIDENCE is git-tracked (findings, verdicts, fixes, audits, ledger).
+# Ignore ONLY machine state. Never add a bare `.code-arena/` line — git cannot
+# re-include a file below an excluded parent directory, so it kills all of it.
+.code-arena/locks/
+.code-arena/**/reduced-supervisor-state.json
+.code-arena/**/preflight-ok.txt
+.code-arena/**/.preflight
+.code-arena/**/PENDING-SPAWNS.md
+.code-arena/**/check-cache/
+.code-arena/**/investigation-cache/
+.code-arena/**/__pycache__/
+.code-arena/**/*.pyc
+# Baseline and tooling-gate logs are durable run evidence (override the repo-wide
+# `*.log` rule above for this one evidence tree).
+!.code-arena/**/*.log
+# Third-party reference text is NEVER committed (copyright) — the ledger records
+# its sha256, and `pdftotext -layout` re-derives it from the operator's source.
+.code-arena/**/reference.txt
+.code-arena/reference/
+
+# code-arena-reference: downloaded third-party source corpus (never tracked; the tracked ISO10383_MIC.csv registry snapshot lives in specs/code-arena-reference/)
+specs/reference/
+
+# Qualification working state
+.work-ledger/

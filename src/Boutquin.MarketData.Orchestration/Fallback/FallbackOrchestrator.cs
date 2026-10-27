@@ -73,7 +73,7 @@ public sealed class FallbackOrchestrator<TRequest, TRecord>
     /// <para>
     /// Failure modes: an adapter that throws is recorded as a failed attempt and the chain continues;
     /// a response the evaluator rejects is recorded with the evaluator's reason and the chain continues.
-    /// Only <see cref="OperationCanceledException"/> triggered by the supplied token escapes without
+    /// Every <see cref="OperationCanceledException"/> escapes without
     /// being logged as a failed attempt — every other exception is captured so the caller sees a complete
     /// provenance record when <see cref="InvalidOperationException"/> is raised.
     /// </para>
@@ -100,6 +100,17 @@ public sealed class FallbackOrchestrator<TRequest, TRecord>
 
             try
             {
+                // Capability evaluation is an adapter call, so it shares FetchAsync's exception
+                // boundary. A false result is still a skip; cancellation still escapes below.
+                if (!adapter.CanHandle(request))
+                {
+                    _logger.LogDebug(
+                        "Adapter {ProviderKey} skipped for {DatasetKey} (CanHandle=false)",
+                        providerKey, request.DatasetKey);
+                    attempts.Add(new FallbackAttempt(providerKey, priority, Succeeded: false, "Skipped — CanHandle=false"));
+                    continue;
+                }
+
                 _logger.LogDebug(
                     "Attempting adapter {ProviderKey} (priority {Priority}) for {DatasetKey}",
                     providerKey, priority, request.DatasetKey);
@@ -126,7 +137,7 @@ public sealed class FallbackOrchestrator<TRequest, TRecord>
 
                 attempts.Add(new FallbackAttempt(providerKey, priority, Succeeded: false, rejectOutcome));
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException)
             {
                 throw;
             }

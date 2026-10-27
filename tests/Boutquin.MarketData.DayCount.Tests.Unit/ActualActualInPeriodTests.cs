@@ -22,6 +22,46 @@ namespace Boutquin.MarketData.DayCount.Tests.Unit;
 
 public sealed class ActualActualInPeriodTests
 {
+    [Theory]
+    [InlineData(-1, 1, "start")]
+    [InlineData(1, 11, "end")]
+    [InlineData(-1, -1, "start")]
+    [InlineData(11, 11, "end")]
+    public void Interval_outside_coupon_period_is_rejected(int startOffset, int endOffset, string parameter)
+    {
+        var periodStart = new DateOnly(2026, 1, 1);
+        var act = () => ActualActualInPeriod.Instance.YearFraction(
+            periodStart.AddDays(startOffset), periodStart.AddDays(endOffset),
+            periodStart, periodStart.AddDays(10), 2);
+
+        act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName(parameter);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public void Empty_interval_at_coupon_boundary_is_accepted(int offset)
+    {
+        var periodStart = new DateOnly(2026, 1, 1);
+        var date = periodStart.AddDays(offset);
+
+        ActualActualInPeriod.Instance.YearFraction(date, date, periodStart, periodStart.AddDays(10), 2)
+            .Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData(int.MaxValue, 2)]
+    [InlineData(1073741824, 4)]
+    public void Large_positive_frequency_returns_finite_positive_fraction(int frequency, int days)
+    {
+        var start = new DateOnly(2026, 1, 1);
+        var end = start.AddDays(days);
+
+        var result = ActualActualInPeriod.Instance.YearFraction(start, end, start, end, frequency);
+
+        result.Should().BeApproximately(1.0 / frequency, 1e-20);
+    }
+
     [Fact]
     public void Code_is_ACT_ACT()
     {
@@ -31,15 +71,15 @@ public sealed class ActualActualInPeriodTests
     [Fact]
     public void Half_period_produces_half_of_one_over_frequency()
     {
-        // Half of a semiannual coupon period: 2026-01-15 to 2026-07-15.
+        // 91 days of a 182-day semiannual coupon period in a leap year.
         var yf = ActualActualInPeriod.Instance.YearFraction(
-            start: new DateOnly(2026, 1, 15),
-            end: new DateOnly(2026, 7, 15),
-            periodStart: new DateOnly(2026, 1, 15),
-            periodEnd: new DateOnly(2026, 7, 15),
+            start: new DateOnly(2024, 1, 1),
+            end: new DateOnly(2024, 4, 1),
+            periodStart: new DateOnly(2024, 1, 1),
+            periodEnd: new DateOnly(2024, 7, 1),
             couponFrequency: 2);
 
-        yf.Should().Be(0.5);
+        yf.Should().Be(0.25);
     }
 
     [Fact]

@@ -31,6 +31,28 @@ public sealed class FuturesSettlementNormalizerTests
     private static readonly ContractMonth s_jun2025 = new(2025, 6);
 
     [Fact]
+    public void Rejects_null_required_contract_code_with_member_diagnostic()
+    {
+        var act = () => _sut.Normalize(default);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("raw")
+            .WithMessage("*ContractCode*");
+    }
+
+    [Fact]
+    public void Rejects_default_contract_code_in_otherwise_initialized_record_with_member_diagnostic()
+    {
+        var settle = new FuturesSettlement(new DateOnly(2024, 6, 15), default, s_jun2025, 95.50m, null);
+
+        var act = () => _sut.Normalize(settle);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("raw")
+            .WithMessage("*ContractCode*");
+    }
+
+    [Fact]
     public void Uppercases_contract_code()
     {
         var settle = new FuturesSettlement(new DateOnly(2024, 6, 15), new FuturesProductCode("sr3"), s_jun2025, 95.50m, null);
@@ -59,14 +81,36 @@ public sealed class FuturesSettlementNormalizerTests
         result.ContractMonth.Should().Be(s_jun2025);
     }
 
-    [Fact]
-    public void Computes_implied_rate_when_null()
+    [Theory]
+    [InlineData("SR3")]
+    [InlineData("ZQ")]
+    public void Computes_decimal_implied_rate_for_supported_interest_rate_product_when_null(string productCode)
     {
-        var settle = new FuturesSettlement(new DateOnly(2024, 6, 15), new FuturesProductCode("SR3"), s_jun2025, 95.50m, null);
+        var settle = new FuturesSettlement(
+            new DateOnly(2024, 6, 15),
+            new FuturesProductCode(productCode),
+            s_jun2025,
+            95.50m,
+            null);
 
         var result = _sut.Normalize(settle);
 
         result.ImpliedRate.Should().Be(0.0450m);
+    }
+
+    [Fact]
+    public void Leaves_implied_rate_null_for_non_rate_product()
+    {
+        var settle = new FuturesSettlement(
+            new DateOnly(2024, 6, 15),
+            new FuturesProductCode("ES"),
+            s_jun2025,
+            5350.25m,
+            null);
+
+        var result = _sut.Normalize(settle);
+
+        result.ImpliedRate.Should().BeNull();
     }
 
     [Fact]

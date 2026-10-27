@@ -52,19 +52,6 @@ Boutquin.MarketData.Abstractions.Records.DividendPayment.Amount.get -> decimal
 Boutquin.MarketData.Abstractions.Records.DividendPayment.Currency.get -> string!
 Boutquin.MarketData.Abstractions.Records.DividendPayment.DividendPayment(System.DateOnly ExDate, decimal Amount, string! Currency) -> void
 Boutquin.MarketData.Abstractions.Records.DividendPayment.ExDate.get -> System.DateOnly
-Boutquin.MarketData.Abstractions.Records.OptionQuote
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Ask.get -> decimal?
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Bid.get -> decimal?
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Date.get -> System.DateOnly
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Expiry.get -> System.DateOnly
-Boutquin.MarketData.Abstractions.Records.OptionQuote.ImpliedVolatility.get -> decimal?
-Boutquin.MarketData.Abstractions.Records.OptionQuote.LastPrice.get -> decimal?
-Boutquin.MarketData.Abstractions.Records.OptionQuote.OpenInterest.get -> long
-Boutquin.MarketData.Abstractions.Records.OptionQuote.OptionQuote(System.DateOnly Date, string! Underlying, System.DateOnly Expiry, decimal Strike, Boutquin.MarketData.Abstractions.Records.OptionType Type, decimal? Bid, decimal? Ask, decimal? LastPrice, decimal? ImpliedVolatility, long OpenInterest, long Volume) -> void
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Strike.get -> decimal
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Type.get -> Boutquin.MarketData.Abstractions.Records.OptionType
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Underlying.get -> string!
-Boutquin.MarketData.Abstractions.Records.OptionQuote.Volume.get -> long
 Boutquin.MarketData.Abstractions.Records.OptionType
 Boutquin.MarketData.Abstractions.Records.OptionType.Call = 0 -> Boutquin.MarketData.Abstractions.Records.OptionType
 Boutquin.MarketData.Abstractions.Records.OptionType.Put = 1 -> Boutquin.MarketData.Abstractions.Records.OptionType

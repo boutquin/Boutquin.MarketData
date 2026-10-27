@@ -59,19 +59,53 @@ public sealed class ExchangeMetadataTests
     [Theory]
     [InlineData(ExchangeCode.XNYS, TimeZoneCode.EST, CountryCode.US)]
     [InlineData(ExchangeCode.XNAS, TimeZoneCode.EST, CountryCode.US)]
-    [InlineData(ExchangeCode.XTSE, TimeZoneCode.JST, CountryCode.JP)]
+    [InlineData(ExchangeCode.XTKS, TimeZoneCode.JST, CountryCode.JP)]
     [InlineData(ExchangeCode.XSHG, TimeZoneCode.CST, CountryCode.CN)]
     [InlineData(ExchangeCode.XHKG, TimeZoneCode.HKT, CountryCode.HK)]
     [InlineData(ExchangeCode.XPAR, TimeZoneCode.CET, CountryCode.FR)]
     [InlineData(ExchangeCode.XLON, TimeZoneCode.GMT, CountryCode.GB)]
     [InlineData(ExchangeCode.XETR, TimeZoneCode.CET, CountryCode.DE)]
     [InlineData(ExchangeCode.XMOS, TimeZoneCode.MSK, CountryCode.RU)]
-    [InlineData(ExchangeCode.XTOR, TimeZoneCode.EST, CountryCode.CA)]
+    [InlineData(ExchangeCode.XTSE, TimeZoneCode.EST, CountryCode.CA)]
     [InlineData(ExchangeCode.NEOE, TimeZoneCode.EST, CountryCode.CA)]
+    [InlineData(ExchangeCode.MISX, TimeZoneCode.MSK, CountryCode.RU)]
     public void Canonical_mappings_match_spec(ExchangeCode exchange, TimeZoneCode expectedTz, CountryCode expectedCountry)
     {
         ExchangeMetadata.GetTimeZone(exchange).Should().Be(expectedTz);
         ExchangeMetadata.GetCountry(exchange).Should().Be(expectedCountry);
+    }
+
+    [Fact]
+    public void Moscow_exchange_standard_offset_is_UTC_plus_three()
+    {
+        // Moscow Exchange trading times: https://www.moex.com/ru/markets/currency
+        ExchangeMetadata.GetTimeZone(ExchangeCode.MISX).Should().Be(TimeZoneCode.MSK);
+        var field = typeof(TimeZoneCode).GetField(nameof(TimeZoneCode.MSK))!;
+        var attribute = (System.ComponentModel.DescriptionAttribute)Attribute.GetCustomAttribute(
+            field, typeof(System.ComponentModel.DescriptionAttribute))!;
+        attribute.Description.Should().Be("+03:00");
+    }
+
+    [Fact]
+    public void Moscow_exchange_uses_ISO_operating_MIC_MISX()
+    {
+        // ISO 10383 registry captured 2026-10-26: MISX = MOSCOW EXCHANGE - ALL MARKETS,
+        // country RU. XMOS is a different, active clearing-organization identifier.
+        Enum.TryParse<ExchangeCode>("MISX", out var exchange).Should().BeTrue();
+        ExchangeMetadata.GetCountry(exchange).Should().Be(CountryCode.RU);
+        ExchangeMetadata.GetTimeZone(exchange).Should().Be(TimeZoneCode.MSK);
+        ((int)exchange).Should().Be(11, "new MICs append without shifting existing ordinals");
+    }
+
+    [Fact]
+    public void XMOS_retains_ordinal_but_identifies_its_registered_clearing_organization()
+    {
+        ((int)ExchangeCode.XMOS).Should().Be(8);
+        var field = typeof(ExchangeCode).GetField(nameof(ExchangeCode.XMOS))!;
+        var attribute = (System.ComponentModel.DescriptionAttribute)Attribute.GetCustomAttribute(
+            field, typeof(System.ComponentModel.DescriptionAttribute))!;
+
+        attribute.Description.Should().Be("Central Counterparty Clearing Center MFB");
     }
 
     [Fact]

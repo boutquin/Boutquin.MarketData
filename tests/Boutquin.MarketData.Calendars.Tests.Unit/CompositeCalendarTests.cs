@@ -27,6 +27,20 @@ namespace Boutquin.MarketData.Calendars.Tests.Unit;
 /// </summary>
 public sealed class CompositeCalendarTests
 {
+    [Theory]
+    [InlineData(CalendarCompositionMode.All)]
+    [InlineData(CalendarCompositionMode.Any)]
+    public void Constructor_CopiesConstituentArray(CalendarCompositionMode mode)
+    {
+        var holiday = new DateOnly(2025, 1, 2);
+        IBusinessCalendar[] calendars = [new HolidayCalendar("CLOSED", [holiday])];
+        var calendar = new CompositeCalendar("COPY", mode, calendars);
+
+        calendars[0] = new HolidayCalendar("OPEN", []);
+
+        calendar.IsBusinessDay(holiday).Should().BeFalse();
+    }
+
     [Fact]
     public void IsBusinessDay_HolidayInAnyCalendar_ReturnsFalse()
     {

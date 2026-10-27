@@ -24,8 +24,9 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// precision.
 /// </summary>
 /// <remarks>
-/// Currency codes are strongly-typed (<c>CurrencyCode</c>) after the reference-data
-/// consolidation spec; casing normalization is no longer applicable at this layer.
+/// The currency pair lives in <c>FxRateDatasetKey</c>, not on the <see cref="FxRate"/> body.
+/// The adapter stamps the currencies from the request into the key, so only the rate is
+/// normalized at this layer.
 /// </remarks>
 public sealed class FxRateNormalizer : INormalizer<FxRate, FxRate>
 {
@@ -35,20 +36,21 @@ public sealed class FxRateNormalizer : INormalizer<FxRate, FxRate>
     /// Initializes a new <see cref="FxRateNormalizer"/>.
     /// </summary>
     /// <param name="decimalPlaces">The number of decimal places for rate rounding. Defaults to 6.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Precision is outside the decimal rounding range of 0 through 28.</exception>
     public FxRateNormalizer(int decimalPlaces = 6)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(decimalPlaces);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(decimalPlaces, 28);
         _decimalPlaces = decimalPlaces;
     }
 
     /// <inheritdoc />
     public FxRate Normalize(FxRate raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
 
         return new FxRate(
             raw.Date,
-            raw.BaseCurrency,
-            raw.QuoteCurrency,
             Math.Round(raw.Rate, _decimalPlaces, MidpointRounding.AwayFromZero));
     }
 }

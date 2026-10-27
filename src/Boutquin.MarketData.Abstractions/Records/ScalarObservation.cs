@@ -14,6 +14,9 @@
 //  limitations under the License.
 //
 
+using Boutquin.Storage.Domain.Attributes;
+using Boutquin.Storage.Domain.Interfaces.TimeSeries;
+
 namespace Boutquin.MarketData.Abstractions.Records;
 
 /// <summary>
@@ -23,7 +26,13 @@ namespace Boutquin.MarketData.Abstractions.Records;
 /// <param name="Date">The observation date.</param>
 /// <param name="Value">The observed value, already normalized (e.g., decimal form, not percent).</param>
 /// <param name="Units">The unit of measurement (e.g., "decimal", "index", "billions-of-dollars").</param>
-public sealed record ScalarObservation(
-    DateOnly Date,
-    decimal Value,
-    string Units);
+/// <remarks>
+/// Implements <see cref="IHasDate"/> and is annotated <c>[ColumnarStorable]</c> so the
+/// generated columnar codec can persist and rehydrate observations.
+/// </remarks>
+[StorageSerializable]
+[ColumnarStorable]
+public partial record struct ScalarObservation(
+    [property: Tag(1)] DateOnly Date,
+    [property: Tag(2)] decimal Value,
+    [property: Tag(3)] string Units) : IHasDate;

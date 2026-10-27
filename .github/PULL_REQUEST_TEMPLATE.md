@@ -19,4 +19,4 @@ Closes #
 - [ ] `dotnet format --verify-no-changes` produces no changes
 - [ ] XML doc comments are complete (no banned phrases; semantic description; `<remarks>` required on core contracts and key implementations — see [CONTRIBUTING.md](../CONTRIBUTING.md#documentation-style-guide))
 - [ ] `CHANGELOG.md` updated under `[Unreleased]` (if user-visible change)
-- [ ] No new cross-layer dependencies introduced: MarketData must not reference Analytics, Trading, or OptionPricing; concrete adapters stay in `Boutquin.MarketData.Adapter` (architecture tests enforce this)
+- [ ] No new cross-layer dependencies introduced: MarketData must not reference Curves, Trading, or OptionPricing; concrete adapters stay in `Boutquin.MarketData.Adapter` (architecture tests enforce this)

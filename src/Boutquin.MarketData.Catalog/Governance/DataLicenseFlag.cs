@@ -17,12 +17,12 @@ namespace Boutquin.MarketData.Catalog.Governance;
 
 /// <summary>
 /// Encodes the licensing posture and redistribution constraints of a data source,
-/// enabling compliance-aware source selection and provenance tracking.
+/// for application-level source-selection policies.
 /// </summary>
 /// <remarks>
-/// License flags are recorded in <see cref="Abstractions.Results.DataProvenance"/> and
-/// used by the pipeline to enforce usage restrictions. For example, a production pipeline
-/// may reject <see cref="WebsiteViewOnly"/> data for downstream redistribution.
+/// These flags are descriptive metadata; the kernel does not enforce usage restrictions
+/// from them. <see cref="Abstractions.Results.DataProvenance"/> carries its own license type.
+/// Applications must explicitly map and enforce the applicable source terms.
 /// </remarks>
 public enum DataLicenseFlag
 {

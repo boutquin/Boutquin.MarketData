@@ -44,8 +44,18 @@ public sealed class IngestionCheckpointStore
     /// <param name="pipelineId">Unique identifier for the ingestion pipeline.</param>
     /// <param name="checkpoint">The checkpoint state to persist.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task that completes after the validated checkpoint is persisted.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="checkpoint"/> is null.</exception>
+    /// <exception cref="ArgumentException">The provider or dataset is empty or whitespace.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The symbol index is negative.</exception>
+    /// <remarks>Invalid checkpoint fields are rejected before replacing any saved checkpoint.</remarks>
     public async Task SaveAsync(string pipelineId, IngestionCheckpoint checkpoint, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(checkpoint);
+        ArgumentException.ThrowIfNullOrWhiteSpace(checkpoint.Provider);
+        ArgumentException.ThrowIfNullOrWhiteSpace(checkpoint.Dataset);
+        ArgumentOutOfRangeException.ThrowIfNegative(checkpoint.SymbolIndex);
+
         var json = JsonSerializer.SerializeToUtf8Bytes(checkpoint);
         await _inner.SaveAsync(pipelineId, checkpoint.SymbolIndex, json, cancellationToken).ConfigureAwait(false);
     }

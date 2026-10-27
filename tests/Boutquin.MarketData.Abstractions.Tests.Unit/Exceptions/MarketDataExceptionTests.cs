@@ -14,7 +14,11 @@
 //  limitations under the License.
 //
 
+using System.Text.RegularExpressions;
+
 using Boutquin.MarketData.Abstractions.Exceptions;
+using Boutquin.MarketData.Abstractions.Results;
+using Boutquin.MarketData.Abstractions.Snapshots;
 
 using FluentAssertions;
 
@@ -37,6 +41,22 @@ public sealed class MarketDataExceptionTests
     public void Base_is_abstract()
     {
         typeof(MarketDataException).IsAbstract.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Generated_base_summary_describes_only_its_exception_family()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Boutquin.MarketData.Abstractions.xml");
+        var xml = File.ReadAllText(path);
+        var member = Regex.Match(xml,
+            "<member name=\"T:Boutquin.MarketData.Abstractions.Exceptions.MarketDataException\">.*?</member>",
+            RegexOptions.Singleline);
+
+        member.Success.Should().BeTrue("this summary ships in the package XML");
+        member.Value.Should().Contain("exception family");
+        member.Value.Should().NotContain("every failure mode");
+        typeof(SnapshotGapException).IsAssignableTo(typeof(MarketDataException)).Should().BeFalse();
+        typeof(DataIssue).IsAssignableTo(typeof(Exception)).Should().BeFalse();
     }
 
     [Theory]

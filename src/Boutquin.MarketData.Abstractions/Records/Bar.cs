@@ -14,6 +14,9 @@
 //  limitations under the License.
 //
 
+using Boutquin.Storage.Domain.Attributes;
+using Boutquin.Storage.Domain.Interfaces.TimeSeries;
+
 namespace Boutquin.MarketData.Abstractions.Records;
 
 /// <summary>
@@ -26,11 +29,24 @@ namespace Boutquin.MarketData.Abstractions.Records;
 /// <param name="Close">Closing (unadjusted) price.</param>
 /// <param name="AdjustedClose">Split- and dividend-adjusted closing price.</param>
 /// <param name="Volume">Number of shares or contracts traded.</param>
-public sealed record Bar(
-    DateOnly Date,
-    decimal Open,
-    decimal High,
-    decimal Low,
-    decimal Close,
-    decimal AdjustedClose,
-    long Volume);
+/// <remarks>
+/// <para><b>Partial + <see cref="IHasDate"/>:</b> declared partial so the Boutquin.Storage columnar
+/// source generator can emit a companion declaration when <c>[ColumnarStorable]</c> is applied.
+/// <see cref="IHasDate"/> surfaces <see cref="Date"/> as the sort-defining timestamp for the
+/// time-series store.</para>
+/// <para><b>Columnar default:</b> <c>[ColumnarStorable]</c> declares this type opt-in for the
+/// columnar on-disk segment format. Field codecs use
+/// the generator-selected defaults from CLR types (<c>DateOnly</c> → <c>DeltaOfDeltaVlq</c>,
+/// <c>decimal</c> → <c>Dictionary</c>/<c>ScaledIntegerBitPacked</c> fallback,
+/// <c>long</c> → <c>DeltaVlq</c>); no per-field <c>[ColumnEncoding]</c> overrides are applied.</para>
+/// </remarks>
+[StorageSerializable]
+[ColumnarStorable]
+public partial record struct Bar(
+    [property: Tag(1)] DateOnly Date,
+    [property: Tag(2)] decimal Open,
+    [property: Tag(3)] decimal High,
+    [property: Tag(4)] decimal Low,
+    [property: Tag(5)] decimal Close,
+    [property: Tag(6)] decimal AdjustedClose,
+    [property: Tag(7)] long Volume) : IHasDate;

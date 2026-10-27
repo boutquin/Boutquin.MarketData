@@ -18,9 +18,7 @@ using Boutquin.MarketData.Abstractions.Requests;
 using Boutquin.MarketData.Abstractions.Results;
 using Boutquin.MarketData.Calendars;
 using Boutquin.MarketData.Orchestration.Coverage;
-
 using FluentAssertions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Orchestration.Tests.Unit.Coverage;

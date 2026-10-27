@@ -105,7 +105,9 @@ public sealed class LazyAsyncCache<TKey, TValue> : IDisposable
         {
             return await lazy.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (
+            cancellationToken.IsCancellationRequested && lazy.IsValueCreated &&
+            !lazy.Value.IsCanceled && !lazy.Value.IsFaulted)
         {
             // Caller cancelled their await — don't evict the entry (the computation may still succeed for others).
             throw;

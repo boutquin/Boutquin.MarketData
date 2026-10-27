@@ -82,7 +82,7 @@ public enum TimeZoneCode
     /// <summary>
     /// Moscow Standard Time.
     /// </summary>
-    [Description("+04:00")]
+    [Description("+03:00")]
     MSK,
 
     /// <summary>

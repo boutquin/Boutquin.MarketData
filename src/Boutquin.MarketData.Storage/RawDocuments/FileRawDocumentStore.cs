@@ -13,6 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
+using System.Globalization;
 using System.Text;
 
 using Boutquin.MarketData.Abstractions.Contracts;
@@ -26,9 +27,13 @@ namespace Boutquin.MarketData.Storage.RawDocuments;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Keys are sanitized using MarketData-specific policy: forward slashes become directory
-/// separators, characters outside <c>[a-zA-Z0-9._-/]</c> are replaced with underscores.
-/// Files are stored with a <c>.json</c> extension.
+/// Keys are encoded as fixed-width hexadecimal UTF-16 code units, in bounded path components,
+/// with a <c>.raw-v2</c> extension. Case and punctuation remain distinct on case-insensitive
+/// filesystems. Traversal-shaped keys are rejected before encoding.
+/// Existing literal <c>.raw-v2</c> files remain readable without rewriting. Invalid UTF-16
+/// input and invalid persisted UTF-8 throw encoding exceptions instead of replacing characters.
+/// Legacy <c>.json</c> files are not read: their lossy names cannot prove the original key.
+/// Re-ingest legacy raw documents from their source into this versioned layout.
 /// </para>
 /// <para>
 /// The underlying <see cref="FileSystemObjectStore"/> provides atomic writes
@@ -38,7 +43,9 @@ namespace Boutquin.MarketData.Storage.RawDocuments;
 /// </remarks>
 public sealed class FileRawDocumentStore : IRawDocumentStore
 {
+    private static readonly UTF8Encoding s_strictUtf8 = new(false, true);
     private readonly IObjectStore _store;
+    private readonly string? _rootDirectory;
 
     /// <summary>
     /// Initializes a new instance of <see cref="FileRawDocumentStore"/>
@@ -48,7 +55,10 @@ public sealed class FileRawDocumentStore : IRawDocumentStore
     /// Root directory for raw document storage.
     /// </param>
     public FileRawDocumentStore(string rootDirectory)
-        => _store = new FileSystemObjectStore(rootDirectory);
+    {
+        _store = new FileSystemObjectStore(rootDirectory);
+        _rootDirectory = Path.GetFullPath(rootDirectory);
+    }
 
     /// <summary>
     /// Initializes a new instance of <see cref="FileRawDocumentStore"/>
@@ -56,13 +66,13 @@ public sealed class FileRawDocumentStore : IRawDocumentStore
     /// </summary>
     /// <param name="store">The object store to delegate to.</param>
     public FileRawDocumentStore(IObjectStore store)
-        => _store = store;
+        => _store = store ?? throw new ArgumentNullException(nameof(store));
 
     /// <inheritdoc />
     public async Task SaveAsync(string key, string content, CancellationToken cancellationToken = default)
     {
-        var storageKey = SanitizeKey(key) + ".json";
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        var storageKey = SanitizeKey(key) + ".raw-v2";
+        var stream = new MemoryStream(s_strictUtf8.GetBytes(content));
         await using (stream.ConfigureAwait(false))
         {
             await _store.WriteAsync(storageKey, stream, cancellationToken).ConfigureAwait(false);
@@ -72,8 +82,13 @@ public sealed class FileRawDocumentStore : IRawDocumentStore
     /// <inheritdoc />
     public async Task<string?> LoadAsync(string key, CancellationToken cancellationToken = default)
     {
-        var storageKey = SanitizeKey(key) + ".json";
+        var storageKey = SanitizeKey(key) + ".raw-v2";
         var stream = await _store.ReadAsync(storageKey, cancellationToken).ConfigureAwait(false);
+        if (stream is null && _rootDirectory is not null)
+        {
+            stream = LegacyObjectReader.Open(_rootDirectory, storageKey, cancellationToken);
+        }
+
         if (stream is null)
         {
             return null;
@@ -81,7 +96,8 @@ public sealed class FileRawDocumentStore : IRawDocumentStore
 
         await using (stream.ConfigureAwait(false))
         {
-            using var reader = new StreamReader(stream, Encoding.UTF8);
+            // SaveAsync adds no preamble: an initial U+FEFF belongs to the payload.
+            using var reader = new StreamReader(stream, s_strictUtf8, detectEncodingFromByteOrderMarks: false);
             return await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         }
     }
@@ -136,20 +152,18 @@ public sealed class FileRawDocumentStore : IRawDocumentStore
             }
         }
 
-        var chars = key.ToCharArray();
-        for (var i = 0; i < chars.Length; i++)
+        var encoded = new StringBuilder();
+        for (var i = 0; i < key.Length; i++)
         {
-            var c = chars[i];
-            if (c == '/' || c == '\\')
+            // Bound each physical component without losing logical separator identity.
+            if (i > 0 && i % 48 == 0)
             {
-                chars[i] = Path.DirectorySeparatorChar;
+                encoded.Append('/');
             }
-            else if (!char.IsLetterOrDigit(c) && c != '.' && c != '_' && c != '-')
-            {
-                chars[i] = '_';
-            }
+
+            encoded.Append(((int)key[i]).ToString("x4", CultureInfo.InvariantCulture));
         }
 
-        return new string(chars);
+        return encoded.ToString();
     }
 }

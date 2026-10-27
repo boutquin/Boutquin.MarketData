@@ -29,11 +29,9 @@ namespace Boutquin.MarketData.DayCount;
 /// </para>
 /// <para>
 /// <strong>Difference from 30/360 (Bond Basis).</strong> 30/360 ISDA applies an
-/// end-of-month adjustment — if <c>D1 = 31</c>, <c>D2</c> is capped via a different
-/// rule that ties months together. 30E/360 has <em>no</em> such adjustment, so
-/// Jan 31 → Feb 28 produces <c>(30·1 + (28 − 30))/360 = 28/360</c> under 30E/360 but
-/// <c>(30·1 + 0)/360 = 30/360</c> under 30/360 ISDA. The simpler rule is what makes
-/// 30E/360 the eurobond standard.
+/// conditional cap on <c>D2 = 31</c> only when the adjusted <c>D1 = 30</c>.
+/// For Jan 15 → Jul 31, 30E/360 produces <c>(180 + 30 − 15)/360 = 195/360</c>,
+/// while 30/360 Bond Basis produces <c>(180 + 31 − 15)/360 = 196/360</c>.
 /// </para>
 /// <para>
 /// Pipeline role: consumers reach this via <see cref="DayCountResolver.Resolve"/>

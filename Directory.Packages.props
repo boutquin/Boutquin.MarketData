@@ -4,25 +4,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="MinVer" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.202" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.6" />
+    <PackageVersion Include="MinVer" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
-    <PackageVersion Include="Polly.Core" Version="8.6.6" />
-    <PackageVersion Include="Polly.RateLimiting" Version="8.6.6" />
-    <PackageVersion Include="Boutquin.Storage.Domain" Version="1.1.1" />
-    <PackageVersion Include="Boutquin.Storage.Infrastructure" Version="1.1.1" />
-    <PackageVersion Include="Boutquin.Numerics" Version="1.0.0" />
-    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
-    <PackageVersion Include="FluentAssertions" Version="8.9.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageVersion Include="Polly.Core" Version="8.8.0" />
+    <PackageVersion Include="Polly.RateLimiting" Version="8.8.0" />
+    <PackageVersion Include="Boutquin.Domain" Version="1.0.0" />
+    <PackageVersion Include="Boutquin.Storage.Domain" Version="2.0.0" />
+    <PackageVersion Include="Boutquin.Storage.Infrastructure" Version="2.0.0" />
+    <PackageVersion Include="Boutquin.Storage.SourceGenerator" Version="2.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+    <PackageVersion Include="FluentAssertions" Version="8.11.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
     <PackageVersion Include="NetArchTest.eNhancedEdition" Version="1.4.5" />
   </ItemGroup>
 </Project>

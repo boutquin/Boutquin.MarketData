@@ -24,11 +24,9 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// zero and rounding to a configurable precision.
 /// </summary>
 /// <remarks>
-/// Currency is strongly-typed (<c>CurrencyCode</c>) after the Tier 1 reference-data
-/// consolidation — casing normalization is no longer applicable at this layer. The
-/// Tier 2 taxonomies spec added a <c>DividendType Type</c> field; the normalizer
-/// passes it through unchanged because issuer-declared classification is not a unit
-/// or format concern. Adapters own the selection of <c>Type</c>.
+/// Currency is strongly typed, so casing normalization is not applicable at this layer.
+/// The normalizer passes <c>DividendType Type</c> through unchanged because issuer-declared
+/// classification is not a unit or format concern. Adapters own the selection of <c>Type</c>.
 /// </remarks>
 public sealed class DividendPaymentNormalizer : INormalizer<DividendPayment, DividendPayment>
 {
@@ -37,16 +35,27 @@ public sealed class DividendPaymentNormalizer : INormalizer<DividendPayment, Div
     /// <summary>
     /// Initializes a new <see cref="DividendPaymentNormalizer"/>.
     /// </summary>
-    /// <param name="decimalPlaces">Decimal places for amount rounding. Defaults to 4.</param>
+    /// <param name="decimalPlaces">Decimal places for amount rounding, from 0 through 28. Defaults to 4.</param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="decimalPlaces"/> is outside the range supported by decimal rounding.
+    /// </exception>
     public DividendPaymentNormalizer(int decimalPlaces = 4)
     {
+        if (decimalPlaces is < 0 or > 28)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(decimalPlaces),
+                decimalPlaces,
+                "Decimal rounding precision must be between 0 and 28, inclusive.");
+        }
+
         _decimalPlaces = decimalPlaces;
     }
 
     /// <inheritdoc />
     public DividendPayment Normalize(DividendPayment raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
 
         var amount = Math.Max(0m, raw.Amount);
         amount = Math.Round(amount, _decimalPlaces, MidpointRounding.AwayFromZero);

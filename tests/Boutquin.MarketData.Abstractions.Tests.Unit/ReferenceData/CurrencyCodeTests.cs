@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-using Boutquin.MarketData.Abstractions.ReferenceData;
+using Boutquin.Domain.Enumerations;
 
 using FluentAssertions;
 
@@ -23,21 +23,22 @@ using Xunit;
 namespace Boutquin.MarketData.Abstractions.Tests.Unit.ReferenceData;
 
 /// <summary>
-/// Locks down the ISO 4217 numeric values assigned to <see cref="CurrencyCode"/>.
+/// Locks down the ISO 4217 numeric values of the <see cref="Currency"/> members that
+/// MarketData's persisted records depend on (currency-unification milestone M-1).
 /// </summary>
 /// <remarks>
 /// <para>
-/// The spec requires the MarketData enum to stay bit-compatible with
-/// <c>Boutquin.Trading.Domain.Enums.CurrencyCode</c> during the shim window
-/// (§3.3 round-trip AC, §6 drift rule). Adding a MarketData dependency on
-/// Trading in this test would violate the architecture rule "MarketData
-/// must not depend on Trading" — so the expected (member, numeric) pairs
-/// are hard-coded here as a trust boundary.
+/// MarketData formerly owned a 14-member <c>CurrencyCode</c> enum; the unification
+/// onto <see cref="Boutquin.Domain.Enumerations.Currency"/> deleted it. The serialized
+/// wire format of <c>FxRateDatasetKey</c> and <c>DividendPayment</c> encodes the
+/// currency column as its ISO 4217 numeric value, so those numbers are a wire-format
+/// contract — this snapshot pins them so a change to the upstream <see cref="Currency"/>
+/// numeric backing (which would silently corrupt persisted data) fails the build here.
 /// </para>
 /// <para>
-/// Updating this snapshot requires a matching update to
-/// <c>Boutquin.Trading.Domain.Enums.CurrencyCode</c> in the same release
-/// cycle, per spec §6 "drift is not a supported state".
+/// Only the subset of <see cref="Currency"/> members reachable through MarketData's
+/// records is pinned; <see cref="Currency"/> itself is a 177-member ISO catalogue owned
+/// and exhaustively tested by Boutquin.Domain.
 /// </para>
 /// </remarks>
 public sealed class CurrencyCodeTests
@@ -62,41 +63,45 @@ public sealed class CurrencyCodeTests
         };
 
     [Fact]
-    public void Has_expected_member_count()
+    public void Expected_members_exist_in_Currency()
     {
-        Enum.GetValues<CurrencyCode>().Should().HaveCount(s_expected.Count);
+        foreach (var name in s_expected.Keys)
+        {
+            Enum.IsDefined(typeof(Currency), name)
+                .Should().BeTrue(because: $"MarketData depends on Currency.{name}; " +
+                                          "the unification must not drop a member MarketData persists");
+        }
     }
 
     [Theory]
-    [InlineData(CurrencyCode.USD, 840)]
-    [InlineData(CurrencyCode.CAD, 124)]
-    [InlineData(CurrencyCode.MXN, 484)]
-    [InlineData(CurrencyCode.GBP, 826)]
-    [InlineData(CurrencyCode.EUR, 978)]
-    [InlineData(CurrencyCode.JPY, 392)]
-    [InlineData(CurrencyCode.CNY, 156)]
-    [InlineData(CurrencyCode.INR, 356)]
-    [InlineData(CurrencyCode.AUD, 36)]
-    [InlineData(CurrencyCode.BRL, 986)]
-    [InlineData(CurrencyCode.RUB, 643)]
-    [InlineData(CurrencyCode.KRW, 410)]
-    [InlineData(CurrencyCode.HKD, 344)]
-    [InlineData(CurrencyCode.CHF, 756)]
-    public void ISO_4217_numeric_values_are_pinned(CurrencyCode code, int expected)
+    [InlineData(Currency.USD, 840)]
+    [InlineData(Currency.CAD, 124)]
+    [InlineData(Currency.MXN, 484)]
+    [InlineData(Currency.GBP, 826)]
+    [InlineData(Currency.EUR, 978)]
+    [InlineData(Currency.JPY, 392)]
+    [InlineData(Currency.CNY, 156)]
+    [InlineData(Currency.INR, 356)]
+    [InlineData(Currency.AUD, 36)]
+    [InlineData(Currency.BRL, 986)]
+    [InlineData(Currency.RUB, 643)]
+    [InlineData(Currency.KRW, 410)]
+    [InlineData(Currency.HKD, 344)]
+    [InlineData(Currency.CHF, 756)]
+    public void ISO_4217_numeric_values_are_pinned(Currency code, int expected)
     {
         ((int)code).Should().Be(expected);
     }
 
     [Fact]
-    public void All_members_match_snapshot()
+    public void All_snapshot_members_map_to_Currency_with_pinned_value()
     {
-        foreach (var code in Enum.GetValues<CurrencyCode>())
+        foreach (var (name, expected) in s_expected)
         {
-            s_expected.Should().ContainKey(code.ToString(),
-                because: "every CurrencyCode member must appear in the pinned snapshot; " +
-                         "adding a new member requires updating both this snapshot and " +
-                         "the Trading-side shim in the same release");
-            ((int)code).Should().Be(s_expected[code.ToString()]);
+            var code = Enum.Parse<Currency>(name);
+            ((int)code).Should().Be(expected,
+                because: $"the serialized wire format encodes Currency.{name} as its ISO 4217 " +
+                         "numeric value; this number is a persisted-data contract");
         }
     }
 }

@@ -53,15 +53,16 @@ public static class ExchangeMetadata
         {
             [ExchangeCode.XNYS] = TimeZoneCode.EST,
             [ExchangeCode.XNAS] = TimeZoneCode.EST,
-            [ExchangeCode.XTSE] = TimeZoneCode.JST,
+            [ExchangeCode.XTKS] = TimeZoneCode.JST,
             [ExchangeCode.XSHG] = TimeZoneCode.CST,
             [ExchangeCode.XHKG] = TimeZoneCode.HKT,
             [ExchangeCode.XPAR] = TimeZoneCode.CET,
             [ExchangeCode.XLON] = TimeZoneCode.GMT,
             [ExchangeCode.XETR] = TimeZoneCode.CET,
             [ExchangeCode.XMOS] = TimeZoneCode.MSK,
-            [ExchangeCode.XTOR] = TimeZoneCode.EST,
+            [ExchangeCode.XTSE] = TimeZoneCode.EST,
             [ExchangeCode.NEOE] = TimeZoneCode.EST,
+            [ExchangeCode.MISX] = TimeZoneCode.MSK,
         };
 
     private static readonly IReadOnlyDictionary<ExchangeCode, CountryCode> s_countries =
@@ -69,15 +70,16 @@ public static class ExchangeMetadata
         {
             [ExchangeCode.XNYS] = CountryCode.US,
             [ExchangeCode.XNAS] = CountryCode.US,
-            [ExchangeCode.XTSE] = CountryCode.JP,
+            [ExchangeCode.XTKS] = CountryCode.JP,
             [ExchangeCode.XSHG] = CountryCode.CN,
             [ExchangeCode.XHKG] = CountryCode.HK,
             [ExchangeCode.XPAR] = CountryCode.FR,
             [ExchangeCode.XLON] = CountryCode.GB,
             [ExchangeCode.XETR] = CountryCode.DE,
             [ExchangeCode.XMOS] = CountryCode.RU,
-            [ExchangeCode.XTOR] = CountryCode.CA,
+            [ExchangeCode.XTSE] = CountryCode.CA,
             [ExchangeCode.NEOE] = CountryCode.CA,
+            [ExchangeCode.MISX] = CountryCode.RU,
         };
 
     /// <summary>

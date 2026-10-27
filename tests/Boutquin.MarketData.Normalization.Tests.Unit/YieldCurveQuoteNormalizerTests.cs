@@ -27,11 +27,23 @@ public sealed class YieldCurveQuoteNormalizerTests
 {
     private readonly YieldCurveQuoteNormalizer _sut = new();
 
+    private static readonly DateOnly s_asOf = new(2026, 4, 10);
+
+    [Fact]
+    public void Rejects_null_required_tenor_with_member_diagnostic()
+    {
+        var act = () => _sut.Normalize(default);
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("raw")
+            .WithMessage("*Tenor*");
+    }
+
     [Fact]
     public void Converts_percent_rate_to_decimal()
     {
         // Arrange — Bank of Canada publishes rates as 4.5 meaning 4.5%
-        var quote = new YieldCurveQuote("10Y", 4.5m);
+        var quote = new YieldCurveQuote(s_asOf, "10Y", 4.5m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -44,7 +56,7 @@ public sealed class YieldCurveQuoteNormalizerTests
     public void Preserves_already_decimal_rate()
     {
         // Arrange — rate already in decimal form (< 1)
-        var quote = new YieldCurveQuote("10Y", 0.045m);
+        var quote = new YieldCurveQuote(s_asOf, "10Y", 0.045m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -57,7 +69,7 @@ public sealed class YieldCurveQuoteNormalizerTests
     public void Uppercases_tenor_label()
     {
         // Arrange
-        var quote = new YieldCurveQuote("10y", 0.045m);
+        var quote = new YieldCurveQuote(s_asOf, "10y", 0.045m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -70,7 +82,7 @@ public sealed class YieldCurveQuoteNormalizerTests
     public void Trims_whitespace_from_tenor()
     {
         // Arrange
-        var quote = new YieldCurveQuote("  3M  ", 0.035m);
+        var quote = new YieldCurveQuote(s_asOf, "  3M  ", 0.035m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -80,10 +92,23 @@ public sealed class YieldCurveQuoteNormalizerTests
     }
 
     [Fact]
+    public void Preserves_as_of_date()
+    {
+        // Arrange — the curve's as-of date must survive normalization unchanged.
+        var quote = new YieldCurveQuote(s_asOf, "5Y", 3.98m);
+
+        // Act
+        var result = _sut.Normalize(quote);
+
+        // Assert
+        result.Date.Should().Be(s_asOf);
+    }
+
+    [Fact]
     public void Rate_of_one_is_treated_as_percent()
     {
         // Arrange — 1.0 is ambiguous, but >= 1 is treated as percent
-        var quote = new YieldCurveQuote("1Y", 1.0m);
+        var quote = new YieldCurveQuote(s_asOf, "1Y", 1.0m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -96,7 +121,7 @@ public sealed class YieldCurveQuoteNormalizerTests
     public void Zero_rate_preserved()
     {
         // Arrange
-        var quote = new YieldCurveQuote("O/N", 0m);
+        var quote = new YieldCurveQuote(s_asOf, "O/N", 0m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -109,7 +134,7 @@ public sealed class YieldCurveQuoteNormalizerTests
     public void Negative_rate_under_one_preserved_as_decimal()
     {
         // Arrange — negative yield (e.g., EUR short rates)
-        var quote = new YieldCurveQuote("3M", -0.005m);
+        var quote = new YieldCurveQuote(s_asOf, "3M", -0.005m);
 
         // Act
         var result = _sut.Normalize(quote);
@@ -122,7 +147,7 @@ public sealed class YieldCurveQuoteNormalizerTests
     public void Negative_rate_over_one_converted_from_percent()
     {
         // Arrange — -1.5% as -1.5
-        var quote = new YieldCurveQuote("3M", -1.5m);
+        var quote = new YieldCurveQuote(s_asOf, "3M", -1.5m);
 
         // Act
         var result = _sut.Normalize(quote);

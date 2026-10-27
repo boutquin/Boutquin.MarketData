@@ -14,15 +14,15 @@
 //  limitations under the License.
 //
 
-using Boutquin.MarketData.Abstractions.ReferenceData;
+using Boutquin.Domain.Enumerations;
 
 namespace Boutquin.MarketData.Abstractions.Records;
 
 /// <summary>
 /// Strongly-typed identifier for a foreign-exchange currency pair.
 /// </summary>
-/// <param name="BaseCurrency">The ISO 4217 currency of the base leg (e.g., <see cref="CurrencyCode.EUR"/>).</param>
-/// <param name="QuoteCurrency">The ISO 4217 currency of the quote leg (e.g., <see cref="CurrencyCode.USD"/>).</param>
+/// <param name="BaseCurrency">The ISO 4217 currency of the base leg (e.g., <see cref="Currency.EUR"/>).</param>
+/// <param name="QuoteCurrency">The ISO 4217 currency of the quote leg (e.g., <see cref="Currency.USD"/>).</param>
 /// <remarks>
 /// <para>
 /// <see cref="ToString"/> returns the market-standard format "BASE/QUOTE" (e.g., "EUR/USD").
@@ -33,7 +33,7 @@ namespace Boutquin.MarketData.Abstractions.Records;
 /// Use <see cref="Invert"/> to reverse the quoting direction.
 /// </para>
 /// </remarks>
-public sealed record FxPair(CurrencyCode BaseCurrency, CurrencyCode QuoteCurrency)
+public sealed record FxPair(Currency BaseCurrency, Currency QuoteCurrency)
 {
     /// <summary>
     /// G10 currency priority for determining standard base/quote ordering.
@@ -46,18 +46,18 @@ public sealed record FxPair(CurrencyCode BaseCurrency, CurrencyCode QuoteCurrenc
     /// </remarks>
     /// <remarks>
     /// Currencies not in this dictionary get rank 0 (always quoted against G10). NZD is
-    /// not yet in the <see cref="CurrencyCode"/> enum; rank 5 is reserved for when it
+    /// not yet in the <see cref="s_currencyRank"/> table; rank 5 is reserved for when it
     /// is added in a future release.
     /// </remarks>
-    private static readonly Dictionary<CurrencyCode, int> s_currencyRank = new()
+    private static readonly Dictionary<Currency, int> s_currencyRank = new()
     {
-        [CurrencyCode.EUR] = 8,
-        [CurrencyCode.GBP] = 7,
-        [CurrencyCode.AUD] = 6,
-        [CurrencyCode.USD] = 4,
-        [CurrencyCode.CAD] = 3,
-        [CurrencyCode.CHF] = 2,
-        [CurrencyCode.JPY] = 1,
+        [Currency.EUR] = 8,
+        [Currency.GBP] = 7,
+        [Currency.AUD] = 6,
+        [Currency.USD] = 4,
+        [Currency.CAD] = 3,
+        [Currency.CHF] = 2,
+        [Currency.JPY] = 1,
     };
 
     /// <inheritdoc />
@@ -78,8 +78,8 @@ public sealed record FxPair(CurrencyCode BaseCurrency, CurrencyCode QuoteCurrenc
     /// vs. EUR and GBP; USD is base against all except EUR, GBP, AUD.
     /// </para>
     /// <para>
-    /// For example, <c>new FxPair(CurrencyCode.USD, CurrencyCode.EUR).MarketConvention()</c>
-    /// returns <c>FxPair(CurrencyCode.EUR, CurrencyCode.USD)</c> because EUR is always the base.
+    /// For example, <c>new FxPair(Currency.USD, Currency.EUR).MarketConvention()</c>
+    /// returns <c>FxPair(Currency.EUR, Currency.USD)</c> because EUR is always the base.
     /// </para>
     /// </remarks>
     /// <returns>
@@ -124,7 +124,7 @@ public sealed record FxPair(CurrencyCode BaseCurrency, CurrencyCode QuoteCurrenc
 
             // USD/CAD (or CAD/USD) settles T+1.
             var pair = MarketConvention();
-            if (pair.BaseCurrency == CurrencyCode.USD && pair.QuoteCurrency == CurrencyCode.CAD)
+            if (pair.BaseCurrency == Currency.USD && pair.QuoteCurrency == Currency.CAD)
             {
                 return 1;
             }

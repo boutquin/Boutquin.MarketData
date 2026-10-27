@@ -26,7 +26,7 @@ namespace Boutquin.MarketData.Calendars;
 /// <para>
 /// Pipeline role: used where an instrument or settlement cycle must respect more than one
 /// jurisdiction's holidays. Examples: a cross-currency swap settling in USD and JPY needs
-/// both NYSE and Tokyo closed before it closes; a dual-listed equity with market-makers in
+/// both settlement calendars open before it can settle; a dual-listed equity with market-makers in
 /// NY and Toronto is tradeable if either venue is open.
 /// </para>
 /// <para>
@@ -65,7 +65,8 @@ public sealed class CompositeCalendar : BusinessCalendarBase
     /// </summary>
     /// <param name="code">Market code identifying this composite calendar (for example <c>US-CA</c> for joint US/CA settlement).</param>
     /// <param name="calendars">Constituent calendars whose intersection defines business days. At least one is required.</param>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="calendars"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException">The code or calendar array is null.</exception>
+    /// <exception cref="ArgumentException">The calendar array is empty or contains null.</exception>
     public CompositeCalendar(string code, params IBusinessCalendar[] calendars)
         : this(code, CalendarCompositionMode.All, calendars)
     {
@@ -79,9 +80,23 @@ public sealed class CompositeCalendar : BusinessCalendarBase
     /// <param name="code">Market code identifying this composite calendar.</param>
     /// <param name="mode">Combination rule: intersection or union of constituent calendars.</param>
     /// <param name="calendars">Constituent calendars. At least one is required.</param>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="calendars"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException">The code or calendar array is null.</exception>
+    /// <exception cref="ArgumentException">The calendar array is empty or contains null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The composition mode is undefined.</exception>
     public CompositeCalendar(string code, CalendarCompositionMode mode, params IBusinessCalendar[] calendars)
     {
+        ArgumentNullException.ThrowIfNull(code);
+        ArgumentNullException.ThrowIfNull(calendars);
+        if (!Enum.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode), mode, "A declared calendar composition mode is required.");
+        }
+
+        if (calendars.Any(calendar => calendar is null))
+        {
+            throw new ArgumentException("Constituent calendars must not contain null.", nameof(calendars));
+        }
+
         if (calendars.Length == 0)
         {
             throw new ArgumentException("At least one calendar must be provided.", nameof(calendars));
@@ -89,7 +104,7 @@ public sealed class CompositeCalendar : BusinessCalendarBase
 
         Code = code;
         _mode = mode;
-        _calendars = calendars;
+        _calendars = (IBusinessCalendar[])calendars.Clone();
     }
 
     /// <inheritdoc />
@@ -98,8 +113,8 @@ public sealed class CompositeCalendar : BusinessCalendarBase
     /// <inheritdoc />
     public override int BusinessDaysPerYear => _mode switch
     {
-        // Union cannot have more business days than the most-open constituent, so Max is the
-        // tightest reachable bound without enumerating the year.
+        // Union has at least as many business days as the most-open constituent, so Max is
+        // a lower-bound annualization estimate without enumerating the year.
         CalendarCompositionMode.Any => _calendars.Max(c => c.BusinessDaysPerYear),
         // Intersection is bounded above by the most-restrictive constituent: any holiday in
         // any single calendar closes the composite.

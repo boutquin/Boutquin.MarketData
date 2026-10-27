@@ -15,7 +15,8 @@
 //
 
 using System.Globalization;
-using System.Text.Json.Serialization;
+
+using Boutquin.Storage.Domain.Attributes;
 
 namespace Boutquin.MarketData.Abstractions.ReferenceData;
 
@@ -23,6 +24,8 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// Year/month pair representing the delivery month of a futures contract
 /// (canonical rendering <c>"YYYY-MM"</c>).
 /// </summary>
+/// <param name="Year">Calendar year (e.g. 2026). Must be at least 1 and at most 9999.</param>
+/// <param name="Month">Calendar month, 1 (January) through 12 (December).</param>
 /// <remarks>
 /// <para>
 /// Replaces the bare-<c>string</c> <c>ContractMonth</c> carried on
@@ -37,44 +40,63 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// <see cref="SortedSet{T}"/>-keyed collections produce chronologically correct
 /// ordering without needing <see cref="DateOnly"/>.
 /// </para>
+/// <para>
+/// Annotated <c>[StorageSerializable]</c> (positional <c>partial record struct</c> with
+/// tagged constructor parameters) so it round-trips on the Boutquin.Storage 2.0 tagged wire
+/// and may be nested inside a serializable record such as
+/// <see cref="Records.FuturesSettlement"/>. The Storage generator emits
+/// <c>Serialize</c>/<c>Deserialize</c>; deserialization reconstructs through this same
+/// validating constructor, so the range guards hold on every read path.
+/// </para>
+/// <para>
+/// Initialization and property access enforce the same bounds. Default or partially initialized
+/// values are invalid for serialization: the generated writer reads these guarded properties
+/// while staging its payload, before emitting any bytes to the destination stream. The diagnostic
+/// <see cref="ToString"/> representation of a default value remains <c>0000-00</c>.
+/// </para>
 /// </remarks>
-public readonly record struct ContractMonth : IComparable<ContractMonth>
+[StorageSerializable]
+public partial record struct ContractMonth(int Year, int Month)
+    : IComparable<ContractMonth>
 {
-    /// <summary>
-    /// The calendar year (e.g. 2026).
-    /// </summary>
-    public int Year { get; }
+    private int _year = ValidateYear(Year);
+    private int _month = ValidateMonth(Month);
 
     /// <summary>
-    /// The calendar month, 1 (January) through 12 (December).
+    /// The calendar year (e.g. 2026), validated on initialization and access.
     /// </summary>
-    public int Month { get; }
-
-    /// <summary>
-    /// Initializes a new <see cref="ContractMonth"/> from explicit year and month.
-    /// </summary>
-    /// <param name="year">Calendar year. Must be at least 1 and at most 9999.</param>
-    /// <param name="month">Calendar month, 1–12.</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="year"/> is outside <c>[1, 9999]</c> or
-    /// <paramref name="month"/> is outside <c>[1, 12]</c>.
+    /// The assigned year is outside 1–9999, or an uninitialized default year is accessed.
     /// </exception>
-    [JsonConstructor]
-    public ContractMonth(int year, int month)
+    [Tag(1)]
+    public int Year
     {
-        if (year is < 1 or > 9999)
-        {
-            throw new ArgumentOutOfRangeException(nameof(year), year, "Year must be in [1, 9999].");
-        }
-
-        if (month is < 1 or > 12)
-        {
-            throw new ArgumentOutOfRangeException(nameof(month), month, "Month must be in [1, 12].");
-        }
-
-        Year = year;
-        Month = month;
+        get => ValidateYear(_year);
+        init => _year = ValidateYear(value);
     }
+
+    /// <summary>
+    /// The calendar month, 1 (January) through 12 (December), validated on initialization and access.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The assigned month is outside 1–12, or an uninitialized default month is accessed.
+    /// </exception>
+    [Tag(2)]
+    public int Month
+    {
+        get => ValidateMonth(_month);
+        init => _month = ValidateMonth(value);
+    }
+
+    private static int ValidateYear(int year) =>
+        year is < 1 or > 9999
+            ? throw new ArgumentOutOfRangeException(nameof(year), year, "Year must be in [1, 9999].")
+            : year;
+
+    private static int ValidateMonth(int month) =>
+        month is < 1 or > 12
+            ? throw new ArgumentOutOfRangeException(nameof(month), month, "Month must be in [1, 12].")
+            : month;
 
     /// <summary>
     /// Initializes a new <see cref="ContractMonth"/> by parsing a textual
@@ -93,6 +115,14 @@ public readonly record struct ContractMonth : IComparable<ContractMonth>
     /// outside <c>[1, 9999]</c>.
     /// </exception>
     public ContractMonth(string text)
+        : this(ParseYear(text), ParseMonth(text))
+    {
+    }
+
+    // The string constructor delegates to the primary (Year, Month) constructor — which runs the
+    // range validation — so the parse here only produces the integer pair. Both helpers parse the
+    // same input identically; the year/month split keeps the chained-constructor argument shape.
+    private static (int Year, int Month) Parse(string text)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(text);
         var trimmed = text.Trim();
@@ -105,35 +135,25 @@ public readonly record struct ContractMonth : IComparable<ContractMonth>
             && int.TryParse(trimmed.AsSpan(0, 4), NumberStyles.None, CultureInfo.InvariantCulture, out year)
             && int.TryParse(trimmed.AsSpan(5, 2), NumberStyles.None, CultureInfo.InvariantCulture, out month))
         {
-            // fall through to validation
+            return (year, month);
         }
+
         // Compact "YYYYMM"
-        else if (trimmed.Length == 6
+        if (trimmed.Length == 6
             && int.TryParse(trimmed.AsSpan(0, 4), NumberStyles.None, CultureInfo.InvariantCulture, out year)
             && int.TryParse(trimmed.AsSpan(4, 2), NumberStyles.None, CultureInfo.InvariantCulture, out month))
         {
-            // fall through to validation
-        }
-        else
-        {
-            throw new ArgumentException(
-                $"Contract month '{text}' is not in 'YYYY-MM' or 'YYYYMM' form.",
-                nameof(text));
+            return (year, month);
         }
 
-        if (year is < 1 or > 9999)
-        {
-            throw new ArgumentOutOfRangeException(nameof(text), year, "Year must be in [1, 9999].");
-        }
-
-        if (month is < 1 or > 12)
-        {
-            throw new ArgumentOutOfRangeException(nameof(text), month, "Month must be in [1, 12].");
-        }
-
-        Year = year;
-        Month = month;
+        throw new ArgumentException(
+            $"Contract month '{text}' is not in 'YYYY-MM' or 'YYYYMM' form.",
+            nameof(text));
     }
+
+    private static int ParseYear(string text) => Parse(text).Year;
+
+    private static int ParseMonth(string text) => Parse(text).Month;
 
     /// <summary>
     /// Compares two contract months chronologically by year then month.
@@ -167,5 +187,5 @@ public readonly record struct ContractMonth : IComparable<ContractMonth>
     /// Returns the canonical <c>YYYY-MM</c> representation.
     /// </summary>
     /// <returns>The canonical rendering; for <c>default</c> returns <c>"0000-00"</c>.</returns>
-    public override string ToString() => $"{Year:D4}-{Month:D2}";
+    public override string ToString() => $"{_year:D4}-{_month:D2}";
 }

@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Boutquin.MarketData.Orchestration\Boutquin.MarketData.Orchestration.csproj" />
+    <ProjectReference Include="..\Boutquin.MarketData.Normalization\Boutquin.MarketData.Normalization.csproj" />
     <ProjectReference Include="..\Boutquin.MarketData.Transport\Boutquin.MarketData.Transport.csproj" />
     <ProjectReference Include="..\Boutquin.MarketData.Cache\Boutquin.MarketData.Cache.csproj" />
     <ProjectReference Include="..\Boutquin.MarketData.Storage\Boutquin.MarketData.Storage.csproj" />

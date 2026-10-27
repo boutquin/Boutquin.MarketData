@@ -13,6 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
+using System.Security.Cryptography;
+using System.Text;
 using Boutquin.MarketData.Abstractions.Contracts;
 using Boutquin.Storage.Domain.Interfaces.ObjectStore;
 using Boutquin.Storage.Infrastructure.ObjectStore;
@@ -21,8 +23,7 @@ namespace Boutquin.MarketData.Storage.Snapshots;
 
 /// <summary>
 /// Durable L2 snapshot store backed by <see cref="FileSystemObjectStore"/>. Delegates I/O to
-/// <see cref="IObjectStore"/>, which performs atomic writes (temp file plus rename) and maps
-/// hierarchical keys containing forward slashes onto nested directories.
+/// <see cref="IObjectStore"/>, with bounded physical keys when constructed from a root directory.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -37,9 +38,11 @@ namespace Boutquin.MarketData.Storage.Snapshots;
 /// otherwise leave a truncated JSON/binary blob that breaks every subsequent read.
 /// </para>
 /// <para>
-/// Read semantics: <see cref="IObjectStore.ReadAsync"/> returns an independent
-/// <see cref="MemoryStream"/> copy so the caller can dispose or seek without holding a file lock
-/// that would block concurrent writers.
+/// Directory-backed instances hash each valid logical key with SHA-256 into a fixed-length
+/// filename beneath <c>%snapshots-v1</c>. The percent sign cannot occur in a legacy object-store
+/// key, so the new physical namespace cannot alias a legacy logical key. Reads first try the
+/// new layout, then earlier encoded and literal layouts; legacy names must match ordinally
+/// and descendant symbolic links are rejected. Existing payloads are neither moved nor rewritten. The configured root itself must still fit the host filesystem's path limits.
 /// </para>
 /// <para>
 /// Choosing between implementations: use this store for any durable workload. Use
@@ -50,11 +53,15 @@ namespace Boutquin.MarketData.Storage.Snapshots;
 /// Testability: the <see cref="IObjectStore"/> constructor overload accepts
 /// <see cref="InMemoryObjectStore"/> so tests can exercise the snapshot API surface without
 /// touching the file system, and integration tests can inject a mock that simulates I/O faults.
+/// Injected stores receive logical keys unchanged and retain their own path, atomicity, and
+/// stream semantics; injecting a filesystem backend does not enable the bounded layout.
 /// </para>
 /// </remarks>
 public sealed class FileSnapshotStore : ISnapshotStore
 {
     private readonly IObjectStore _store;
+    private readonly IObjectStore? _legacyStore;
+    private readonly string? _baseDirectory;
 
     /// <summary>
     /// Initializes a new instance of <see cref="FileSnapshotStore"/>
@@ -62,25 +69,81 @@ public sealed class FileSnapshotStore : ISnapshotStore
     /// </summary>
     /// <param name="baseDirectory">Root directory for snapshot files.</param>
     public FileSnapshotStore(string baseDirectory)
-        => _store = new FileSystemObjectStore(baseDirectory);
+    {
+        _legacyStore = new FileSystemObjectStore(baseDirectory);
+        _baseDirectory = Path.GetFullPath(baseDirectory);
+        _store = new FileSystemObjectStore(Path.Combine(baseDirectory, "%snapshots-v1"));
+    }
 
     /// <summary>
     /// Initializes a new instance of <see cref="FileSnapshotStore"/>
     /// using the provided <see cref="IObjectStore"/> implementation.
     /// </summary>
-    /// <param name="store">The object store to delegate to.</param>
+    /// <param name="store">The object store to delegate to with unchanged logical keys.</param>
     public FileSnapshotStore(IObjectStore store)
-        => _store = store;
+        => _store = store ?? throw new ArgumentNullException(nameof(store));
 
     /// <inheritdoc />
     public async Task<bool> ExistsAsync(string snapshotKey, CancellationToken cancellationToken = default)
-        => await _store.ExistsAsync(snapshotKey, cancellationToken).ConfigureAwait(false);
+    {
+        if (await _store.ExistsAsync(GetPhysicalKey(snapshotKey), cancellationToken).ConfigureAwait(false))
+        {
+            return true;
+        }
+
+        try
+        {
+            return _legacyStore is not null
+                && (LegacyObjectReader.Find(_baseDirectory!, "%snapshots-v1/" + GetPhysicalKey(snapshotKey), cancellationToken) is not null
+                    || await _legacyStore.ExistsAsync(snapshotKey, cancellationToken).ConfigureAwait(false)
+                    || LegacyObjectReader.Find(_baseDirectory!, snapshotKey, cancellationToken) is not null);
+        }
+        catch (PathTooLongException)
+        {
+            return false;
+        }
+    }
 
     /// <inheritdoc />
     public async Task<Stream?> ReadAsync(string snapshotKey, CancellationToken cancellationToken = default)
-        => await _store.ReadAsync(snapshotKey, cancellationToken).ConfigureAwait(false);
+    {
+        var stream = await _store.ReadAsync(GetPhysicalKey(snapshotKey), cancellationToken).ConfigureAwait(false);
+        if (stream is not null || _legacyStore is null)
+        {
+            return stream;
+        }
+
+        try
+        {
+            return LegacyObjectReader.Open(_baseDirectory!, "%snapshots-v1/" + GetPhysicalKey(snapshotKey), cancellationToken)
+                ?? await _legacyStore.ReadAsync(snapshotKey, cancellationToken).ConfigureAwait(false)
+                ?? LegacyObjectReader.Open(_baseDirectory!, snapshotKey, cancellationToken);
+        }
+        catch (PathTooLongException)
+        {
+            return null;
+        }
+    }
 
     /// <inheritdoc />
     public async Task WriteAsync(string snapshotKey, Stream content, CancellationToken cancellationToken = default)
-        => await _store.WriteAsync(snapshotKey, content, cancellationToken).ConfigureAwait(false);
+        => await _store.WriteAsync(GetPhysicalKey(snapshotKey), content, cancellationToken).ConfigureAwait(false);
+
+    private string GetPhysicalKey(string snapshotKey)
+    {
+        if (_legacyStore is null)
+        {
+            return snapshotKey;
+        }
+
+        // Preserve the filesystem backend's logical-key grammar before mapping it to an opaque name.
+        ArgumentException.ThrowIfNullOrWhiteSpace(snapshotKey);
+        if (snapshotKey.Any(c => !char.IsAsciiLetterOrDigit(c) && c is not '.' and not '_' and not '-' and not '/')
+            || snapshotKey.Split('/').Any(segment => segment is "" or "." or ".."))
+        {
+            throw new ArgumentException("Snapshot keys must contain valid relative object-store path segments.", nameof(snapshotKey));
+        }
+
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(snapshotKey)));
+    }
 }

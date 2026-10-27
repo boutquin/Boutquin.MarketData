@@ -22,4 +22,9 @@
     <ProjectReference Include="../../src/Boutquin.MarketData.Cache/Boutquin.MarketData.Cache.csproj" />
     <ProjectReference Include="../../src/Boutquin.MarketData.Storage/Boutquin.MarketData.Storage.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="../../src/Boutquin.MarketData.Cache/PublicAPI.Unshipped.txt" Link="PublicAPI.Unshipped.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -17,11 +17,14 @@
 namespace Boutquin.MarketData.Calendars.Holidays;
 
 /// <summary>
-/// NYSE / NASDAQ equity trading calendar. Computes US market holidays algorithmically
-/// for any year, including Saturday-to-Friday and Sunday-to-Monday observance rules.
+/// NYSE / NASDAQ equity trading calendar using recurring US market holiday rules
+/// and explicitly recorded exceptional closures.
 /// </summary>
 /// <remarks>
-/// This is the equity market calendar (9 holidays). It does <b>not</b> include Columbus Day
+/// Recurring rules use Gregorian Easter from 1583 onward; historical rule changes and
+/// exceptional closures are not comprehensively represented. The recorded exceptional
+/// closure is January 9, 2025. This is not a complete historical or future exchange schedule.
+/// The equity market calendar does <b>not</b> include Columbus Day
 /// or Veterans Day, which are SIFMA bond market holidays. For the bond market calendar,
 /// use <see cref="HolidayCalendar"/> with <see cref="HolidayDatasets.UsSifma"/>.
 /// </remarks>
@@ -49,6 +52,13 @@ public sealed class UsNyseCalendar : BusinessCalendarBase
         var year = date.Year;
         var month = date.Month;
         var day = date.Day;
+
+        // NYSE national day of mourning for President Jimmy Carter.
+        // https://www.nyse.com/publicdocs/nyse/markets/american-options/rule-interpretations/2025/National_Day_of_Mourning_20250102.pdf
+        if (date == new DateOnly(2025, 1, 9))
+        {
+            return true;
+        }
 
         // New Year's Day (Jan 1) — observed
         if (IsObservedHoliday(date, new DateOnly(year, 1, 1)))
@@ -80,8 +90,8 @@ public sealed class UsNyseCalendar : BusinessCalendarBase
             return true;
         }
 
-        // Juneteenth (Jun 19) — observed, holiday since 2021
-        if (year >= 2021 && IsObservedHoliday(date, new DateOnly(year, 6, 19)))
+        // Juneteenth (Jun 19) — observed, NYSE holiday since 2022
+        if (year >= 2022 && IsObservedHoliday(date, new DateOnly(year, 6, 19)))
         {
             return true;
         }

@@ -17,7 +17,6 @@
 using Boutquin.MarketData.Abstractions;
 using Boutquin.MarketData.Abstractions.Primitives;
 using Boutquin.MarketData.Abstractions.ReferenceData;
-using Boutquin.MarketData.Abstractions.Requests;
 
 namespace Boutquin.MarketData.Storage.InMemory;
 
@@ -99,8 +98,9 @@ public sealed class InMemoryFixingsStore : IFixingsStore
     /// <inheritdoc />
     public IReadOnlyList<TimeSeriesPoint<decimal>> GetFixings(BenchmarkName benchmark, DateRange range)
     {
-        ArgumentNullException.ThrowIfNull(range);
-
+        // `range` is a Boutquin.Storage.Domain.ValueObjects.DateRange — a readonly record struct,
+        // not nullable. The prior `ArgumentNullException.ThrowIfNull(range)` was a no-op and has
+        // been removed; degenerate inputs (From > To) produce IsEmpty = true and return zero rows.
         if (!_data.TryGetValue(benchmark, out var series))
         {
             return [];

@@ -26,6 +26,22 @@ namespace Boutquin.MarketData.Testing.Tests.Unit;
 public sealed class FakeHttpMessageHandlerTests
 {
     [Fact]
+    public async Task Binary_registration_snapshots_input_and_returns_independent_ordered_content()
+    {
+        var bytes = new byte[] { 1, 2, 3, 4 };
+        using var handler = new FakeHttpMessageHandler();
+        handler.RespondToWithBytes("https://example.com/binary", bytes);
+        bytes[0] = 99;
+        using var client = new HttpClient(handler);
+        using var first = await client.GetAsync("https://example.com/binary");
+        var firstBytes = await first.Content.ReadAsByteArrayAsync();
+        firstBytes.Should().Equal(1, 2, 3, 4);
+        firstBytes[1] = 88;
+        using var second = await client.GetAsync("https://example.com/binary");
+        (await second.Content.ReadAsByteArrayAsync()).Should().Equal(1, 2, 3, 4);
+    }
+
+    [Fact]
     public async Task Default_response_is_returned_when_no_mapping_matches()
     {
         using var handler = new FakeHttpMessageHandler("default-body");

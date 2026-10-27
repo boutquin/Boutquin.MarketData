@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.MarketData.Abstractions.ReferenceData;
 using Boutquin.MarketData.Calendars.Holidays;
 
 using FluentAssertions;
@@ -27,6 +28,58 @@ namespace Boutquin.MarketData.Calendars.Tests.Unit;
 /// </summary>
 public sealed class HolidayCalendarFactoryTests
 {
+    [Fact]
+    public void EurEstr_PublicationCalendar_ObservesTargetClosures()
+    {
+        var benchmark = StandardBenchmarks.EurEstr;
+        var calendar = HolidayCalendarFactory.Create(benchmark.PublicationCalendarCode);
+
+        calendar.IsBusinessDay(new DateOnly(2024, 3, 29)).Should().BeFalse();
+        calendar.IsBusinessDay(new DateOnly(2024, 4, 1)).Should().BeFalse();
+        calendar.IsBusinessDay(new DateOnly(2024, 4, 2)).Should().BeTrue();
+        calendar.Advance(new DateOnly(2024, 3, 28), benchmark.PublicationLagBusinessDays)
+            .Should().Be(new DateOnly(2024, 4, 2));
+    }
+
+    [Fact]
+    public void CAST_TruthAndReconciliationDay_StartsIn2021()
+    {
+        var calendar = HolidayCalendarFactory.Create("CAST");
+
+        calendar.IsBusinessDay(new DateOnly(2020, 9, 30)).Should().BeTrue();
+        calendar.IsBusinessDay(new DateOnly(2021, 9, 30)).Should().BeFalse();
+        calendar.IsBusinessDay(new DateOnly(2020, 9, 29)).Should().BeTrue();
+        calendar.IsBusinessDay(new DateOnly(2020, 10, 1)).Should().BeTrue();
+    }
+
+    [Fact]
+    public void CATO_SaturdayChristmas_ClosesMondayAndTuesdayOnly()
+    {
+        var calendar = HolidayCalendarFactory.Create("CATO");
+
+        calendar.IsBusinessDay(new DateOnly(2021, 12, 24)).Should().BeTrue();
+        calendar.IsBusinessDay(new DateOnly(2021, 12, 27)).Should().BeFalse();
+        calendar.IsBusinessDay(new DateOnly(2021, 12, 28)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void USNY_Juneteenth_StartsIn2022()
+    {
+        var calendar = HolidayCalendarFactory.Create("USNY");
+
+        calendar.IsBusinessDay(new DateOnly(2021, 6, 18)).Should().BeTrue();
+        calendar.IsBusinessDay(new DateOnly(2022, 6, 20)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void CATO_VictoriaDay_IsStrictlyBeforeMay25()
+    {
+        var calendar = HolidayCalendarFactory.Create("CATO");
+
+        calendar.IsBusinessDay(new DateOnly(2026, 5, 18)).Should().BeFalse();
+        calendar.IsBusinessDay(new DateOnly(2026, 5, 25)).Should().BeTrue();
+    }
+
     [Fact]
     public void Create_USNY_ReturnsAlgorithmicCalendar()
     {
@@ -94,19 +147,20 @@ public sealed class HolidayCalendarFactoryTests
     }
 
     [Fact]
-    public void SupportedCodes_ContainsAllSeven()
+    public void SupportedCodes_ContainsAllEight()
     {
         // Act
         var codes = HolidayCalendarFactory.SupportedCodes;
 
         // Assert
-        codes.Should().HaveCount(7);
+        codes.Should().HaveCount(8);
         codes.Should().Contain("USNY");
         codes.Should().Contain("GBLO");
         codes.Should().Contain("TARGET");
         codes.Should().Contain("CATO");
         codes.Should().Contain("XCME");
         codes.Should().Contain("USSF");
+        codes.Should().Contain("USSOFR");
         codes.Should().Contain("CAST");
     }
 

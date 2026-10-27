@@ -73,6 +73,9 @@ public sealed class InstrumentConventionRegistry
     /// four-currency OIS/FRA/futures/swap-leg entries historically emitted by
     /// <c>Boutquin.Curves.Conventions.InstrumentConventionRegistry.CreateDefault</c>.
     /// </summary>
+    /// <remarks>Defaults are editable application baselines. They do not select a trading venue,
+    /// clearing agreement, contractual observation window, or administrator publication calendar.
+    /// Register the terms of the actual instrument before using them to construct cash flows.</remarks>
     /// <returns>A registry containing built-in OIS, FRA, futures, and swap-leg conventions.</returns>
     public static InstrumentConventionRegistry CreateDefault() =>
         new InstrumentConventionRegistry()

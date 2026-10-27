@@ -32,7 +32,21 @@ namespace Boutquin.MarketData.Abstractions.ReferenceData;
 /// currency's jurisdictional default) and log the inference. Adapters MUST NOT silently
 /// emit <see cref="Unclassified"/> when any more-specific category would apply —
 /// consumers treat <see cref="Unclassified"/> as a last-resort fallback reserved for
-/// data points where every other category has been ruled out.
+/// data points where every other category has been ruled out. For a single payment whose
+/// category is merely unreported, the jurisdictional default remains the fallback —
+/// <see cref="Unclassified"/> is not a shortcut around an inference the source supports.
+/// </para>
+/// <para>
+/// Provider-aggregated amounts are the sanctioned <see cref="Unclassified"/> case. Some
+/// sources report one cash figure per ex-date that is the sum of everything distributed on
+/// that date; for a fund this routinely blends ordinary or qualified income with
+/// <see cref="ReturnOfCapital"/> and <see cref="CapitalGainDistribution"/>. Such a blend
+/// differs in kind from an unreported classification: no single category applies to it, so
+/// assigning a jurisdictional default would assert an income treatment that is wrong for the
+/// return-of-capital and capital-gain portions — and downstream gross-up and withholding
+/// computations would act on that assertion. An adapter emitting a provider-aggregated
+/// amount therefore selects <see cref="Unclassified"/>, and the inference MUST be logged so
+/// the choice is auditable rather than silent.
 /// </para>
 /// <para>
 /// Consumer exhaustiveness. Switch expressions over <see cref="DividendType"/> MUST

@@ -14,64 +14,77 @@
 //   limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
+
 namespace Boutquin.MarketData.Abstractions.ReferenceData;
 
 /// <summary>
-/// Canonical catalogue of the six major overnight rate benchmarks referenced by
-/// Hull 11e Ch 4: USD SOFR, GBP SONIA, EUR ESTR, CAD CORRA, CHF SARON, JPY TONA.
+/// Catalogue of six overnight rate benchmarks: USD SOFR, GBP SONIA, EUR ESTR,
+/// CAD CORRA, CHF SARON, and JPY TONA.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The catalogue is a <em>starting point</em> — consumers may construct
 /// <see cref="RateBenchmark"/> values directly for any benchmark not listed here.
-/// The listed conventions follow the administrators' published methodologies
-/// (ARRC for SOFR, WMBA for SONIA, ECB for ESTR, BoC for CORRA, SIX for SARON,
-/// and BOJ for TONA). Each benchmark is an overnight risk-free or
-/// overnight-indexed rate. All six are compounded in arrears per standard
-/// OIS and FRN market conventions.
+/// Calendar codes identify the supplied schedules, which have their own coverage limits.
+/// In particular, CHZU and JPTO currently resolve to weekend-only fallbacks, while CATO
+/// supplies the TSX trading calendar rather than a complete CORRA publication schedule.
+/// Consumers needing full administrator-specific history must provide the corresponding
+/// calendar. All six entries are classified as overnight risk-free rates and use
+/// compounded-in-arrears metadata for OIS and FRN composition.
 /// </para>
 /// </remarks>
 public static class StandardBenchmarks
 {
     /// <summary>
-    /// USD SOFR — Secured Overnight Financing Rate (ACT/360, USNY, fixing lag 0, publication lag 1, compounded in arrears).
+    /// USD SOFR — Secured Overnight Financing Rate (ACT/360, USSOFR, fixing lag 0, publication lag 1, compounded in arrears).
     /// </summary>
+    /// <remarks>
+    /// USSOFR combines SIFMA full-trading closures with explicit New York Fed non-publication
+    /// exceptions for Good Friday 2021, 2023, and 2026. SIFMA early closing alone does not
+    /// determine publication. See the <see href="https://www.newyorkfed.org/markets/opolicy/operating_policy_260312a">2026 publication notice</see>.
+    /// Calendar datasets have documented date limits; future exceptions require updates.
+    /// </remarks>
     public static RateBenchmark UsdSofr { get; } = new(
         new BenchmarkName("USD-SOFR"),
-        CurrencyCode.USD,
+        Currency.USD,
         BenchmarkKind.OvernightRiskFree,
         Tenor: null,
         FixingLagBusinessDays: 0,
         PublicationLagBusinessDays: 1,
-        PublicationCalendarCode: "USNY",
+        PublicationCalendarCode: "USSOFR",
         AccrualDayCountCode: "ACT/360",
         IsCompoundedInArrears: true);
 
     /// <summary>
-    /// GBP SONIA — Sterling Overnight Index Average (ACT/365F, GBLO, fixing lag 0, publication lag 0, compounded in arrears).
+    /// GBP SONIA — Sterling Overnight Index Average (ACT/365F, GBLO, fixing lag 0, publication lag 1, compounded in arrears).
     /// </summary>
+    /// <remarks>
+    /// The Bank of England publishes each observation on the following London business day.
+    /// See <see href="https://www.bankofengland.co.uk/markets/sonia-benchmark/sonia-key-features-and-policies">SONIA key features</see>.
+    /// </remarks>
     public static RateBenchmark GbpSonia { get; } = new(
         new BenchmarkName("GBP-SONIA"),
-        CurrencyCode.GBP,
+        Currency.GBP,
         BenchmarkKind.OvernightRiskFree,
         Tenor: null,
         FixingLagBusinessDays: 0,
-        PublicationLagBusinessDays: 0,
+        PublicationLagBusinessDays: 1,
         PublicationCalendarCode: "GBLO",
         AccrualDayCountCode: "ACT/365F",
         IsCompoundedInArrears: true);
 
     /// <summary>
-    /// EUR ESTR — Euro Short-Term Rate (ACT/360, EUTA, fixing lag 0, publication lag 1, compounded in arrears).
+    /// EUR ESTR — Euro Short-Term Rate (ACT/360, TARGET, fixing lag 0, publication lag 1, compounded in arrears).
     /// </summary>
     public static RateBenchmark EurEstr { get; } = new(
         new BenchmarkName("EUR-ESTR"),
-        CurrencyCode.EUR,
+        Currency.EUR,
         BenchmarkKind.OvernightRiskFree,
         Tenor: null,
         FixingLagBusinessDays: 0,
         PublicationLagBusinessDays: 1,
-        PublicationCalendarCode: "EUTA",
+        PublicationCalendarCode: "TARGET",
         AccrualDayCountCode: "ACT/360",
         IsCompoundedInArrears: true);
 
@@ -80,7 +93,7 @@ public static class StandardBenchmarks
     /// </summary>
     public static RateBenchmark CadCorra { get; } = new(
         new BenchmarkName("CAD-CORRA"),
-        CurrencyCode.CAD,
+        Currency.CAD,
         BenchmarkKind.OvernightRiskFree,
         Tenor: null,
         FixingLagBusinessDays: 0,
@@ -95,7 +108,7 @@ public static class StandardBenchmarks
     /// <remarks>Hull 11e Ch 4 p.99–100.</remarks>
     public static RateBenchmark ChfSaron { get; } = new(
         new BenchmarkName("CHF-SARON"),
-        CurrencyCode.CHF,
+        Currency.CHF,
         BenchmarkKind.OvernightRiskFree,
         Tenor: null,
         FixingLagBusinessDays: 0,
@@ -110,7 +123,7 @@ public static class StandardBenchmarks
     /// <remarks>Hull 11e Ch 4 p.99–100.</remarks>
     public static RateBenchmark JpyTona { get; } = new(
         new BenchmarkName("JPY-TONA"),
-        CurrencyCode.JPY,
+        Currency.JPY,
         BenchmarkKind.OvernightRiskFree,
         Tenor: null,
         FixingLagBusinessDays: 0,

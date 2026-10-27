@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 using FluentAssertions;
@@ -56,9 +57,9 @@ public sealed class StandardBenchmarksTests
         var b = StandardBenchmarks.UsdSofr;
 
         b.Name.Value.Should().Be("USD-SOFR");
-        b.Currency.Should().Be(CurrencyCode.USD);
+        b.Currency.Should().Be(Currency.USD);
         b.Kind.Should().Be(BenchmarkKind.OvernightRiskFree);
-        b.PublicationCalendarCode.Should().Be("USNY");
+        b.PublicationCalendarCode.Should().Be("USSOFR");
         b.AccrualDayCountCode.Should().Be("ACT/360");
         b.FixingLagBusinessDays.Should().Be(0);
     }
@@ -68,7 +69,7 @@ public sealed class StandardBenchmarksTests
     {
         var b = StandardBenchmarks.ChfSaron;
 
-        b.Currency.Should().Be(CurrencyCode.CHF);
+        b.Currency.Should().Be(Currency.CHF);
         b.PublicationCalendarCode.Should().Be("CHZU");
         b.AccrualDayCountCode.Should().Be("ACT/360");
     }
@@ -78,7 +79,7 @@ public sealed class StandardBenchmarksTests
     {
         var b = StandardBenchmarks.JpyTona;
 
-        b.Currency.Should().Be(CurrencyCode.JPY);
+        b.Currency.Should().Be(Currency.JPY);
         b.PublicationCalendarCode.Should().Be("JPTO");
         b.AccrualDayCountCode.Should().Be("ACT/365F");
     }

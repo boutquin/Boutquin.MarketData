@@ -15,6 +15,8 @@
 //
 
 using Boutquin.MarketData.Abstractions.ReferenceData;
+using Boutquin.Storage.Domain.Attributes;
+using Boutquin.Storage.Domain.Interfaces.TimeSeries;
 
 namespace Boutquin.MarketData.Abstractions.Records;
 
@@ -25,10 +27,30 @@ namespace Boutquin.MarketData.Abstractions.Records;
 /// <param name="ContractCode">The product code (e.g., <c>new FuturesProductCode("SR3")</c> for 3-month SOFR futures).</param>
 /// <param name="ContractMonth">The delivery month (canonical <c>YYYY-MM</c>).</param>
 /// <param name="SettlePrice">The daily settlement price.</param>
-/// <param name="ImpliedRate">The implied interest rate derived from the settlement price (100 - price), or <see langword="null"/> if not applicable.</param>
-public sealed record FuturesSettlement(
-    DateOnly Date,
-    FuturesProductCode ContractCode,
-    ContractMonth ContractMonth,
-    decimal SettlePrice,
-    decimal? ImpliedRate);
+/// <param name="ImpliedRate">
+/// The implied interest rate in decimal form (for example, <c>0.025</c> for 2.5%), derived as
+/// <c>(100 - price) / 100</c> for price-quoted rate products such as <c>SR3</c> and <c>ZQ</c>, or
+/// <see langword="null"/> when the product does not carry that meaning.
+/// </param>
+/// <remarks>
+/// <para>Declared as a <c>partial record struct</c> implementing <see cref="IHasDate"/> so the
+/// storage generator can add serialization members and the time-series store can order rows.</para>
+/// <para><b>Tagged-wire serializable, row opt-out.</b> This record carries
+/// <c>[StorageSerializable]</c>, so the Boutquin.Storage 2.0 source generator emits
+/// <c>Serialize</c>/<c>Deserialize</c> and the type satisfies
+/// <c>ISerializable&lt;FuturesSettlement&gt;</c> — making it eligible for the row-format
+/// <c>ITimeSeriesStore</c> registration. Its value-object wrappers
+/// <see cref="FuturesProductCode"/> and <see cref="ContractMonth"/> are themselves
+/// <c>[StorageSerializable]</c>, so each nests as a length-prefixed child payload on the wire and
+/// reconstructs through its own validating constructor; <see cref="ImpliedRate"/> is a natively
+/// tagged nullable <c>decimal?</c> (absent tag ⇒ <see langword="null"/>).</para>
+/// <para>It is deliberately not <c>[ColumnarStorable]</c>. The nested record-struct wrappers and
+/// nullable <c>decimal?</c> have no supported columnar encoding, so the row codec is used.</para>
+/// </remarks>
+[StorageSerializable]
+public partial record struct FuturesSettlement(
+    [property: Tag(1)] DateOnly Date,
+    [property: Tag(2)] FuturesProductCode ContractCode,
+    [property: Tag(3)] ContractMonth ContractMonth,
+    [property: Tag(4)] decimal SettlePrice,
+    [property: Tag(5)] decimal? ImpliedRate) : IHasDate;

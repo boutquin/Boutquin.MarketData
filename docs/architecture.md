@@ -4,9 +4,9 @@
 
 `Boutquin.MarketData` is the shared data ingestion kernel for three consumer libraries:
 
-- **Boutquin.Trading** — backtesting, portfolio construction, factor research
-- **Boutquin.Analytics** — yield curves, fixings, conventions, valuation
-- **Boutquin.OptionPricing** — option models consuming curves and spot prices
+- **[Boutquin.Trading](https://github.com/boutquin/Boutquin.Trading)** — backtesting, portfolio construction, factor research
+- **[Boutquin.Curves](https://github.com/boutquin/Boutquin.Curves)** — yield curves, fixings, conventions, bootstrap calibration
+- **[Boutquin.OptionPricing](https://github.com/boutquin/Boutquin.OptionPricing)** — option models consuming curves and spot prices
 
 The kernel prevents data-fetching duplication across consumers. FX rates, price bars, economic series, overnight fixings, and yield curve quotes are universal — every quantitative system needs them. Without a shared kernel, each consumer reimplements transport, caching, parsing, and provenance tracking independently.
 
@@ -17,11 +17,12 @@ The kernel prevents data-fetching duplication across consumers. FX rates, price 
 ```
 Layer 1: Shared Ingestion Kernel (Boutquin.MarketData.*)
   Canonical records, typed requests, transport, caching, storage,
-  normalization, provenance, fallback orchestration, concrete adapters
+  normalization, provenance, fallback orchestration
+  Concrete adapters live in the separate Boutquin.MarketData.Adapter repository
 
 Layer 2: Domain Recipes/Builders (in each consumer repo)
-  Boutquin.Trading.Recipes   — BacktestDatasetBuilder, FactorResearchBuilder
-  Boutquin.Analytics.Recipes    — EodCurveSnapshotBuilder, FixingsSnapshotBuilder
+  Boutquin.Trading.Recipes   — BacktestDatasetBuilder, BacktestDatasetSpec
+  Boutquin.Curves.Recipes    — CurveBuilder, CurveRecipe, CurveSnapshot, CurveCalibrationInput
 
 Layer 3: Application Code (in each consumer repo)
   Backtests, curve builds, pricing runs — depend on recipes, not adapters
@@ -33,9 +34,9 @@ Layer 3: Application Code (in each consumer repo)
 |---------|----------|-----------|
 | Canonical record types (Bar, FxRate, ScalarObservation, ...) | Kernel Abstractions | Universal — same shape regardless of consumer |
 | Typed request records (PriceHistoryRequest, FxHistoryRequest, ...) | Kernel Abstractions | Request semantics are data-type-specific, not domain-specific |
-| Concrete source adapters (Tiingo, Frankfurter, FRED, NY Fed, ...) | Kernel Adapter.* packages | Emit kernel-level records; multiple consumers need the same sources |
+| Concrete source adapters (Tiingo, Frankfurter, FRED, NY Fed, ...) | Boutquin.MarketData.Adapter repository | Emit kernel-level records; multiple consumers need the same sources |
 | Transport, caching, storage, fallback | Kernel infrastructure packages | Generic plumbing shared by all adapters |
-| Recipes/builders (BacktestDatasetBuilder, EodCurveSnapshotBuilder) | Consumer domain repos | Compose kernel adapters into domain-specific bundles |
+| Recipes/builders (`BacktestDatasetBuilder`, `CurveBuilder`) | Consumer domain repos | Compose kernel adapters into domain-specific bundles |
 | Domain-specific adapters (CanDeal OTC quotes, legacy LIBOR) | Consumer domain repos | Only one domain needs them |
 
 ### The DRY test
@@ -47,7 +48,7 @@ services.AddMarketDataKernel();
 services.AddMarketDataFrankfurter();          // FX rates — shared adapter
 services.AddMarketDataNewYorkFed();           // SOFR fixings — shared adapter
 services.AddMarketDataUsTreasury();           // Par yields — shared adapter
-// Done — same adapters, same cache, same provenance as Trading and Analytics
+// Done — same adapters, same cache, same provenance as Trading and Curves
 ```
 
 Not: copy-paste Frankfurter parsing from Trading, or take a dependency on Trading just for FX.
@@ -57,12 +58,12 @@ Not: copy-paste Frankfurter parsing from Trading, or take a dependency on Tradin
 ## Package Layering
 
 ```
-Boutquin.MarketData.Abstractions              (core contracts + canonical records, zero dependencies)
+Boutquin.MarketData.Abstractions              (core contracts + canonical records; shared Boutquin.Domain types)
   ^
-Transport / Cache / Storage / Catalog         (infrastructure, depend on Abstractions only)
+Transport / Cache / Storage / Catalog         (infrastructure, depend on Abstractions and their external infrastructure libraries)
   ^
 Adapter.Tiingo / .Frankfurter / .Fred         (concrete adapters for Trading-origin sources)
-Adapter.BankOfCanada / .NewYorkFed            (concrete adapters for Analytics-origin sources)
+Adapter.BankOfCanada / .NewYorkFed            (concrete adapters for Curves-origin sources)
 Adapter.UsTreasury / .BankOfEngland / .Ecb    (overnight fixings + yield curves)
 Adapter.FamaFrench / .Cme / .TwelveData      (factor returns, futures, alternative equities)
   ^
@@ -83,11 +84,11 @@ Seven record families in `Abstractions/Records/`:
 |--------|--------|---------|
 | `Bar` | Date, Open, High, Low, Close, AdjustedClose, Volume | Trading (backtests), OptionPricing (spot history) |
 | `FxPair` | BaseCurrency, QuoteCurrency | All (currency pair identifier) |
-| `FxRate` | Date, BaseCurrency, QuoteCurrency, Rate | Trading (multi-currency backtests), Analytics (FX basis), OptionPricing (FX options) |
-| `ScalarObservation` | Date, Value, Units | Trading (FRED economic series), Analytics (overnight fixings), OptionPricing (risk-free rates) |
-| `YieldCurveQuote` | Tenor, Rate | Analytics (curve construction), OptionPricing (discount curves) |
-| `FuturesSettlement` | Date, ContractCode, ContractMonth, SettlePrice, ImpliedRate | Analytics (SOFR futures strip) |
-| `FactorObservation` | Date, Factors (dictionary) | Trading (Fama-French factor research) |
+| `FxRate` | Date, Rate (currency pair belongs to the dataset key) | Trading (multi-currency backtests), Curves (FX basis), OptionPricing (FX options) |
+| `ScalarObservation` | Date, Value, Units | Trading (FRED economic series), Curves (overnight fixings), OptionPricing (risk-free rates) |
+| `YieldCurveQuote` | Date, Tenor, Rate | Curves (curve construction), OptionPricing (discount curves) |
+| `FuturesSettlement` | Date, ContractCode, ContractMonth, SettlePrice, ImpliedRate | Curves (SOFR futures strip) |
+| `FactorObservation` | Date, FactorName, Value | Trading (Fama-French factor research) |
 
 ### Design decisions
 
@@ -160,7 +161,7 @@ Multiple adapters for the same `<TRequest, TRecord>` pair coexist via `TryAddEnu
 - Structured logging of requests, retries, and completions
 
 ### Caching
-- **L1** — `ExactOnceMemoryCache` / `LazyAsyncCache`: in-process, exact-once materialization. Cache hits set `RetrievalMode="cache"` on provenance so callers can distinguish cached from fresh data.
+- **L1** — `ExactOnceMemoryCache` uses in-process last-write-wins overwrites and per-entry TTL; `LazyAsyncCache` coalesces concurrent cold misses. Cache hits set `RetrievalMode="cache"` on provenance so callers can distinguish cached from fresh data.
 - **L2** — `WriteThroughCache<TKey, TData>`: durable write-through to `ISnapshotStore`. L2 snapshots preserve `DataIssue` entries alongside `DataProvenance` so warnings survive cache round-trips.
 - **Keys** — `CacheKeyBuilder`: deterministic, sorted, lexicographic
 
@@ -192,7 +193,7 @@ services.AddMarketDataFamaFrench();
 services.AddSingleton<BacktestDatasetBuilder>();
 ```
 
-### Analytics
+### Curves
 
 ```csharp
 services.AddMarketDataKernel();
@@ -203,8 +204,8 @@ services.AddMarketDataBankOfEngland();
 services.AddMarketDataEcb();
 services.AddMarketDataCme(opts => opts.SettlementDirectory = "...");
 
-// Analytics' own recipe layer composes these into curve snapshots
-services.AddSingleton<EodCurveSnapshotBuilder>();
+// Boutquin.Curves' own recipe layer composes these into calibrated curve snapshots.
+// See https://github.com/boutquin/Boutquin.Curves — Boutquin.Curves.Recipes.CurveBuilder.
 ```
 
 ### OptionPricing
@@ -215,9 +216,27 @@ services.AddMarketDataFrankfurter();          // FX for FX options
 services.AddMarketDataNewYorkFed();           // SOFR for discount curves
 services.AddMarketDataUsTreasury();           // Par yields for curve context
 
-// OptionPricing consumes Analytics' curve recipes, not raw adapters
-// Discount curves come via Boutquin.Analytics.Recipes.EodCurveSnapshotBuilder
+// OptionPricing consumes Boutquin.Curves' calibrated recipes, not raw adapters.
+// Discount curves come via Boutquin.Curves.Recipes.CurveBuilder
+// (see https://github.com/boutquin/Boutquin.Curves).
 ```
+
+---
+
+## Time-Series Store Cache Tier
+
+`DataPipeline` can route cache reads and gap-fill writes through a columnar LSM
+time-series store (`Boutquin.Storage`'s `ITimeSeriesStore<TDatasetKey, TRecord>`)
+in place of the legacy L2 snapshot store, behind the preview flag
+`DataPipelineOptions.UseTimeSeriesStore` (default `false`). With the flag off,
+the pipeline retains its existing L2 exact-key behaviour unchanged; with the
+flag on, cache reads become coverage-aware — a request is served from the
+store when its date range is already covered, and only the genuinely missing
+dates trigger an adapter dispatch. See
+[Time-Series Store Cache Tier](time-series-cache.md) for the full gap-fill
+flow, snapshot-isolated reads for backtests and calibration, the segment
+format and compaction choices, and the Boutquin.Storage 2.0 wire-format
+migration note.
 
 ---
 
@@ -225,6 +244,6 @@ services.AddMarketDataUsTreasury();           // Par yields for curve context
 
 | Domain | What stays | Why |
 |--------|-----------|-----|
-| Trading | `BacktestDatasetBuilder`, `PortfolioInputSnapshotBuilder`, panel alignment, CSV symbol reader | Domain-specific bundle composition |
-| Analytics | `EodCurveSnapshotBuilder`, `MarketDataAggregationService`, commercial adapter scaffolds (ICE, CanDeal, OTC), legacy adapters (LIBOR, CDOR), curve construction | Domain-specific governance, bootstrap, conventions |
-| OptionPricing | `OptionMarketData`, volatility surface calibration, dividend schedule construction | Domain-specific pricing model inputs |
+| [Trading](https://github.com/boutquin/Boutquin.Trading) | `BacktestDatasetBuilder`, `BacktestDatasetSpec`, panel alignment, portfolio construction | Domain-specific bundle composition |
+| [Curves](https://github.com/boutquin/Boutquin.Curves) | `CurveBuilder`, `CurveRecipe`, `CurveSnapshot`, `CurveCalibrationInput`, commercial adapter scaffolds (ICE, CanDeal, OTC), legacy adapters (LIBOR, CDOR), bootstrap calibration | Domain-specific governance, bootstrap, conventions |
+| [OptionPricing](https://github.com/boutquin/Boutquin.OptionPricing) | Black-Scholes and beyond — closed-form pricing, binomial trees, implied volatility, calibrated smile surfaces | Domain-specific pricing model inputs |

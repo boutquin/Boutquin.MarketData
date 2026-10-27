@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
 namespace Boutquin.MarketData.Abstractions.Records;
@@ -49,5 +50,5 @@ public sealed record CorporateAction(
     CorporateActionType ActionType,
     decimal? Factor,
     decimal? Amount,
-    CurrencyCode? Currency,
+    Currency? Currency,
     string? Description);

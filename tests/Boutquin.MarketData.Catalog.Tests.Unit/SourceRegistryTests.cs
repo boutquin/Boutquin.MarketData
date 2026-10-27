@@ -18,9 +18,7 @@ using Boutquin.MarketData.Abstractions.Provenance;
 using Boutquin.MarketData.Abstractions.Requests;
 using Boutquin.MarketData.Abstractions.Results;
 using Boutquin.MarketData.Catalog.Registry;
-
 using FluentAssertions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Catalog.Tests.Unit;

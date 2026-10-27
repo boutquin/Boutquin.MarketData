@@ -27,10 +27,14 @@ public sealed class YieldCurveQuoteTests
     [Fact]
     public void Construction_PreservesAllFields()
     {
+        // Arrange
+        var date = new DateOnly(2026, 4, 10);
+
         // Act
-        var quote = new YieldCurveQuote("10Y", 0.045m);
+        var quote = new YieldCurveQuote(date, "10Y", 0.045m);
 
         // Assert
+        quote.Date.Should().Be(date);
         quote.Tenor.Should().Be("10Y");
         quote.Rate.Should().Be(0.045m);
     }
@@ -39,8 +43,9 @@ public sealed class YieldCurveQuoteTests
     public void Equality_SameValues_AreEqual()
     {
         // Arrange
-        var quote1 = new YieldCurveQuote("5Y", 0.038m);
-        var quote2 = new YieldCurveQuote("5Y", 0.038m);
+        var date = new DateOnly(2026, 4, 10);
+        var quote1 = new YieldCurveQuote(date, "5Y", 0.038m);
+        var quote2 = new YieldCurveQuote(date, "5Y", 0.038m);
 
         // Act & Assert
         quote1.Should().Be(quote2);

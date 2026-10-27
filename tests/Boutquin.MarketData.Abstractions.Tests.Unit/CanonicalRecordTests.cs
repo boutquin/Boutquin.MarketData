@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.Domain.Enumerations;
 using Boutquin.MarketData.Abstractions.Records;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 
@@ -31,7 +32,7 @@ public sealed class CorporateActionTests
         var action = new CorporateAction(
             new DateOnly(2024, 8, 15), new Symbol("AAPL"),
             CorporateActionType.CashDividend,
-            Factor: null, Amount: 0.82m, Currency: CurrencyCode.USD,
+            Factor: null, Amount: 0.82m, Currency: Currency.USD,
             Description: "Quarterly dividend");
 
         action.ActionType.Should().Be(CorporateActionType.CashDividend);
@@ -83,21 +84,21 @@ public sealed class CorporateActionTests
 
 public sealed class OptionQuoteTests
 {
+    // M-2.7: OptionQuote slimmed to (Date, Bid?, Ask?, LastPrice?, ImpliedVolatility?, OpenInterest,
+    // Volume). The contract identity (Underlying, Expiry, Strike, Type) moved into
+    // OptionQuoteDatasetKey (operator decision A / §2.5.1), so the body no longer carries those fields;
+    // the prior Underlying/Expiry/Strike/Type body assertions are removed for that reason. Every
+    // surviving body field is still asserted below.
     [Fact]
     public void Construction_preserves_all_fields()
     {
         var quote = new OptionQuote(
-            new DateOnly(2024, 6, 15), new Symbol("AAPL"),
-            new DateOnly(2024, 7, 19), 195.0m, OptionType.Call,
+            new DateOnly(2024, 6, 15),
             Bid: 5.20m, Ask: 5.40m, LastPrice: 5.30m,
             ImpliedVolatility: 0.25m,
             OpenInterest: 15_000, Volume: 2_500);
 
         quote.Date.Should().Be(new DateOnly(2024, 6, 15));
-        quote.Underlying.Should().Be(new Symbol("AAPL"));
-        quote.Expiry.Should().Be(new DateOnly(2024, 7, 19));
-        quote.Strike.Should().Be(195.0m);
-        quote.Type.Should().Be(OptionType.Call);
         quote.Bid.Should().Be(5.20m);
         quote.Ask.Should().Be(5.40m);
         quote.LastPrice.Should().Be(5.30m);
@@ -110,8 +111,7 @@ public sealed class OptionQuoteTests
     public void Nullable_fields_can_be_null()
     {
         var quote = new OptionQuote(
-            new DateOnly(2024, 6, 15), new Symbol("SPY"),
-            new DateOnly(2024, 12, 20), 500.0m, OptionType.Put,
+            new DateOnly(2024, 6, 15),
             Bid: null, Ask: null, LastPrice: null,
             ImpliedVolatility: null,
             OpenInterest: 0, Volume: 0);
@@ -125,8 +125,8 @@ public sealed class OptionQuoteTests
     [Fact]
     public void Record_equality_works()
     {
-        var a = new OptionQuote(new DateOnly(2024, 1, 1), new Symbol("X"), new DateOnly(2024, 2, 1), 100m, OptionType.Call, 1m, 2m, 1.5m, 0.2m, 100, 50);
-        var b = new OptionQuote(new DateOnly(2024, 1, 1), new Symbol("X"), new DateOnly(2024, 2, 1), 100m, OptionType.Call, 1m, 2m, 1.5m, 0.2m, 100, 50);
+        var a = new OptionQuote(new DateOnly(2024, 1, 1), 1m, 2m, 1.5m, 0.2m, 100, 50);
+        var b = new OptionQuote(new DateOnly(2024, 1, 1), 1m, 2m, 1.5m, 0.2m, 100, 50);
 
         a.Should().Be(b);
     }

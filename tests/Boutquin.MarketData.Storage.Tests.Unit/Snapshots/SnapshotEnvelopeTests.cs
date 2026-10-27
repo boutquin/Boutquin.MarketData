@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+using Boutquin.MarketData.Abstractions.Diagnostics;
 using Boutquin.MarketData.Abstractions.Provenance;
 using Boutquin.MarketData.Abstractions.Results;
 using Boutquin.MarketData.Storage.Snapshots;
@@ -27,6 +28,46 @@ namespace Boutquin.MarketData.Storage.Tests.Unit.Snapshots;
 
 public sealed class SnapshotEnvelopeTests
 {
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void Metadata_owns_audit_collections(bool useInit, bool useReadOnlyView)
+    {
+        var original = new DataProvenance(new ProviderCode("original"), "AAPL", LicenseType.Commercial,
+            RetrievalMode.Api, FreshnessClass.EndOfDay, DateTimeOffset.UnixEpoch, null);
+        var issue = new DataIssue(IssueCode.MissingField, IssueSeverity.Error, "Missing audited field");
+        var provenance = new List<DataProvenance> { original };
+        var issues = new List<DataIssue> { issue };
+        IReadOnlyList<DataProvenance> provenanceInput = useReadOnlyView ? provenance.AsReadOnly() : provenance;
+        IReadOnlyList<DataIssue> issuesInput = useReadOnlyView ? issues.AsReadOnly() : issues;
+        var metadata = useInit
+            ? new SnapshotMetadata(DateTimeOffset.UnixEpoch, [], []) with { Provenance = provenanceInput, Issues = issuesInput }
+            : new SnapshotMetadata(DateTimeOffset.UnixEpoch, provenanceInput, issuesInput);
+
+        provenance.Clear();
+        issues.Clear();
+
+        metadata.Provenance.Should().ContainSingle().Which.Should().Be(original);
+        metadata.Issues.Should().ContainSingle().Which.Should().Be(issue);
+    }
+
+    [Fact]
+    public void Metadata_getters_refuse_audit_mutation()
+    {
+        var original = new DataProvenance(new ProviderCode("original"), "AAPL", LicenseType.Commercial,
+            RetrievalMode.Api, FreshnessClass.EndOfDay, DateTimeOffset.UnixEpoch, null);
+        var issue = new DataIssue(IssueCode.MissingField, IssueSeverity.Error, "Missing audited field");
+        var metadata = new SnapshotMetadata(DateTimeOffset.UnixEpoch, new[] { original }, new[] { issue });
+
+        Action mutateProvenance = () => ((IList<DataProvenance>)metadata.Provenance)[0] = original with { LicenseFlag = LicenseType.Free };
+        Action mutateIssues = () => ((IList<DataIssue>)metadata.Issues)[0] = issue with { Message = "Changed" };
+
+        mutateProvenance.Should().Throw<NotSupportedException>();
+        mutateIssues.Should().Throw<NotSupportedException>();
+    }
+
     [Fact]
     public void Construction_preserves_all_fields()
     {

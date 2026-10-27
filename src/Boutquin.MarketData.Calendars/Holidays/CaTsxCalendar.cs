@@ -18,10 +18,12 @@ namespace Boutquin.MarketData.Calendars.Holidays;
 
 /// <summary>
 /// TSX (Toronto Stock Exchange) trading calendar. Computes Canadian market holidays
-/// algorithmically for any year, including weekend observance rules.
+/// using recurring rules and weekend observance adjustments.
 /// </summary>
 /// <remarks>
-/// This is the equity exchange calendar (9 holidays). It does <b>not</b> include Truth
+/// Recurring rules use Gregorian Easter from 1583 onward. Historical rule changes and
+/// exceptional closures are not comprehensively represented; this is not a complete
+/// historical or future exchange schedule. This equity calendar does <b>not</b> include Truth
 /// and Reconciliation Day or Remembrance Day, for which the TSX remains open.
 /// For the statutory calendar, use <see cref="HolidayCalendar"/> with
 /// <see cref="HolidayDatasets.CaStatutory"/>.
@@ -51,14 +53,21 @@ public sealed class CaTsxCalendar : BusinessCalendarBase
         var month = date.Month;
         var day = date.Day;
 
+        // Full-day equity closure confirmed by the Bank of Canada 2001-09-12 statement.
+        // September 11 traded before an emergency early close; it remains a business day.
+        if (date == new DateOnly(2001, 9, 12))
+        {
+            return true;
+        }
+
         // New Year's Day (Jan 1) — observed
         if (IsObservedHoliday(date, new DateOnly(year, 1, 1)))
         {
             return true;
         }
 
-        // Family Day — 3rd Monday of February
-        if (month == 2 && date.DayOfWeek == DayOfWeek.Monday && CalendarHelpers.NthDayOfWeek(year, 2, DayOfWeek.Monday, 3) == day)
+        // Family Day — 3rd Monday of February, first observed in Ontario/TSX in 2008.
+        if (year >= 2008 && month == 2 && date.DayOfWeek == DayOfWeek.Monday && CalendarHelpers.NthDayOfWeek(year, 2, DayOfWeek.Monday, 3) == day)
         {
             return true;
         }
@@ -74,7 +83,7 @@ public sealed class CaTsxCalendar : BusinessCalendarBase
         {
             var may25 = new DateOnly(year, 5, 25);
             var victoriaDay = may25.DayOfWeek == DayOfWeek.Monday
-                ? may25
+                ? may25.AddDays(-7)
                 : may25.AddDays(-((int)may25.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7);
             if (date == victoriaDay)
             {
@@ -123,10 +132,10 @@ public sealed class CaTsxCalendar : BusinessCalendarBase
     {
         var christmas = new DateOnly(year, 12, 25);
 
-        // Saturday Christmas: Fri=Christmas observed, Mon=Boxing Day observed
+        // Saturday Christmas: Mon=Christmas observed, Tue=Boxing Day observed
         if (christmas.DayOfWeek == DayOfWeek.Saturday)
         {
-            return date == christmas.AddDays(-1) || date == christmas.AddDays(2);
+            return date == christmas.AddDays(2) || date == christmas.AddDays(3);
         }
 
         // Sunday Christmas: Mon=Christmas observed, Tue=Boxing Day observed

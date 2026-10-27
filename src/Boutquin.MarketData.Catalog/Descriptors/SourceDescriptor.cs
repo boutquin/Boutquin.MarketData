@@ -20,13 +20,12 @@ namespace Boutquin.MarketData.Catalog.Descriptors;
 
 /// <summary>
 /// Immutable metadata describing a data source's identity, governance posture, and capabilities.
-/// Used by the <see cref="Registry.SourceRegistry{TRequest,TRecord}"/> for adapter routing
-/// and by the pipeline for provenance and compliance tracking.
+/// Applications may use this metadata to define their own source-selection policies.
 /// </summary>
-/// <param name="SourceId">Stable identifier for preferred-source routing (e.g., "nyfed-sofr", "tiingo-equity").</param>
+/// <param name="SourceId">Stable descriptive identifier (e.g., "nyfed-sofr", "tiingo-equity").</param>
 /// <param name="DisplayName">Human-readable label for logging and diagnostics.</param>
-/// <param name="Tier">Governance tier controlling fallback ordering and production eligibility.</param>
-/// <param name="LicenseFlag">Licensing posture for compliance-aware source selection.</param>
+/// <param name="Tier">Governance tier available to application-level selection policies.</param>
+/// <param name="LicenseFlag">Descriptive licensing posture; the kernel does not enforce it.</param>
 /// <param name="PrimaryFrequency">The primary publication cadence of this source.</param>
 /// <param name="SupportsHistorical">Whether this source provides historical backfill data.</param>
 /// <param name="SupportsEndOfDay">Whether this source provides end-of-day snapshots.</param>
@@ -36,11 +35,12 @@ namespace Boutquin.MarketData.Catalog.Descriptors;
 /// <remarks>
 /// <para>
 /// Domain-specific classification (currency, instrument family) belongs in the domain repo's
-/// adapter, not here. This record carries only the source-level metadata that the shared kernel
-/// needs for routing, fallback, and provenance.
+/// adapter, not here. This record is passive metadata. The registry routes adapters using
+/// their provider keys and request support; the pipeline does not automatically consume
+/// this descriptor's tier, license flag, or capability fields.
 /// </para>
 /// <para>
-/// The <see cref="SourceId"/> should be unique within a <see cref="Registry.SourceRegistry{TRequest,TRecord}"/>.
+/// Applications should keep <see cref="SourceId"/> unique within their descriptor catalogue.
 /// Use lowercase-with-hyphens convention (e.g., "bank-of-canada-valet", "fred-series").
 /// </para>
 /// </remarks>

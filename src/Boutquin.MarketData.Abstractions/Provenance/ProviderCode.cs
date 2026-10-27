@@ -38,12 +38,11 @@ namespace Boutquin.MarketData.Abstractions.Provenance;
 /// compare equal under both structural equality and <see cref="CompareTo"/>.
 /// </para>
 /// <para>
-/// Adapter packages should expose their canonical <see cref="ProviderCode"/> as a
-/// <c>public static readonly</c> field (e.g. <c>public static readonly ProviderCode Code
-/// = new("tiingo");</c>) so consumers can reference <c>KnownProviders.Tiingo</c> without
-/// spelling the literal. No global registry is maintained in MarketData itself — two
-/// adapters that pick the same value collide at audit rather than at build, but this is
-/// considered a code-review concern, not a runtime bug.
+/// Adapter packages return provider codes from their adapter implementations. Provider identity
+/// uses normalized value equality, so registrations, lookups, and provenance agree even when
+/// separate <see cref="ProviderCode"/> instances carry the same value. No global registry is
+/// maintained in MarketData itself — two adapters that pick the same value collide at audit
+/// rather than at build, but this is considered a code-review concern, not a runtime bug.
 /// </para>
 /// </remarks>
 public readonly record struct ProviderCode : IComparable<ProviderCode>

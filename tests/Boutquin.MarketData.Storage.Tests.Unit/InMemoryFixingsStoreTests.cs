@@ -15,11 +15,8 @@
 //
 
 using Boutquin.MarketData.Abstractions.ReferenceData;
-using Boutquin.MarketData.Abstractions.Requests;
 using Boutquin.MarketData.Storage.InMemory;
-
 using FluentAssertions;
-
 using Xunit;
 
 namespace Boutquin.MarketData.Storage.Tests.Unit;

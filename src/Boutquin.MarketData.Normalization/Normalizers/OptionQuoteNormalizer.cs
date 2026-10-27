@@ -30,9 +30,17 @@ namespace Boutquin.MarketData.Normalization.Normalizers;
 /// Values &lt; 1 are assumed to already be in decimal form.
 /// </para>
 /// <para>
-/// Underlying is strongly-typed (<c>Symbol</c>) after the reference-data
-/// consolidation spec — casing normalization is no longer applicable at this layer
-/// because the <c>Symbol</c> constructor already rejects whitespace.
+/// Contract identity (<c>Underlying</c>, <c>Expiry</c>, <c>Strike</c>, <c>Type</c>) lives in
+/// <c>OptionQuoteDatasetKey</c>, not the record body, so this normalizer operates on the slimmed
+/// body <c>(Date, Bid?, Ask?, LastPrice?, ImpliedVolatility?, OpenInterest, Volume)</c>. <c>Strike</c>
+/// rounding is therefore dropped here — strike precision is governed by <c>[DecimalScale(4)]</c> on
+/// the key's ordered wire, not by this normalizer.
+/// </para>
+/// <para>
+/// The implied-volatility conversion is a representation heuristic, not a range check. A genuine
+/// decimal volatility greater than or equal to <c>1.0</c> (100%) is indistinguishable from a
+/// percent-form value and will be divided by 100. Adapters for markets where such values are valid
+/// should emit a known representation and replace or bypass this normalizer.
 /// </para>
 /// </remarks>
 public sealed class OptionQuoteNormalizer : INormalizer<OptionQuote, OptionQuote>
@@ -43,22 +51,21 @@ public sealed class OptionQuoteNormalizer : INormalizer<OptionQuote, OptionQuote
     /// Initializes a new <see cref="OptionQuoteNormalizer"/>.
     /// </summary>
     /// <param name="decimalPlaces">Decimal places for price rounding. Defaults to 4.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Precision is outside the decimal rounding range of 0 through 28.</exception>
     public OptionQuoteNormalizer(int decimalPlaces = 4)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(decimalPlaces);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(decimalPlaces, 28);
         _decimalPlaces = decimalPlaces;
     }
 
     /// <inheritdoc />
     public OptionQuote Normalize(OptionQuote raw)
     {
-        ArgumentNullException.ThrowIfNull(raw);
+        NormalizerInputGuard.ThrowIfNull(raw);
 
         return new OptionQuote(
             raw.Date,
-            raw.Underlying,
-            raw.Expiry,
-            Round(raw.Strike),
-            raw.Type,
             raw.Bid.HasValue ? Round(raw.Bid.Value) : null,
             raw.Ask.HasValue ? Round(raw.Ask.Value) : null,
             raw.LastPrice.HasValue ? Round(raw.LastPrice.Value) : null,

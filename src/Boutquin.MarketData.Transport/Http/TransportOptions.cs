@@ -22,12 +22,15 @@ namespace Boutquin.MarketData.Transport.Http;
 public sealed class TransportOptions
 {
     /// <summary>
-    /// User-Agent header value sent with every request.
+    /// Default User-Agent sent with each request, including requests through a supplied client.
+    /// An explicit per-request User-Agent takes precedence. The supplied client's default headers
+    /// are not changed.
     /// </summary>
     public string UserAgent { get; set; } = "Boutquin.MarketData/1.0";
 
     /// <summary>
-    /// HTTP request timeout per attempt.
+    /// HTTP request timeout per attempt, including response-body buffering. Applies without
+    /// changing a borrowed client's timeout; the caller's cancellation can stop the attempt earlier.
     /// </summary>
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(30);
 
@@ -73,9 +76,10 @@ public sealed class TransportOptions
 
     /// <summary>
     /// When <see langword="false"/> (the default), <see cref="ResilientHttpDataTransport.GetAsync"/>
-    /// rejects requests to loopback, link-local, and RFC-1918 private-network addresses as SSRF
-    /// defense. Set to <see langword="true"/> only for test harnesses that must reach localhost
-    /// or VPN-resolved private hosts.
+    /// rejects literal loopback, link-local, and RFC-1918 private-network addresses, plus known
+    /// internal hostnames, before dispatch. This guard does not resolve DNS or prevent DNS
+    /// rebinding; restrict untrusted hostnames or enforce network-level egress controls.
+    /// Set to <see langword="true"/> only when private-network access is explicitly intended.
     /// </summary>
     public bool AllowPrivateNetworks { get; set; }
 
@@ -84,6 +88,7 @@ public sealed class TransportOptions
     /// <see cref="ResilientHttpDataTransport.GetAsync"/> call. Defaults to 32 MiB. A misbehaving
     /// or malicious server that streams a multi-GB body will be aborted once the buffered size
     /// exceeds this limit, preventing memory exhaustion. Zero disables the check (not recommended).
+    /// Negative values are rejected when constructing the transport.
     /// </summary>
     public long MaxResponseBytes { get; set; } = 32L * 1024 * 1024;
 
