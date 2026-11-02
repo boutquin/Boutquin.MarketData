@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [2.0.1] — Unreleased
+## [2.0.1] — 2026-11-02
 
-The first stable release after 2.0.0-rc.20261027.4. A 2.0.0 stable was prepared but never published, so its changes (listed below under 2.0.0) ship here.
+The first stable release after 2.0.0-rc.20261027.4, published to nuget.org on 2026-11-02 from source `e6079f9`. A 2.0.0 stable was prepared but never published, so its changes (listed below under 2.0.0) ship here.
 
 ### Changed
 - Refreshes stable third-party dependencies and build tooling; runtime contracts remain unchanged.

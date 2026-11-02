@@ -53,6 +53,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir release-assets --pattern '*.nupkg' --pattern '*.snupkg' --pattern 'package-hashes.json'
+      - name: Verify release documentation for stable tags
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [[ "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            python3 scripts/check-release-docs.py "${BASH_REMATCH[1]}"
+          fi
       - name: Build metadata inspector only
         run: dotnet build scripts/package-inspector/PackageInspector.csproj -c Release
       - name: Verify exact qualified package bytes and public source identity

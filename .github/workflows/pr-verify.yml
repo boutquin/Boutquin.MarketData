@@ -43,6 +43,12 @@ jobs:
             [[ "$MinVerVersionOverride" =~ ^2\.0\.[01](-rc\.[0-9]+(\.[0-9]+)*)?$ ]]
           fi
 
+      - name: Verify release documentation describes the qualified version
+        run: |
+          if [[ "$MinVerVersionOverride" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            python3 scripts/check-release-docs.py "$MinVerVersionOverride"
+          fi
+
       - name: Enable long paths for preserved private evidence on Windows
         if: runner.os == 'Windows'
         shell: pwsh
