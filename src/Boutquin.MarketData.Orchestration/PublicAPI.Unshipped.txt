@@ -94,3 +94,5 @@ Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecover
 Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexCapacity.set -> void
 Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexTtl.get -> System.TimeSpan
 Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.TimeSeriesRecoveryIndexTtl.set -> void
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.AllowIncrementalPriceHistoryGapFill.get -> bool
+Boutquin.MarketData.Orchestration.Pipeline.DataPipelineOptions.AllowIncrementalPriceHistoryGapFill.set -> void

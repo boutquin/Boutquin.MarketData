@@ -182,7 +182,7 @@ public sealed class CompactionAndRecoveryTests : IDisposable
             checkpointDirectory: Path.Combine(_tempDir, "checkpoints"),
             eventLogDirectory: Path.Combine(_tempDir, "events"),
             timeSeriesDirectory: Path.Combine(_tempDir, subdir),
-            configurePipeline: opt => opt.UseTimeSeriesStore = true);
+            configurePipeline: opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
         services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter);
         using var sp = services.BuildServiceProvider();
 
@@ -236,7 +236,7 @@ public sealed class CompactionAndRecoveryTests : IDisposable
                 timeSeriesDirectory: Path.Combine(_tempDir, "ingested"),
                 configurePipeline: options =>
                 {
-                    options.UseTimeSeriesStore = true;
+                    options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                     options.L1CacheTtl = TimeSpan.Zero;
                     options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
                 });

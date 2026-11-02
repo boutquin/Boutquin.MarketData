@@ -174,6 +174,7 @@ public sealed class Round2PipelineRegressionTests : IDisposable
             configurePipeline: options =>
             {
                 options.UseTimeSeriesStore = useTimeSeriesStore;
+                options.AllowIncrementalPriceHistoryGapFill = useTimeSeriesStore;
                 options.L1CacheTtl = TimeSpan.Zero;
                 options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
             });

@@ -48,6 +48,10 @@ behaviour until they explicitly opt in. See
 [Storage format versioning](#storage-format-versioning) before flipping the
 flag on an existing data directory.
 
+### Price history and window-anchored levels
+
+`PriceHistoryRequest` bypasses the incremental gap-fill path by default, even with `UseTimeSeriesStore` on: the request is fetched whole through the legacy path. Some providers return levels anchored to the fetch window (for example a total return rebuilt from the first bar of each response), so stored segments fetched at different times carry different anchors and a merged series is wrong at every seam. Set `AllowIncrementalPriceHistoryGapFill = true` only when every adapter serving price history returns levels that do not depend on the window.
+
 ### Restart recovery and bounded indexes
 
 For single-row series, the pipeline persists the providers that contributed to a

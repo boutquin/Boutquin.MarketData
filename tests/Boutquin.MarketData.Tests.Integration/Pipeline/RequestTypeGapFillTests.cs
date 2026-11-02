@@ -66,7 +66,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
             services => services.AddSingleton<IDataSourceAdapter<FuturesSettlementRequest, FuturesSettlement>>(adapter),
             options =>
             {
-                options.UseTimeSeriesStore = true;
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                 options.L1CacheTtl = TimeSpan.Zero;
                 options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
             }))
@@ -77,7 +77,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
 
         using var reader = BuildKernel(_ => { }, options =>
         {
-            options.UseTimeSeriesStore = true;
+            options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
             options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
         });
         var recovered = await reader.GetRequiredService<IDataPipeline>().ExecuteAsync<FuturesSettlementRequest, FuturesSettlement>(request);
@@ -88,7 +88,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
     public async Task Futures_legacy_blank_month_fails_before_merging_lossy_data()
     {
         var date = new DateOnly(2024, 1, 2);
-        using var kernel = BuildKernel(_ => { }, options => options.UseTimeSeriesStore = true);
+        using var kernel = BuildKernel(_ => { }, options => options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true);
         var store = kernel.GetRequiredService<ITimeSeriesStoreRegistry>().Resolve<FuturesSettlementDatasetKey, FuturesSettlement>()!;
         await store.AppendAsync(new FuturesSettlementDatasetKey("default", "SR3", string.Empty),
             [new FuturesSettlement(date, new FuturesProductCode("SR3"), new ContractMonth(2026, 6), 95m, 0.05m)]);
@@ -96,6 +96,56 @@ public sealed class RequestTypeGapFillTests : IDisposable
 
         var read = () => kernel.GetRequiredService<IDataPipeline>().ExecuteAsync<FuturesSettlementRequest, FuturesSettlement>(request);
         await read.Should().ThrowAsync<MarketDataStorageException>().WithMessage("*re-ingest*");
+    }
+
+    // Window-anchored price levels carry a different anchor per fetched window, so the default
+    // keeps price history off the incremental time-series path: each requested range is fetched
+    // in one piece and nothing is spliced.
+    [Fact]
+    public async Task PriceHistory_by_default_bypasses_incremental_gap_fill()
+    {
+        var adapter = new CountingAdapter<PriceHistoryRequest, Bar>("prices",
+            range => [new Bar(range.From, 1m, 1m, 1m, 1m, 1m, 1)]);
+        using var kernel = BuildKernel(
+            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            options =>
+            {
+                options.UseTimeSeriesStore = true;
+                options.L1CacheTtl = TimeSpan.Zero;
+            });
+        var pipeline = kernel.GetRequiredService<IDataPipeline>();
+        var first = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 5)));
+        var wider = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 9)));
+
+        await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(first);
+        await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(wider);
+
+        // The wider request is fetched whole, never as a gap spliced onto the stored segment.
+        adapter.Dispatches.Should().Equal([first.Range, wider.Range]);
+    }
+
+    [Fact]
+    public async Task PriceHistory_opt_in_fetches_only_the_gap()
+    {
+        var adapter = new CountingAdapter<PriceHistoryRequest, Bar>("prices",
+            range => [new Bar(range.From, 1m, 1m, 1m, 1m, 1m, 1)]);
+        using var kernel = BuildKernel(
+            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            options =>
+            {
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
+                options.L1CacheTtl = TimeSpan.Zero;
+                options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
+            });
+        var pipeline = kernel.GetRequiredService<IDataPipeline>();
+        var first = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 5)));
+        var wider = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 9)));
+
+        await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(first);
+        await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(wider);
+
+        adapter.Dispatches.Should().HaveCount(2);
+        adapter.Dispatches[1].From.Should().BeAfter(first.Range.From, "only the uncovered tail is dispatched");
     }
 
     private readonly string _tempDir =
@@ -186,7 +236,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<FxHistoryRequest, FxRate>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
         var request = new FxHistoryRequest(
@@ -212,7 +262,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<EconomicSeriesRequest, ScalarObservation>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
         var request = new EconomicSeriesRequest(
@@ -246,7 +296,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<OptionChainRequest, OptionChainRow>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
         var request = new OptionChainRequest(

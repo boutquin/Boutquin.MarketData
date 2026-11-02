@@ -32,3 +32,6 @@ review-accepted.yaml export-ignore
 
 # Tests of private planning artifacts do not belong in public source exports.
 tests/Boutquin.MarketData.DependencyInjection.Tests.Unit/DividendPrivateSpecificationTests.cs export-ignore
+
+# Private archive access is excluded from public source snapshots.
+.github/workflows/qualify-patch-private.yml export-ignore

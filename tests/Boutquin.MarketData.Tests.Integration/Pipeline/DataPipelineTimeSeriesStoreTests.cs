@@ -151,7 +151,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
             options =>
             {
-                options.UseTimeSeriesStore = true;
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                 options.QuarantineBehavior = QuarantineBehavior.FailQuery;
                 options.ContinueOnPartitionFailure = continueOnFailure;
                 options.DataQualityIncidentSink = sink;
@@ -196,7 +196,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
             options =>
             {
-                options.UseTimeSeriesStore = true;
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                 options.QuarantineBehavior = QuarantineBehavior.SkipRowGroup;
                 options.DataQualityIncidentSink = sink;
             });
@@ -240,7 +240,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
             options =>
             {
-                options.UseTimeSeriesStore = true;
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                 options.QuarantineBehavior = QuarantineBehavior.TreatAsGap;
                 options.DataQualityIncidentSink = sink;
             });
@@ -293,7 +293,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
             options =>
             {
-                options.UseTimeSeriesStore = true;
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                 options.QuarantineBehavior = QuarantineBehavior.TreatAsGap;
             });
 
@@ -394,7 +394,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         // Pre-populate the LIVE store resolved from the production registry with coverage
         // (2000-01-01, 2026-04-18) under (default, Daily, "AGG").
@@ -439,7 +439,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -474,7 +474,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -540,7 +540,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -582,7 +582,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -623,7 +623,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -667,7 +667,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
         var to = new DateOnly(2004, 1, 1);
@@ -698,7 +698,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -740,7 +740,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -787,7 +787,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
             },
             opt =>
             {
-                opt.UseTimeSeriesStore = true;
+                opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true;
                 opt.TimeSeriesStalenessMaxAge = TimeSpan.FromDays(7);
             });
 
@@ -830,7 +830,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
             svc.AddSingleton<IClock>(new FakeClock { UtcNow = new DateTimeOffset(2026, 1, 20, 0, 0, 0, TimeSpan.Zero) });
         }, options =>
         {
-            options.UseTimeSeriesStore = true;
+            options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
             options.TimeSeriesStalenessMaxAge = TimeSpan.FromDays(1);
         });
         var store = sp.GetRequiredService<ITimeSeriesStoreRegistry>().Resolve<PriceBarDatasetKey, Bar>()!;
@@ -861,7 +861,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
 
@@ -910,7 +910,7 @@ public sealed class DataPipelineTimeSeriesStoreTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;

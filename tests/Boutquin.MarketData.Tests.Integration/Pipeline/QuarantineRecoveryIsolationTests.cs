@@ -206,7 +206,7 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
             checkpointDirectory: Path.Combine(root, "checkpoints"),
             eventLogDirectory: Path.Combine(root, "events"),
             timeSeriesDirectory: Path.Combine(root, "timeseries"),
-            configurePipeline: options => options.UseTimeSeriesStore = true);
+            configurePipeline: options => options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true);
         configure(services);
         return services.BuildServiceProvider();
     }

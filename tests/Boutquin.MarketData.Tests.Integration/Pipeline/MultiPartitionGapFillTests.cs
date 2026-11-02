@@ -143,7 +143,7 @@ public sealed class MultiPartitionGapFillTests : IDisposable
         var adapter = new PerSymbolBarAdapter();
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
 
@@ -207,7 +207,7 @@ public sealed class MultiPartitionGapFillTests : IDisposable
         var adapter = new PerPairFxAdapter();
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<FxHistoryRequest, FxRate>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
         var request = new FxHistoryRequest(

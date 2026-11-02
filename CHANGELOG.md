@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.1] — Unreleased
+
+The first stable release after 2.0.0-rc.20261027.4. A 2.0.0 stable was prepared but never published, so its changes (listed below under 2.0.0) ship here.
+
+### Changed
+- Refreshes stable third-party dependencies and build tooling; runtime contracts remain unchanged.
+- Retains assembly version 2.0.0.0 and advances file version to 2.0.1.0.
+- Uses fresh package identities; previously qualified 2.0.0 and RC archives remain immutable.
+
+### Added
+- Publishing uses nuget.org trusted publishing (GitHub OIDC); the workflow no longer reads a long-lived API key.
+- `DataPipelineOptions.AllowIncrementalPriceHistoryGapFill` (default `false`). With `UseTimeSeriesStore` on, price-history requests now skip the incremental gap-fill tier and fetch each requested range in one piece. A price series whose levels are anchored to the fetch window (a provider total return rebuilt from the first bar of each response) has a different anchor in every stored segment, so splicing segments misstated the levels at each seam by the distributions after it. Set the option to `true` only when every adapter serving price history returns window-independent levels. Other record types are unaffected.
+
+## [2.0.0] — not published; shipped as 2.0.1
+
+### Changed
+- Targets .NET 10 and published Storage 2.0.0; all twelve kernel packages use version 2.0.0 with assembly/file version 2.0.0.0.
+- Stable installation and migration instructions, immutable stable documentation links, and exact stable-tag validation for the frozen-archive publisher.
+- Retains the RC4 runtime behavior and the changes documented below. Optional features remain opt-in.
+
 ## [2.0.0-rc.20261027.4] — 2026-10-27
 
 ### Added

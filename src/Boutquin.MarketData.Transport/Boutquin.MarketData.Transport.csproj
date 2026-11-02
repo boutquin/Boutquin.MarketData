@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Polly.Core" />
     <PackageReference Include="Polly.RateLimiting" />
+    <PackageReference Include="System.Threading.RateLimiting" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Boutquin.MarketData.Abstractions\Boutquin.MarketData.Abstractions.csproj" />

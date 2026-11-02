@@ -142,7 +142,7 @@ public sealed class FormatVersionFailFastTests : IDisposable
     {
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new ThrowingBarAdapter()),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -194,7 +194,7 @@ public sealed class FormatVersionFailFastTests : IDisposable
                 svc.AddSingleton<IDataSourceAdapter<EconomicSeriesRequest, ScalarObservation>>(
                     new ThrowingScalarAdapter());
             },
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
 

@@ -101,7 +101,7 @@ public sealed class SubsumptionCasesTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;
@@ -189,7 +189,7 @@ public sealed class SubsumptionCasesTests : IDisposable
 
         using var sp = BuildKernel(
             svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
-            opt => opt.UseTimeSeriesStore = true);
+            opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
         var store = registry.Resolve<PriceBarDatasetKey, Bar>()!;

@@ -101,6 +101,22 @@ public sealed class DataPipelineOptions
     public bool UseTimeSeriesStore { get; set; }
 
     /// <summary>
+    /// When <see langword="true"/>, the time-series tier may gap-fill a <c>PriceHistoryRequest</c>
+    /// from stored segments plus newly fetched ranges. Defaults to <see langword="false"/>: a
+    /// price series whose levels are anchored to the fetch window (for example a provider total
+    /// return rebuilt from the first bar of each response) carries a different anchor in every
+    /// segment, so merging segments misstates the levels at each seam by the distributions after
+    /// it. With the default, the tier declines price-history requests and the pipeline fetches
+    /// each requested range in one piece through the legacy path.
+    /// </summary>
+    /// <remarks>
+    /// Only read when <see cref="UseTimeSeriesStore"/> is <see langword="true"/>. Enable it only
+    /// when every adapter serving price history returns levels that do not depend on the fetch
+    /// window.
+    /// </remarks>
+    public bool AllowIncrementalPriceHistoryGapFill { get; set; }
+
+    /// <summary>
     /// When <see langword="true"/>, <c>AddMarketDataKernel</c> registers the normalizer shipped
     /// by <c>Boutquin.MarketData.Normalization</c> for every canonical record type that has one,
     /// so <c>DataPipeline</c> resolves a live <c>INormalizer&lt;TRecord, TRecord&gt;</c> and the

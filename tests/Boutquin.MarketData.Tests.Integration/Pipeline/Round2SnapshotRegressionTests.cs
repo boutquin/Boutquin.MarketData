@@ -160,7 +160,7 @@ public sealed class Round2SnapshotRegressionTests : IDisposable
             timeSeriesDirectory: Path.Combine(_directory, "timeseries"),
             configurePipeline: options =>
             {
-                options.UseTimeSeriesStore = true;
+                options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
                 options.L1CacheTtl = TimeSpan.Zero;
             });
         services.AddSingleton<IDataSourceAdapter<TRequest, TRecord>>(source);

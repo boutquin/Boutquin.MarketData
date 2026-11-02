@@ -174,6 +174,14 @@ internal sealed class TimeSeriesPipelineExecutor
         // Find the IDatasetKeyBuilder<TRequest, TDatasetKey> registered for this request type. The
         // open generic is closed over (TRequest, ?) — we scan the registered builder descriptors to
         // discover the concrete TDatasetKey. No builder ⇒ this request type is not time-series-backed.
+        if (request is PriceHistoryRequest && !_options.AllowIncrementalPriceHistoryGapFill)
+        {
+            _logger.LogDebug(
+                "Incremental price-history gap-fill is disabled; {RequestType} uses the legacy "
+                + "exact-range path so window-anchored levels are never spliced.", typeof(TRequest).Name);
+            return null;
+        }
+
         var datasetKeyType = ResolveDatasetKeyType(typeof(TRequest));
         if (datasetKeyType is null)
         {

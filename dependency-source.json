@@ -1,39 +1,82 @@
 {
   "schema": 1,
+  "packages": [],
   "publishedPackages": [
     {
-      "id": "Boutquin.Storage.Domain",
-      "version": "2.0.0",
-      "file": "Boutquin.Storage.Domain.2.0.0.nupkg",
-      "sha256": "6238b34ee345cc179d07b7d4872776a8daa2f583d916edd2ea4d0bf7469f1f70",
-      "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
-      "sourceCommit": "b64aaff6426babca4bbc588da877a6008154b873",
+      "id": "Boutquin.Domain",
+      "version": "1.0.1",
+      "file": "Boutquin.Domain.1.0.1.nupkg",
+      "sha256": "d420eea292b373e0ab655dd44df251c21c62a9fa8902e0549bc4012291bc67d5",
+      "sourceRepository": "https://github.com/boutquin/Boutquin.Domain",
+      "sourceCommit": "493b14ceccdbdec2880205961f3aea09d0100322",
       "packageSource": "https://api.nuget.org/v3/index.json",
-      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.domain/2.0.0/boutquin.storage.domain.2.0.0.nupkg",
-      "contentHash": "fwZk9FtOuQpTT/MSuOFgJSHK9mTvMA/Z33TM4BvyPyMx0fcAzZv/rEHGMyoeW1mUqHX8ftpx+edRZcix3g7pOw=="
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.domain/1.0.1/boutquin.domain.1.0.1.nupkg",
+      "contentHash": "tT7PhmUGA3ziZCFX/6TafzJANtg1gP6V/HV+Dt6M6s1+8+NKYQHbIXQgbg8mpnXJCaIr7X+yy2Pa63SCqrb2Yw=="
+    }
+  ],
+  "preparedPackages": [
+    {
+      "id": "Boutquin.Storage.Domain",
+      "version": "2.0.1",
+      "file": "Boutquin.Storage.Domain.2.0.1.nupkg",
+      "sha256": "0cbe58efad7409a7f85b1a489c985155afd4e9bd3e76585c9b31f72a76a9fb36",
+      "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
+      "sourceCommit": "b25d820553b9b6ba956838a691fe53b624a2bb3e",
+      "packageSource": "https://api.nuget.org/v3/index.json",
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.domain/2.0.1/boutquin.storage.domain.2.0.1.nupkg",
+      "contentHash": "1A0Dn2pU1RFia0qLyfBx8ZfX5T/HCyiswx9MxRxPU6WI18omgqdeHbZKyZ7+3gxgKa7MfxLOAJFInxtPCEXGmQ==",
+      "payloadSha256": {
+        "_rels/.rels": "cbca3b28afbac2e3a657224e21ae1136372a38df0b1c5385e5e30dceca41f50d",
+        "Boutquin.Storage.Domain.nuspec": "799f52b9d3ad654a4b9ff602b0575dedcdb51abbeb4a3f06eafd9686b856b07e",
+        "icon.png": "edfefc00c663ac7bc6894ee62195201f98d688a6b435225d4eb66c9236d93d4a",
+        "README.md": "8ab5068a29f5bc14fd6009ac6db029dc3a1a1ae5e46ef499b9e5651e5a135432",
+        "lib/net10.0/Boutquin.Storage.Domain.dll": "a86fdb11c459683dcaa5ad16288dbb2cb6e18c7764fd24ae7b344b08df147a6e",
+        "lib/net10.0/Boutquin.Storage.Domain.xml": "6d214310601d2f51eaafc970403c14364757f7e1ea2216b38b7a7b244f92b400",
+        "[Content_Types].xml": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+        "package/services/metadata/core-properties/nuget.psmdcp": "a28ec1dae1d95132ba19561cf60f292924cdd14729d7307dbd552c79d2963610"
+      }
     },
     {
       "id": "Boutquin.Storage.Infrastructure",
-      "version": "2.0.0",
-      "file": "Boutquin.Storage.Infrastructure.2.0.0.nupkg",
-      "sha256": "718b58eb040fec8b26a9e80c765052b8a26c0636d30afae408a0c421774a334c",
+      "version": "2.0.1",
+      "file": "Boutquin.Storage.Infrastructure.2.0.1.nupkg",
+      "sha256": "840cf4245f77a3be21251c71722dec3d748b37030a5eb92d70570fa8ce0e626c",
       "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
-      "sourceCommit": "b64aaff6426babca4bbc588da877a6008154b873",
+      "sourceCommit": "b25d820553b9b6ba956838a691fe53b624a2bb3e",
       "packageSource": "https://api.nuget.org/v3/index.json",
-      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.infrastructure/2.0.0/boutquin.storage.infrastructure.2.0.0.nupkg",
-      "contentHash": "hse+IHLQ3Cz/zzV1S+Addd/s48Atf3FkmfUKVQoEK3Ac+rl3yr6RqD3gKqkAvMk1ynZTyyjBgrDKLrhgE0iMHA=="
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.infrastructure/2.0.1/boutquin.storage.infrastructure.2.0.1.nupkg",
+      "contentHash": "99oP+ier6RnsdHfVjbBFP4Lkg15C33vXvgX5WGQ4TwrM0R62TSLrCFu0SFYcvHDRYW/3MZSZlV4CEXmF3Ic8Dg==",
+      "payloadSha256": {
+        "_rels/.rels": "16f98fb38bd2270e7359e28a07bbeba5103d8330ccc3d3146f32de7099dd89e7",
+        "Boutquin.Storage.Infrastructure.nuspec": "e6cd398c62ea9efdfd497ef68ddf691525f09f2164c49557f6b69b5aa533a985",
+        "icon.png": "edfefc00c663ac7bc6894ee62195201f98d688a6b435225d4eb66c9236d93d4a",
+        "README.md": "8ab5068a29f5bc14fd6009ac6db029dc3a1a1ae5e46ef499b9e5651e5a135432",
+        "lib/net10.0/Boutquin.Storage.Infrastructure.dll": "ce05e7280edef5a9c13b754300809118c2ca1828bacee47df260aa71604ffb9c",
+        "lib/net10.0/Boutquin.Storage.Infrastructure.xml": "d0f7a01aa12482cf0195143bf589460f8b80367a632e69f5501ad52a165fd81a",
+        "[Content_Types].xml": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+        "package/services/metadata/core-properties/nuget.psmdcp": "6f2a2056957b5c84ed38e4c1230ab01506a72276f8f13f8221ffc7a26f1ab8c7"
+      }
     },
     {
       "id": "Boutquin.Storage.SourceGenerator",
-      "version": "2.0.0",
-      "file": "Boutquin.Storage.SourceGenerator.2.0.0.nupkg",
-      "sha256": "9d381a558c000ba50221b1a3695e0a14da608ff5ead3a8d32a791dafd88b8cf9",
+      "version": "2.0.1",
+      "file": "Boutquin.Storage.SourceGenerator.2.0.1.nupkg",
+      "sha256": "3060dce17b65b691bd027797c37ca15461f29a9230ecf2547ebd38414bb1c1c4",
       "sourceRepository": "https://github.com/boutquin/Boutquin.Storage",
-      "sourceCommit": "b64aaff6426babca4bbc588da877a6008154b873",
+      "sourceCommit": "b25d820553b9b6ba956838a691fe53b624a2bb3e",
       "packageSource": "https://api.nuget.org/v3/index.json",
-      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.sourcegenerator/2.0.0/boutquin.storage.sourcegenerator.2.0.0.nupkg",
-      "contentHash": "RB0JI3kw/vJa/yrojpbdw9l1z8asc+PzgIE1wA90bh0JCFfs342NPK2Vj1XG6f5T/uuLfhnGN3kz7EMTq1h1bQ=="
+      "downloadUrl": "https://api.nuget.org/v3-flatcontainer/boutquin.storage.sourcegenerator/2.0.1/boutquin.storage.sourcegenerator.2.0.1.nupkg",
+      "contentHash": "o+Eb+eOl4HWNVUN64sd3jYWc2L9aKMT7zGX7dq5QxZEuC+MV2MOsy1JvLNdsxMzn02/uciSEkwnXtwBQa6IoxQ==",
+      "payloadSha256": {
+        "_rels/.rels": "95883e7ce5dc8fd23b4d631bc7cc4fec80187c360ee00871cd124fb1f11135be",
+        "Boutquin.Storage.SourceGenerator.nuspec": "c1e30f05e829dd0d432b9e467496faa16179d5c88e77c611a2dabac2b758b593",
+        "icon.png": "edfefc00c663ac7bc6894ee62195201f98d688a6b435225d4eb66c9236d93d4a",
+        "README.md": "8ab5068a29f5bc14fd6009ac6db029dc3a1a1ae5e46ef499b9e5651e5a135432",
+        "analyzers/dotnet/cs/Boutquin.Storage.SourceGenerator.CodeFixes.dll": "6beead1c88577c87e2c1ab707bf665af92fb72adf8dc9697c855170b4787861d",
+        "analyzers/dotnet/cs/Boutquin.Storage.SourceGenerator.dll": "93849645bf913bebd396cefbe24d602bf65381e0c2fe58e7c8673a79359c1089",
+        "[Content_Types].xml": "014be50bead1e534b5c4260670332bbcb06ae1ba2fd5ee8f297a47d7605c8765",
+        "package/services/metadata/core-properties/nuget.psmdcp": "4efcb20f697424ecd01427cace1a9bd1a5c2b98cafdad2687e4f0475890dea32"
+      }
     }
-  ],
-  "packages": []
+  ]
 }

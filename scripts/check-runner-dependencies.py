@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import runpy
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -15,7 +16,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def verify_archive(item, path):
     content = path.read_bytes()
-    if hashlib.sha256(content).hexdigest() != item["sha256"]:
+    if "payloadSha256" in item:
+        content = runpy.run_path(str(ROOT / "scripts/prepared-dependencies.py"))["verify"](item, path)
+    elif hashlib.sha256(content).hexdigest() != item["sha256"]:
         raise ValueError(f"Package SHA-256 mismatch: {item['id']}")
     with zipfile.ZipFile(path) as archive:
         names = [n for n in archive.namelist() if n.endswith(".nuspec")]
@@ -85,9 +88,9 @@ def verify(feed, packages=None):
     pins = {
         item.attrib["Include"]: item.attrib["Version"]
         for item in ET.parse(ROOT / "Directory.Packages.props").iter("PackageVersion")
-        if item.attrib["Include"].startswith(("Boutquin.Storage.", "Boutquin.Numerics"))
+        if item.attrib["Include"].startswith(("Boutquin.Storage.", "Boutquin.Numerics", "Boutquin.Domain"))
     }
-    all_packages = lock["packages"] + lock.get("publishedPackages", [])
+    all_packages = lock["packages"] + lock.get("publishedPackages", []) + lock.get("preparedPackages", [])
     declared = {item["id"]: item["version"] for item in all_packages}
     verify_mappings(lock)
     if pins != declared or len(declared) != len(all_packages):
@@ -124,6 +127,14 @@ def verify(feed, packages=None):
             raise ValueError("Published Storage must resolve from nuget.org")
         if packages is not None and item["id"] in resolved:
             verify_cached_package(item, packages, item["packageSource"])
+    prepared = runpy.run_path(str(ROOT / 'scripts/prepared-dependencies.py')) if lock.get('preparedPackages') else None
+    for item in lock.get('preparedPackages', []):
+        if prepared['candidate_feed']() is not None:
+            verify_archive(item, prepared['candidate_feed']() / item['file'])
+        if packages is not None and item['id'] in resolved:
+            verify_cached_package(item, packages, prepared['source'](item))
+    if prepared is not None and prepared["candidate_feed"]() is not None:
+        head = "sealed prepared inputs + nuget.org"
     print(f"PASS: {len(declared)} original package identities and hashes; source {head}")
     if packages is not None:
         print(f"PASS: all {len(resolved)} referenced dependencies resolved from their verified sources")

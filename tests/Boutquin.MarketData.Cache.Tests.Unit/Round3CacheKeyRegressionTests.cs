@@ -27,6 +27,38 @@ namespace Boutquin.MarketData.Cache.Tests.Unit;
 
 public sealed class Round3CacheKeyRegressionTests
 {
+    [Theory]
+    [InlineData("Legacy-Key", "legacy-key")]
+    [InlineData("Provider/Symbol/Quote", "provider/Symbol/Quote")]
+    [InlineData("Provider/Symbol/Quote", "Provider/symbol/Quote")]
+    [InlineData("Provider/Symbol/Quote", "Provider/Symbol/quote")]
+    public async Task Legacy_fallback_requires_exact_case_for_every_key_segment(string key, string differentKey)
+    {
+        var root = Path.Combine(Path.GetTempPath(), "snapshot-legacy-case-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var legacy = new FileSystemObjectStore(root);
+            using var payload = new MemoryStream("exact-key-payload"u8.ToArray());
+            await legacy.WriteAsync(key, payload);
+
+            var store = new FileSnapshotStore(root);
+            (await store.ExistsAsync(key)).Should().BeTrue();
+            await using var exact = await store.ReadAsync(key);
+            exact.Should().NotBeNull();
+            using var reader = new StreamReader(exact!);
+            (await reader.ReadToEndAsync()).Should().Be("exact-key-payload");
+
+            await using var different = await store.ReadAsync(differentKey);
+            using var assertions = new FluentAssertions.Execution.AssertionScope();
+            different.Should().BeNull("legacy fallback must preserve ordinal snapshot identity");
+            (await store.ExistsAsync(differentKey)).Should().BeFalse("a case variant is a different snapshot key");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Fact]
     public async Task Long_and_colliding_shape_keys_retain_independent_payloads()
     {
