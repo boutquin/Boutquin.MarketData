@@ -52,9 +52,19 @@ public sealed record PriceHistoryRequest(
     /// Exposed as an <c>init</c> property rather than a primary-constructor parameter so
     /// that adding this field in 1.1.0 remains binary-compatible for consumers compiled
     /// against the 1.0.x primary-ctor signature. Set via object-initializer:
-    /// <c>new PriceHistoryRequest(symbols, range) { Exchange = ExchangeCode.XTSE }</c>.
+    /// <c>new PriceHistoryRequest(symbols, range) { Exchange = ExchangeCode.XTSE, Basis = PriceBasis.Raw }</c>.
     /// </remarks>
     public ExchangeCode? Exchange { get; init; }
+
+    /// <summary>The required adjustment and computation basis of every returned bar.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">The invalid default basis is assigned.</exception>
+    public required PriceBasis Basis
+    {
+        get;
+        init => field = value.AdjustedCloseSource == 0
+            ? throw new ArgumentOutOfRangeException(nameof(value), "An explicit price basis is required.")
+            : value;
+    }
 
     /// <inheritdoc />
     /// <remarks>
@@ -62,16 +72,17 @@ public sealed record PriceHistoryRequest(
     /// singletons retain their legacy text; lists and tickers containing <c>_</c> use a
     /// count-prefixed UTF-16 encoding. Ticker slashes are doubled before the optional
     /// <c>/</c> plus <see cref="Exchange"/> suffix, keeping opaque symbols distinct from venues.
-    /// Upgrade using a fresh snapshot directory and restart to discard old L1 entries: legacy
-    /// keys can contain aliased data even at an unchanged venue-qualified key. Re-fetch the data;
-    /// no automatic migration or legacy-key fallback is performed. Existing files are left untouched.
+    /// The suffix <c>/basis:{Token}</c> scopes every price cache entry to its explicit basis.
+    /// Legacy keys are never read or overwritten; prices are fetched once under the new keys.
+    /// Existing files remain available for rollback.
     /// </remarks>
     public string DatasetKey
     {
         get
         {
             var symbolsKey = DividendDatasetIdentity.EncodeSymbolList(Symbols.Select(symbol => symbol.Ticker));
-            return Exchange is null ? symbolsKey : $"{symbolsKey}/{Exchange.Value}";
+            var venueKey = Exchange is null ? symbolsKey : $"{symbolsKey}/{Exchange.Value}";
+            return $"{venueKey}/basis:{Basis.Token}";
         }
     }
 
@@ -80,12 +91,12 @@ public sealed record PriceHistoryRequest(
 
     /// <inheritdoc />
     /// <remarks>
-    /// Preserves the symbol set, the optional <see cref="Exchange"/> venue hint, and the
+    /// Preserves the symbol set, the required <see cref="Basis"/>, the optional <see cref="Exchange"/> venue hint, and the
     /// <see cref="DataFrequency"/>; only <see cref="IDataRequest.Range"/> is narrowed to the gap.
     /// Used by the time-series gap-fill to fetch just a missing sub-range.
     /// </remarks>
     public IDataRequest WithRange(DateRange range) =>
-        new PriceHistoryRequest(Symbols, range, Frequency) { Exchange = Exchange };
+        new PriceHistoryRequest(Symbols, range, Frequency) { Exchange = Exchange, Basis = Basis };
 
     private static IReadOnlyList<Symbol> CopyAndValidate(IReadOnlyList<Symbol> symbols)
     {

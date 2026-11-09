@@ -39,8 +39,7 @@ values with no visible failure mode.
 
 `ACT/ACT` without further qualification resolves to ICMA (in-period), because
 that is the convention most new consumers reach for (US Treasury / euro
-government bonds). The ISDA variant is not yet shipped; when it lands, the
-`ACT/ACT ISDA` alias will be added without changing this default.
+government bonds). The ISDA variant and its `ACT/ACT ISDA` alias are not supported. Supply a separate calculator when that convention is required.
 
 ## `ActualActualInPeriod` usage
 

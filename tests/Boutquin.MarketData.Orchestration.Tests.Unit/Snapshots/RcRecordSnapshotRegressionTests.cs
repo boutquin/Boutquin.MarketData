@@ -49,7 +49,7 @@ public sealed class RcRecordSnapshotRegressionTests
     [Fact]
     public void Legacy_snapshot_copies_constructor_and_init_collections_and_protects_getter()
     {
-        var request = new PriceHistoryRequest([new Symbol("AGG")], new DateRange(new DateOnly(2024, 1, 1), new DateOnly(2024, 1, 2)));
+        var request = new PriceHistoryRequest([new Symbol("AGG")], new DateRange(new DateOnly(2024, 1, 1), new DateOnly(2024, 1, 2))) { Basis = PriceBasis.Raw };
         var source = new List<int> { 7 };
         var original = new LegacyL2Snapshot<PriceHistoryRequest, int>(request, source);
         source[0] = 99;

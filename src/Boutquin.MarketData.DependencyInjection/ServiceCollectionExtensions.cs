@@ -771,6 +771,7 @@ public static class ServiceCollectionExtensions
                 options.TimeSeriesSegmentFormat, "The time-series segment format must be Row or Columnar.");
         }
 
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.TimeSeriesMemTableCapacity);
         ArgumentNullException.ThrowIfNull(options.TimeSeriesBloomFilter);
         _ = new Boutquin.Storage.Domain.ValueObjects.SortedStringTable.SegmentBloomFilterOptions<TimeSeriesKey<PriceBarDatasetKey>>(
             options.TimeSeriesBloomFilter.Enabled,
@@ -815,7 +816,13 @@ public static class ServiceCollectionExtensions
                 w.GroupCommitLatencyMs = options.TimeSeriesWriteAheadLog.GroupCommitLatencyMs;
                 w.SegmentMaxBytes = options.TimeSeriesWriteAheadLog.SegmentMaxBytes;
             })
-            .WithBloomFilter(options.TimeSeriesBloomFilter);
+            .WithBloomFilter(options.TimeSeriesBloomFilter)
+            .WithMemTableCapacity(options.TimeSeriesMemTableCapacity);
+
+        if (options.PersistTimeSeriesCoverageIndex)
+        {
+            builder.UsePersistedCoverageIndex();
+        }
 
         if (options.DataQualityIncidentSink is { } incidentSink)
         {
@@ -849,6 +856,9 @@ public static class ServiceCollectionExtensions
         rowOptions.CompactionStrategy = options.TimeSeriesCompactionStrategy;
         rowOptions.WriteAheadLog = options.TimeSeriesWriteAheadLog;
         rowOptions.BloomFilter = options.TimeSeriesBloomFilter;
+        rowOptions.MemTableCapacity = options.TimeSeriesMemTableCapacity;
+        rowOptions.PersistCoverageIndex = options.PersistTimeSeriesCoverageIndex;
+        rowOptions.DataQualityIncidentSink = options.DataQualityIncidentSink;
 
         rowOptions.ValueLog = options.TimeSeriesValueLog;
     }
@@ -934,9 +944,9 @@ public static class ServiceCollectionExtensions
         // resolves ISnapshotReadBinding<TRecord> from this same IServiceProvider on first read, so a
         // pipeline-acquired snapshot reads through LsmSnapshotReadBinding (a real src/ type) rather
         // than throwing "No snapshot read binding is registered". The binding is format-agnostic —
-        // registered for every store, same as the store/engine registration; a row-format store
-        // serves snapshot reads, while the columnar default surfaces the upstream
-        // columnar-rejects-snapshot limitation from AcquireSnapshotAsync (NOT a missing binding).
+        // registered for every store, same as the store/engine registration. Both row and columnar
+        // engines support engine-level snapshots in Storage 2.x (ColumnarSegmentFormat.SupportsSnapshots
+        // only says whether the format carries a per-entry sequence number, not whether snapshots work).
         // TryAdd so a pre-registered custom binding (e.g. a test double) wins.
         services.TryAddSingleton<ISnapshotReadBinding<TRecord>>(
             sp => new LsmSnapshotReadBinding<TDatasetKey, TRecord>(sp));
@@ -988,8 +998,9 @@ public static class ServiceCollectionExtensions
         // realize-on-resolve disposal leaked the engine whenever the registry was never resolved
         // (the UseTimeSeriesStore=false default). The engine is captured for disposal only (row
         // records cannot be registered into the engine/snapshot surface).
-        AddTimeSeriesStoreRegistrationSlot<TDatasetKey, TRecord>(services, _ =>
+        AddTimeSeriesStoreRegistrationSlot<TDatasetKey, TRecord>(services, sp =>
         {
+            options.DataQualityIncidentSink ??= sp.GetService<IDataQualityIncidentSink>();
             var stack = RowTimeSeriesStoreFactory
                 .BuildStackAsync<TDatasetKey, TRecord>(typeof(TRecord).Name, options)
                 .GetAwaiter().GetResult();

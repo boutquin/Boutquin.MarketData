@@ -100,7 +100,7 @@ public sealed class SubsumptionCasesTests : IDisposable
         var adapter = new CountingBarAdapter("tiingo", range => [Bar(range.From, 1m), Bar(range.To, 1m)]);
 
         using var sp = BuildKernel(
-            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)),
             opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
@@ -188,7 +188,7 @@ public sealed class SubsumptionCasesTests : IDisposable
         });
 
         using var sp = BuildKernel(
-            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)),
             opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
@@ -233,13 +233,13 @@ public sealed class SubsumptionCasesTests : IDisposable
     }
 
     private static PriceHistoryRequest PriceRequest(string ticker, DateOnly from, DateOnly to)
-        => new([new Symbol(ticker)], new DateRange(from, to));
+        => new([new Symbol(ticker)], new DateRange(from, to)) { Basis = PriceBasis.Raw };
 
     private static Bar Bar(DateOnly date, decimal close)
         => new(date, close, close, close, close, close, 1_000);
 
     private static PriceBarDatasetKey KeyFor(string ticker)
-        => new("default", DataFrequency.Daily, ticker, null);
+        => new("default/none.provider.none", DataFrequency.Daily, ticker, null);
 
     private static DataProvenance ApiProvenance(string provider, string dataset)
         => new(new ProviderCode(provider), dataset, LicenseType.Free, RetrievalMode.Api,

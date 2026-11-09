@@ -92,10 +92,10 @@ public sealed class FormatVersionFailFastTests : IDisposable
         => new(date, close, close, close, close, close, 1_000);
 
     private static PriceBarDatasetKey KeyFor(string ticker)
-        => new("default", DataFrequency.Daily, ticker, null);
+        => new("default/none.provider.none", DataFrequency.Daily, ticker, null);
 
     private static PriceHistoryRequest PriceRequest(string ticker, DateOnly from, DateOnly to)
-        => new([new Symbol(ticker)], new DateRange(from, to));
+        => new([new Symbol(ticker)], new DateRange(from, to)) { Basis = PriceBasis.Raw };
 
     private static List<Bar> Batch(DateOnly start, int count)
     {
@@ -141,7 +141,7 @@ public sealed class FormatVersionFailFastTests : IDisposable
     public async Task AC11_higher_format_version_surfaces_unwrapped_enriched_exception(bool batch)
     {
         using var sp = BuildKernel(
-            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new ThrowingBarAdapter()),
+            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(new ThrowingBarAdapter(), PriceBasis.Raw)),
             opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
@@ -190,7 +190,7 @@ public sealed class FormatVersionFailFastTests : IDisposable
         using var sp = BuildKernel(
             svc =>
             {
-                svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new ThrowingBarAdapter());
+                svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(new ThrowingBarAdapter(), PriceBasis.Raw));
                 svc.AddSingleton<IDataSourceAdapter<EconomicSeriesRequest, ScalarObservation>>(
                     new ThrowingScalarAdapter());
             },

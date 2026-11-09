@@ -67,7 +67,7 @@ public sealed class CompactionAndRecoveryTests : IDisposable
         => new(date, close, close, close, close, close, 1_000);
 
     private static PriceBarDatasetKey KeyFor(string ticker)
-        => new("default", DataFrequency.Daily, ticker, null);
+        => new("default/none.provider.none", DataFrequency.Daily, ticker, null);
 
     private static List<Bar> Batch(DateOnly start, int count)
     {
@@ -183,7 +183,7 @@ public sealed class CompactionAndRecoveryTests : IDisposable
             eventLogDirectory: Path.Combine(_tempDir, "events"),
             timeSeriesDirectory: Path.Combine(_tempDir, subdir),
             configurePipeline: opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
-        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter);
+        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw));
         using var sp = services.BuildServiceProvider();
 
         var registry = sp.GetRequiredService<ITimeSeriesStoreRegistry>();
@@ -197,7 +197,7 @@ public sealed class CompactionAndRecoveryTests : IDisposable
         // The re-fetch half: ExecuteAsync over the now-uncovered range must dispatch the adapter via
         // gap fill and repopulate the missing span — not return stale/empty data.
         var pipeline = sp.GetRequiredService<IDataPipeline>();
-        var request = new PriceHistoryRequest([new Symbol("AGG")], new DateRange(affectedFrom, affectedTo));
+        var request = new PriceHistoryRequest([new Symbol("AGG")], new DateRange(affectedFrom, affectedTo)) { Basis = PriceBasis.Raw };
         var result = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(request).ConfigureAwait(true);
 
         adapter.Dispatches.Should().ContainSingle(
@@ -240,12 +240,12 @@ public sealed class CompactionAndRecoveryTests : IDisposable
                     options.L1CacheTtl = TimeSpan.Zero;
                     options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
                 });
-            services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter);
+            services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw));
             return services.BuildServiceProvider();
         }
 
         var from = new DateOnly(2022, 1, 1);
-        var request = new PriceHistoryRequest([new Symbol("AGG")], new DateRange(from, from.AddDays(299)));
+        var request = new PriceHistoryRequest([new Symbol("AGG")], new DateRange(from, from.AddDays(299))) { Basis = PriceBasis.Raw };
         using (var writer = Host(new SelfHealBarAdapter()))
         {
             var written = await writer.GetRequiredService<IDataPipeline>()

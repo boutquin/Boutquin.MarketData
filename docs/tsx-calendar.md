@@ -19,7 +19,7 @@ References:
 
 ## Separate calendar compatibility builds
 
-The published 2.0.1 release uses matching 2.0.1 Abstractions, with assembly version `2.0.0.0` and file version `2.0.1.0`. The optional build below creates a separate compatibility candidate; it is not the published release. Set the four environment variables to the existing consumer ABI and a fresh package identity before running it.
+The 3.0 family uses matching 3.0 Abstractions, with assembly and file versions `3.0.0.0`. The optional build below creates a separate compatibility candidate; it is not the published release. Set the four environment variables to the existing consumer ABI and a fresh package identity before running it.
 
 The normal build retains its project reference to current Abstractions. For an application still
 using an older Abstractions package, pass `CalendarAbstractionsPackageVersion` to build and pack

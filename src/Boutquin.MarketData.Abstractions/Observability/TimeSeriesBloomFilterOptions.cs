@@ -32,9 +32,12 @@ public sealed record TimeSeriesBloomFilterOptions
     public bool Enabled { get; init; } = true;
 
     /// <summary>
-    /// Expected number of distinct keys per segment, sizing the bit array. Defaults to 131,072.
+    /// Expected number of distinct keys per segment, sizing the bit array, or <see langword="null"/>
+    /// (the default) to size each filter from the segment's actual entry count. A fixed capacity
+    /// allocates the same filter for a ten-row flush as for a compacted segment, which wastes space
+    /// for the range-only reads this kernel performs.
     /// </summary>
-    public int ExpectedItems { get; init; } = 131_072;
+    public int? ExpectedItems { get; init; }
 
     /// <summary>
     /// Target false-positive probability in the open interval (0, 1). Defaults to 0.01 (1%).

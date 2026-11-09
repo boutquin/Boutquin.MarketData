@@ -22,6 +22,9 @@
     <ProjectReference Include="../../src/Boutquin.MarketData.Abstractions/Boutquin.MarketData.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="../../src/Boutquin.MarketData.Abstractions/PublicAPI.Shipped.txt" Link="PublicAPI.Shipped.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="../../src/Boutquin.MarketData.Abstractions/PublicAPI.Unshipped.txt" Link="PublicAPI.Unshipped.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

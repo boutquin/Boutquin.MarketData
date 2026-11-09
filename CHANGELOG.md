@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [3.0.0] — 2026-11-08
+
+### Added
+- `DataPipelineOptions.PersistTimeSeriesCoverageIndex` (and `TimeSeriesStoreBuilder.UsePersistedCoverageIndex`) persist the coverage index beside the segments so the first coverage query after a restart skips an engine rescan. Opt-in; a corrupt segment excluded at open triggers a rebuild.
+- `DataPipelineOptions.TimeSeriesMemTableCapacity`, `TimeSeriesStoreBuilder.WithMemTableCapacity` and the row-store equivalents tune the flush threshold per store.
+- `DataQualityIncidentKind.SegmentExclusion`: a corrupt or missing time-series segment excluded at open is now reported to the incident sink (columnar and row stores) instead of silently becoming a gap.
+- `LegacyL2Snapshot.AttestsRawPriceBasis`: legacy price imports require explicit attestation that the bars are unadjusted.
+
+### Changed
+- `TimeSeriesBloomFilterOptions.ExpectedItems` is now `int?` and defaults to `null`, sizing each Bloom filter from its segment's actual entries instead of a fixed 131,072. Only point reads use Bloom filters and this kernel reads by range, so the fixed size wasted space on every small flush.
+- Price partitions that rewrite `PriceBasis` are refused before any adapter runs, for a single partition as well as several.
+- Default write-ahead-log group-commit latency cap is now 1 ms (was 5 ms). Storage awaits one commit per record, so a single caller's append time roughly halves (macOS, columnar: 25-row appends 11.1 s to 6.0 s over 40 calls; 300 single-row appends 3.4 s to 1.9 s). Durability is unchanged; set `GroupCommitLatencyMs` back to 5 to restore the old window.
+
+### Added
+- Required, validated `PriceBasis` values identify corporate actions in adjusted close and OHLC, and distinguish provider-supplied from adapter-computed adjusted close.
+- Price provenance states its delivered basis. The kernel checks declarations and provenance before accepting a delivery, independently of consumer evaluators.
+
+### Changed
+- Every `PriceHistoryRequest` requires `Basis`; callers must set it explicitly, including range copies. Third-party price adapters must implement `IPriceBasisAdapter`, refuse unsupported bases before I/O, restrict `CanHandle`, and stamp every price provenance entry.
+- Price dataset and cache keys include the basis token: the first use performs a price cache cold start. Existing cache files remain untouched for rollback, and non-price identities remain unchanged.
+- Price adapters delivering different bases no longer substitute for one another. A failed price partition still reports `PARTITION_FAILED`; unsupported declared bases and cache/snapshot mismatches propagate as typed exceptions regardless of partition-continuation options.
+- Incremental price gap filling requires both the explicit option and a window-independent raw basis. Non-raw requests fetch their entire window; separately anchored levels are never spliced by the kernel.
+- Time-series price keys gain a basis suffix after any registered builder, including consumer builders. Legacy unsuffixed series are not read.
+- The legacy snapshot importer refuses non-raw price snapshots before append. Existing adjusted-price imports must be re-fetched; only independently verified raw bars may be asserted raw.
+- Snapshot price reads state the raw basis and reject requests for another basis after the unchanged gap check.
+- Product assembly and file versions advance to `3.0.0.0`; Storage, Domain and Numerics contracts are unchanged. See [the migration guide](docs/migration-3.0.md).
+
 ## [2.0.1] — 2026-11-02
 
 The first stable release after 2.0.0-rc.20261027.4, published to nuget.org on 2026-11-02 from source `e6079f9`. A 2.0.0 stable was prepared but never published, so its changes (listed below under 2.0.0) ship here.

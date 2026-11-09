@@ -103,7 +103,9 @@ public sealed class DataSnapshot : IDataSnapshot
                 + "adapter; compose an explicit live read if you need gap-fill semantics.");
         }
 
-        return BuildEnvelope(request, result.Records);
+        var envelope = BuildEnvelope(request, result.Records);
+        Boutquin.MarketData.Orchestration.Pipeline.PriceBasisGuard.CanReplay<TRecord>(request, envelope.Provenance);
+        return envelope;
     }
 
     /// <inheritdoc />
@@ -164,7 +166,11 @@ public sealed class DataSnapshot : IDataSnapshot
             RetrievalMode: RetrievalMode.Snapshot,
             Freshness: FreshnessClass.EndOfDay,
             RetrievedAtUtc: DateTimeOffset.UtcNow,
-            SourceUrl: null);
+            SourceUrl: null)
+        {
+            PriceBasis = typeof(TRecord) == typeof(Boutquin.MarketData.Abstractions.Records.Bar)
+                ? Boutquin.MarketData.Abstractions.Requests.PriceBasis.Raw : null
+        };
 
         return new DataEnvelope<IReadOnlyList<TRecord>>(
             records,

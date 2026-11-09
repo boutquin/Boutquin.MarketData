@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       qualification_version:
-        description: Exact 2.0.0/2.0.1 stable or numeric RC version to verify without publication
+        description: Exact stable or numeric RC version to verify without publication
         required: false
         type: string
       source_ref:
@@ -12,7 +12,7 @@ on:
         required: false
         type: string
       stable_qualification:
-        description: Verify the prepared 2.0.0 version without publication
+        description: Verify an exact stable qualification version without publication
         required: false
         type: boolean
         default: false
@@ -27,7 +27,7 @@ jobs:
     name: PR Verify (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     env:
-      MinVerVersionOverride: ${{ inputs.qualification_version || (inputs.stable_qualification && '2.0.0') || '' }}
+      MinVerVersionOverride: ${{ inputs.qualification_version || '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -38,9 +38,12 @@ jobs:
 
     steps:
       - name: Validate qualification version
+        env:
+          STABLE_QUALIFICATION: ${{ inputs.stable_qualification }}
         run: |
+          if [[ "$STABLE_QUALIFICATION" == "true" && ! "$MinVerVersionOverride" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then echo "stable_qualification requires an exact stable qualification_version" >&2; exit 1; fi
           if [[ -n "$MinVerVersionOverride" ]]; then
-            [[ "$MinVerVersionOverride" =~ ^2\.0\.[01](-rc\.[0-9]+(\.[0-9]+)*)?$ ]]
+            [[ "$MinVerVersionOverride" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.[0-9]+(\.[0-9]+)*)?$ ]]
           fi
 
       - name: Enable long paths for preserved private evidence on Windows
@@ -71,6 +74,7 @@ jobs:
         run: |
           if [[ "$MinVerVersionOverride" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             python3 scripts/check-release-docs.py "$MinVerVersionOverride"
+            python3 scripts/check-api-release-baseline.py --release
           fi
 
       - name: Initialize cold NuGet directories
@@ -120,6 +124,11 @@ jobs:
 
       - name: dotnet format (analyzers)
         run: dotnet format analyzers Boutquin.MarketData.slnx --verify-no-changes --no-restore
+
+      - name: Verify released API baseline and compile price documentation
+        run: |
+          python3 scripts/check-api-release-baseline.py
+          python3 scripts/check-price-doc-examples.py
 
       - name: Verify RC archive checks
         run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'

@@ -3,6 +3,9 @@
 ###############################################################################
 * text=auto
 
+# These files are fingerprinted as raw release inputs on every platform.
+/src/*/PublicAPI.*.txt text eol=lf
+
 ###############################################################################
 # Exclude private files from git archive (used for public repo squash push)
 ###############################################################################
@@ -35,3 +38,5 @@ tests/Boutquin.MarketData.DependencyInjection.Tests.Unit/DividendPrivateSpecific
 
 # Private archive access is excluded from public source snapshots.
 .github/workflows/qualify-patch-private.yml export-ignore
+# Unified patches contain mandatory single-space blank context lines; treat those as patch data.
+specs/verification/price-basis-2.1/mutations/*.patch -whitespace

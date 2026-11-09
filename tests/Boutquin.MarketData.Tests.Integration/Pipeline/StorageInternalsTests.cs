@@ -85,7 +85,7 @@ public sealed class StorageInternalsTests : IDisposable
         => new(date, close, close, close, close, close, 1_000);
 
     private static PriceBarDatasetKey KeyFor(string ticker)
-        => new("default", DataFrequency.Daily, ticker, null);
+        => new("default/none.provider.none", DataFrequency.Daily, ticker, null);
 
     private static List<Bar> Flush24Months()
     {

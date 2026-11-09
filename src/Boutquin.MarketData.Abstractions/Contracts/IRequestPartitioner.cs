@@ -24,7 +24,9 @@ namespace Boutquin.MarketData.Abstractions.Contracts;
 /// Partitioning strategies include splitting by date range (e.g., monthly chunks for APIs
 /// with row-count limits) or by dataset key (e.g., batching multiple symbols). The pipeline
 /// reassembles partitioned results into a single <see cref="Results.DataEnvelope{TPayload}"/> before
-/// returning to the caller.
+/// returning to the caller. Adjusted price requests may partition symbols but must preserve the
+/// original date window: independently anchored adjusted levels cannot be concatenated. Raw prices
+/// remain eligible for date-range partitioning.
 /// </remarks>
 public interface IRequestPartitioner<TRequest>
     where TRequest : IDataRequest

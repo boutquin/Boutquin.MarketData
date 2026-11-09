@@ -1,0 +1,17 @@
+{
+  "version": "3.0.0",
+  "packages": {
+    "Boutquin.MarketData.Abstractions": "5fa3af0db4ebd6650be593f7920bbe5d6bac9fcc96724aa92f716a26c469ed3b",
+    "Boutquin.MarketData.Cache": "6ad3fbb24a84cc77c178446c1ede302a1bcd82097f3ed278fc36e0ac034d1fe5",
+    "Boutquin.MarketData.Calendars": "02a6fc2987318300f4cd8f152c6f10011000f43860c6c5bd05645a1f71c8bf03",
+    "Boutquin.MarketData.Catalog": "3dbaa45674e22a6c3570951b416935fc2ccf276be35e4d1b840604d382129b07",
+    "Boutquin.MarketData.Conventions": "8b73a1f38e181c0c49b8a04d67707e9cfdb5f2e2b113b0a9cd04c103a1dada5e",
+    "Boutquin.MarketData.DayCount": "89394ca0e5e4833df482138bbe96d038c474c5e93fa65b385d6e10fb35f74b36",
+    "Boutquin.MarketData.DependencyInjection": "383e63c6e79303e3380acf27fdd240e7d587c61b4cadde6d1f264cef70b0ff4f",
+    "Boutquin.MarketData.Normalization": "ffc9c13a543a1f676b457c2c969a63b83d6422cf1a1ea46dc2dad043e37ba6ac",
+    "Boutquin.MarketData.Orchestration": "d0652855d12f775b5c756803682b71743d017fe8e6beec585f812eba199cea08",
+    "Boutquin.MarketData.Storage": "5d284afcdc8f580a03730995d64de45eda5de7580ca4a305ec963a10f45b9613",
+    "Boutquin.MarketData.Testing": "37ab23f36ebc8910c1a76368bf74bfc8e510eec393ebc19bf7db3c43b6a7d31c",
+    "Boutquin.MarketData.Transport": "708470f71fba6daacf67a39c2647f551664aaefb0ad52b81671e29a411ed87fd"
+  }
+}

@@ -1829,11 +1829,11 @@ public sealed class DividendHistoryPipelineTests : IDisposable
             dividendAdapter,
             useTimeSeriesStore: true,
             configureServices: services =>
-                services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(priceAdapter));
+                services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(priceAdapter, PriceBasis.Raw)));
         var pipeline = sp.GetRequiredService<IDataPipeline>();
 
         var dividendRequest = VymRequest();
-        var priceRequest = new PriceHistoryRequest(dividendRequest.Symbols, dividendRequest.Range);
+        var priceRequest = new PriceHistoryRequest(dividendRequest.Symbols, dividendRequest.Range) { Basis = PriceBasis.Raw };
         _ = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(priceRequest).ConfigureAwait(true);
         var dividends = await pipeline
             .ExecuteAsync<DividendHistoryRequest, DividendPayment>(dividendRequest)

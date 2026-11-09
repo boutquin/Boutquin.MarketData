@@ -202,7 +202,8 @@ public sealed class KernelStoreShapingOptionsTests : IDisposable
         builder.SegmentFormat.Should().Be(TimeSeriesSegmentFormat.Columnar);
         builder.CompactionStrategy.Should().Be(TimeSeriesCompactionStrategy.SizeTiered);
         builder.WriteAheadLogOptions.GroupCommitBatchSize.Should().Be(256);
-        builder.BloomFilterOptions.ExpectedItems.Should().Be(131_072);
+        builder.WriteAheadLogOptions.GroupCommitLatencyMs.Should().Be(1, "measured: 5 ms doubled sequential append time");
+        ((int?)builder.BloomFilterOptions.ExpectedItems).Should().BeNull();
         builder.ValueLogEnabled.Should().BeFalse();
     }
 
@@ -223,6 +224,7 @@ public sealed class KernelStoreShapingOptionsTests : IDisposable
 
         rowOptions.CompactionStrategy.Should().Be(TimeSeriesCompactionStrategy.Leveled);
         rowOptions.WriteAheadLog.GroupCommitBatchSize.Should().Be(1);
+        new RowTimeSeriesStoreOptions().WriteAheadLog.GroupCommitLatencyMs.Should().Be(1);
         rowOptions.ValueLog.Should().NotBeNull("a finite value-log threshold enables WiscKey on a row store");
         rowOptions.SegmentRoot.Should().Be(RootTemplate);
     }

@@ -32,6 +32,12 @@ public enum DataQualityIncidentKind
     /// (for example, out-of-range or duplicate dates) before they reach a consumer.
     /// </summary>
     IngestionAnomaly,
+
+    /// <summary>
+    /// A time-series segment failed its integrity check (or went missing) when the store opened and
+    /// was excluded. Its span reads as a gap and is re-fetched; no data is silently served from it.
+    /// </summary>
+    SegmentExclusion,
 }
 
 /// <summary>

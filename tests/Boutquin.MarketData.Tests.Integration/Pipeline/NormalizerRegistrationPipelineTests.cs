@@ -74,7 +74,7 @@ public sealed class NormalizerRegistrationPipelineTests : IDisposable
             checkpointDirectory: Path.Combine(_tempDir, "checkpoints"),
             eventLogDirectory: Path.Combine(_tempDir, "events"),
             configurePipeline: o => o.RegisterDefaultNormalizers = registerDefaultNormalizers);
-        services.AddSingleton(adapter);
+        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw));
         return services.BuildServiceProvider();
     }
 
@@ -108,7 +108,7 @@ public sealed class NormalizerRegistrationPipelineTests : IDisposable
     }
 
     private static PriceHistoryRequest BuildRequest(DateOnly date) =>
-        new([new Symbol("AAPL")], new DateRange(date, date));
+        new([new Symbol("AAPL")], new DateRange(date, date)) { Basis = PriceBasis.Raw };
 
     [Fact]
     public async Task FlagOn_NormalizesTheProductionDispatchPath_NoManualNormalizerRegistered()

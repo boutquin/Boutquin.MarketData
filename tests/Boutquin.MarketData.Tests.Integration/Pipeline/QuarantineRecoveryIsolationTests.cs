@@ -63,8 +63,8 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
             "cross-provider-race",
             services =>
             {
-                services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(damagedAdapter);
-                services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(cleanAdapter);
+                services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(damagedAdapter, PriceBasis.Raw));
+                services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(cleanAdapter, PriceBasis.Raw));
             });
 
         var registry = host.GetRequiredService<IMutableTimeSeriesStoreRegistry>();
@@ -72,7 +72,7 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
         // PriceBarDatasetKeyBuilder's established cache identity uses the configured default
         // provider. Seed both requests under that identity so this test isolates quarantine
         // ownership rather than a provider-key cache miss.
-        var cleanKey = new PriceBarDatasetKey("default", DataFrequency.Daily, "CLEAN", null);
+        var cleanKey = new PriceBarDatasetKey("default/none.provider.none", DataFrequency.Daily, "CLEAN", null);
 
         await store.AppendAsync(cleanKey,
         [
@@ -83,14 +83,14 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
 
         var pipeline = host.GetRequiredService<IDataPipeline>();
         var damagedTask = pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(from, to)));
+            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(from, to)) { Basis = PriceBasis.Raw });
         await store.DamagedReadObserved.Task.WaitAsync(TimeSpan.FromSeconds(10));
 
         DataEnvelope<IReadOnlyList<Bar>> clean;
         try
         {
             clean = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-                new PriceHistoryRequest([new Symbol("CLEAN")], new DateRange(from, to)));
+                new PriceHistoryRequest([new Symbol("CLEAN")], new DateRange(from, to)) { Basis = PriceBasis.Raw });
         }
         finally
         {
@@ -114,12 +114,12 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
         var adapter = new SelectivePriceAdapter("damaged-provider", "DAMAGED");
         using var host = BuildHost(
             "same-dataset-race",
-            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter));
+            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)));
 
         var store = await InstallCorruptedDamagedStoreAsync(host, "same-dataset-race", from, to);
         var pipeline = host.GetRequiredService<IDataPipeline>();
         var ownerTask = pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(from, to)));
+            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(from, to)) { Basis = PriceBasis.Raw });
         await store.DamagedReadObserved.Task.WaitAsync(TimeSpan.FromSeconds(10));
 
         DataEnvelope<IReadOnlyList<Bar>> follower;
@@ -128,7 +128,7 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
             // This is a distinct request/cache key. Its range overlaps the owner's corrupted row
             // group, so both requests must retain their own clipped recovery work.
             follower = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-                new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(followerFrom, to)));
+                new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(followerFrom, to)) { Basis = PriceBasis.Raw });
         }
         finally
         {
@@ -151,13 +151,13 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
         var adapter = new SelectivePriceAdapter("damaged-provider", "DAMAGED");
         using var host = BuildHost(
             "cancelled-owner-retry",
-            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter));
+            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)));
 
         var store = await InstallCorruptedDamagedStoreAsync(host, "cancelled-owner-retry", from, to);
         var pipeline = host.GetRequiredService<IDataPipeline>();
         using var cancellation = new CancellationTokenSource();
         var cancelledTask = pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(from, to)),
+            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(from, to)) { Basis = PriceBasis.Raw },
             cancellation.Token);
         await store.DamagedReadObserved.Task.WaitAsync(TimeSpan.FromSeconds(10));
         cancellation.Cancel();
@@ -166,7 +166,7 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
             .Should().ThrowAsync<OperationCanceledException>();
 
         var retry = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(retryFrom, to)));
+            new PriceHistoryRequest([new Symbol("DAMAGED")], new DateRange(retryFrom, to)) { Basis = PriceBasis.Raw });
 
         retry.Payload.Should().HaveCount(2).And.OnlyContain(row => row.Close == 900m);
         adapter.Dispatches.Should().ContainSingle().Which.Should().Be(new DateRange(retryFrom, to));
@@ -182,7 +182,7 @@ public sealed class QuarantineRecoveryIsolationTests : IDisposable
         var inner = registry.Resolve<PriceBarDatasetKey, Bar>()!;
         var store = new PauseAfterDamagedReadStore(inner, "DAMAGED");
         registry.Register<PriceBarDatasetKey, Bar>(store);
-        var damagedKey = new PriceBarDatasetKey("default", DataFrequency.Daily, "DAMAGED", null);
+        var damagedKey = new PriceBarDatasetKey("default/none.provider.none", DataFrequency.Daily, "DAMAGED", null);
         await store.AppendAsync(damagedKey,
         [
             new Bar(from, 101m, 101m, 101m, 101m, 101m, 100),

@@ -110,9 +110,9 @@ public sealed class DataPipelineOptions
     /// each requested range in one piece through the legacy path.
     /// </summary>
     /// <remarks>
-    /// Only read when <see cref="UseTimeSeriesStore"/> is <see langword="true"/>. Enable it only
-    /// when every adapter serving price history returns levels that do not depend on the fetch
-    /// window.
+    /// Only read when <see cref="UseTimeSeriesStore"/> is <see langword="true"/>. The kernel also
+    /// requires the request's explicit basis to be raw and window-independent. Adjusted bases
+    /// continue through the whole-window path even when this option is enabled.
     /// </remarks>
     public bool AllowIncrementalPriceHistoryGapFill { get; set; }
 
@@ -225,7 +225,7 @@ public sealed class DataPipelineOptions
 
     /// <summary>
     /// Group-commit write-ahead-log tuning for time-series store engines. Defaults match the
-    /// Storage 2.0 group-commit WAL contract (256-append batch, 5 ms latency cap, 64 MiB
+    /// Storage 2.0 group-commit WAL contract (256-append batch, 1 ms latency cap, 64 MiB
     /// segment rotation; Hellerstein 2007, section 4.1). The removed per-append <c>FsyncOnEveryAppend</c>
     /// toggle is replaced by setting <c>GroupCommitBatchSize = 1</c> for near-per-append fsync.
     /// Only read when <see cref="UseTimeSeriesStore"/> is <see langword="true"/>.
@@ -234,9 +234,10 @@ public sealed class DataPipelineOptions
     /// <para>
     /// The group-commit mode coalesces up to <c>GroupCommitBatchSize</c> in-flight
     /// <c>AppendAsync</c> calls into a single <c>fsync</c>, bounded by the
-    /// <c>GroupCommitLatencyMs</c> timeout. A nightly gap-fill loop appending 100 rows for
-    /// one ticker typically completes under 5 fsyncs at the default settings — the entire
-    /// batch lands within one group-commit window.
+    /// <c>GroupCommitLatencyMs</c> timeout. Storage awaits each record's commit in turn, so a
+    /// single caller's append costs about one commit wait per record. Measured on macOS
+    /// (2,520 rows, one dataset): 26.7 s at a 5 ms cap, 14.5 s at 1 ms, which is why the
+    /// default is 1 ms. Concurrent writers still coalesce into shared fsyncs.
     /// </para>
     /// <para>
     /// WAL segments rotate when their on-disk size reaches <c>SegmentMaxBytes</c> (64 MiB
@@ -248,13 +249,13 @@ public sealed class DataPipelineOptions
     public WriteAheadLogOptions TimeSeriesWriteAheadLog { get; set; } = new()
     {
         GroupCommitBatchSize = 256,
-        GroupCommitLatencyMs = 5,
+        GroupCommitLatencyMs = 1,
         SegmentMaxBytes = 64L * 1024L * 1024L,
     };
 
     /// <summary>
     /// Sizes physical point-lookup Bloom filters in new row and columnar segments.
-    /// Defaults to 131,072 expected items and a 1% false-positive target.
+    /// Defaults to sizing each filter from its segment's actual entries and a 1% false-positive target.
     /// </summary>
     /// <remarks>
     /// Settings apply to flush and compaction output. Reopening uses persisted state, so changing
@@ -262,6 +263,22 @@ public sealed class DataPipelineOptions
     /// validated during kernel composition regardless of <see cref="UseTimeSeriesStore"/>.
     /// </remarks>
     public TimeSeriesBloomFilterOptions TimeSeriesBloomFilter { get; set; } = new();
+
+    /// <summary>
+    /// MemTable entry count that triggers an automatic flush for every time-series store.
+    /// Defaults to 10,000. Larger values mean fewer, bigger segments (less read amplification for
+    /// wide fan-out record types); per-record overrides go through the store builder or configurator.
+    /// </summary>
+    public int TimeSeriesMemTableCapacity { get; set; } = 10_000;
+
+    /// <summary>
+    /// Persists each time-series store's dataset coverage index beside its segments so the first
+    /// coverage query after a restart does not rescan the engine. Defaults to <see langword="false"/>:
+    /// Storage rewrites the whole manifest on each append that touches coverage, so a store with very
+    /// many datasets pays that cost on the write path. A corrupt segment excluded at open triggers a
+    /// rebuild from the surviving data.
+    /// </summary>
+    public bool PersistTimeSeriesCoverageIndex { get; set; }
 
     /// <summary>
     /// WiscKey value-log options for row-format time-series engines. The default

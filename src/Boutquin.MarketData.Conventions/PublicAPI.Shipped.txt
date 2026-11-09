@@ -1,1 +1,147 @@
 #nullable enable
+Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.CompoundingConvention.Annual = 2 -> Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.CompoundingConvention.Continuous = 0 -> Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.CompoundingConvention.Monthly = 5 -> Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.CompoundingConvention.Quarterly = 4 -> Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.CompoundingConvention.SemiAnnual = 3 -> Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.CompoundingConvention.Simple = 1 -> Boutquin.MarketData.Conventions.CompoundingConvention
+Boutquin.MarketData.Conventions.FraConvention
+Boutquin.MarketData.Conventions.FraConvention.<Clone>$() -> Boutquin.MarketData.Conventions.FraConvention!
+Boutquin.MarketData.Conventions.FraConvention.BusinessDayAdjustment.get -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Conventions.FraConvention.BusinessDayAdjustment.init -> void
+Boutquin.MarketData.Conventions.FraConvention.CalendarCode.get -> string!
+Boutquin.MarketData.Conventions.FraConvention.CalendarCode.init -> void
+Boutquin.MarketData.Conventions.FraConvention.Code.get -> string!
+Boutquin.MarketData.Conventions.FraConvention.Code.init -> void
+Boutquin.MarketData.Conventions.FraConvention.DayCountCode.get -> string!
+Boutquin.MarketData.Conventions.FraConvention.DayCountCode.init -> void
+Boutquin.MarketData.Conventions.FraConvention.Deconstruct(out string! Code, out string! CalendarCode, out string! DayCountCode, out Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment BusinessDayAdjustment, out int SettlementLagBusinessDays) -> void
+Boutquin.MarketData.Conventions.FraConvention.Equals(Boutquin.MarketData.Conventions.FraConvention? other) -> bool
+Boutquin.MarketData.Conventions.FraConvention.FraConvention(string! Code, string! CalendarCode, string! DayCountCode, Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment BusinessDayAdjustment, int SettlementLagBusinessDays) -> void
+Boutquin.MarketData.Conventions.FraConvention.SettlementLagBusinessDays.get -> int
+Boutquin.MarketData.Conventions.FraConvention.SettlementLagBusinessDays.init -> void
+Boutquin.MarketData.Conventions.FutureContractConvention
+Boutquin.MarketData.Conventions.FutureContractConvention.<Clone>$() -> Boutquin.MarketData.Conventions.FutureContractConvention!
+Boutquin.MarketData.Conventions.FutureContractConvention.CalendarCode.get -> string!
+Boutquin.MarketData.Conventions.FutureContractConvention.CalendarCode.init -> void
+Boutquin.MarketData.Conventions.FutureContractConvention.Code.get -> string!
+Boutquin.MarketData.Conventions.FutureContractConvention.Code.init -> void
+Boutquin.MarketData.Conventions.FutureContractConvention.ContractCycleCode.get -> string!
+Boutquin.MarketData.Conventions.FutureContractConvention.ContractCycleCode.init -> void
+Boutquin.MarketData.Conventions.FutureContractConvention.ConvexityAdjustmentLagBusinessDays.get -> int
+Boutquin.MarketData.Conventions.FutureContractConvention.ConvexityAdjustmentLagBusinessDays.init -> void
+Boutquin.MarketData.Conventions.FutureContractConvention.DayCountCode.get -> string!
+Boutquin.MarketData.Conventions.FutureContractConvention.DayCountCode.init -> void
+Boutquin.MarketData.Conventions.FutureContractConvention.Deconstruct(out string! Code, out string! CalendarCode, out string! DayCountCode, out string! ContractCycleCode, out int ConvexityAdjustmentLagBusinessDays) -> void
+Boutquin.MarketData.Conventions.FutureContractConvention.Equals(Boutquin.MarketData.Conventions.FutureContractConvention? other) -> bool
+Boutquin.MarketData.Conventions.FutureContractConvention.FutureContractConvention(string! Code, string! CalendarCode, string! DayCountCode, string! ContractCycleCode, int ConvexityAdjustmentLagBusinessDays = 0) -> void
+Boutquin.MarketData.Conventions.IInstrumentConvention
+Boutquin.MarketData.Conventions.IInstrumentConvention.Code.get -> string!
+Boutquin.MarketData.Conventions.InstrumentConventionRegistry
+Boutquin.MarketData.Conventions.InstrumentConventionRegistry.Add(Boutquin.MarketData.Conventions.IInstrumentConvention! convention) -> Boutquin.MarketData.Conventions.InstrumentConventionRegistry!
+Boutquin.MarketData.Conventions.InstrumentConventionRegistry.GetRequired(string! code) -> Boutquin.MarketData.Conventions.IInstrumentConvention!
+Boutquin.MarketData.Conventions.InstrumentConventionRegistry.InstrumentConventionRegistry() -> void
+Boutquin.MarketData.Conventions.ObservationShiftConvention
+Boutquin.MarketData.Conventions.ObservationShiftConvention.Lockout = 3 -> Boutquin.MarketData.Conventions.ObservationShiftConvention
+Boutquin.MarketData.Conventions.ObservationShiftConvention.Lookback = 2 -> Boutquin.MarketData.Conventions.ObservationShiftConvention
+Boutquin.MarketData.Conventions.ObservationShiftConvention.None = 0 -> Boutquin.MarketData.Conventions.ObservationShiftConvention
+Boutquin.MarketData.Conventions.ObservationShiftConvention.Shifted = 1 -> Boutquin.MarketData.Conventions.ObservationShiftConvention
+Boutquin.MarketData.Conventions.OisConvention
+Boutquin.MarketData.Conventions.OisConvention.<Clone>$() -> Boutquin.MarketData.Conventions.OisConvention!
+Boutquin.MarketData.Conventions.OisConvention.BusinessDayAdjustment.get -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Conventions.OisConvention.BusinessDayAdjustment.init -> void
+Boutquin.MarketData.Conventions.OisConvention.CalendarCode.get -> string!
+Boutquin.MarketData.Conventions.OisConvention.CalendarCode.init -> void
+Boutquin.MarketData.Conventions.OisConvention.Code.get -> string!
+Boutquin.MarketData.Conventions.OisConvention.Code.init -> void
+Boutquin.MarketData.Conventions.OisConvention.DayCountCode.get -> string!
+Boutquin.MarketData.Conventions.OisConvention.DayCountCode.init -> void
+Boutquin.MarketData.Conventions.OisConvention.Deconstruct(out string! Code, out string! CalendarCode, out string! DayCountCode, out Boutquin.MarketData.Conventions.PaymentFrequency PaymentFrequency, out Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment BusinessDayAdjustment, out int SettlementLagBusinessDays, out int PaymentLagBusinessDays, out Boutquin.MarketData.Conventions.ObservationShiftConvention ObservationShiftConvention) -> void
+Boutquin.MarketData.Conventions.OisConvention.Equals(Boutquin.MarketData.Conventions.OisConvention? other) -> bool
+Boutquin.MarketData.Conventions.OisConvention.ObservationShiftConvention.get -> Boutquin.MarketData.Conventions.ObservationShiftConvention
+Boutquin.MarketData.Conventions.OisConvention.ObservationShiftConvention.init -> void
+Boutquin.MarketData.Conventions.OisConvention.OisConvention(string! Code, string! CalendarCode, string! DayCountCode, Boutquin.MarketData.Conventions.PaymentFrequency PaymentFrequency, Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment BusinessDayAdjustment, int SettlementLagBusinessDays, int PaymentLagBusinessDays, Boutquin.MarketData.Conventions.ObservationShiftConvention ObservationShiftConvention) -> void
+Boutquin.MarketData.Conventions.OisConvention.PaymentFrequency.get -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.OisConvention.PaymentFrequency.init -> void
+Boutquin.MarketData.Conventions.OisConvention.PaymentLagBusinessDays.get -> int
+Boutquin.MarketData.Conventions.OisConvention.PaymentLagBusinessDays.init -> void
+Boutquin.MarketData.Conventions.OisConvention.SettlementLagBusinessDays.get -> int
+Boutquin.MarketData.Conventions.OisConvention.SettlementLagBusinessDays.init -> void
+Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.Annual = 5 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.Daily = 0 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.Monthly = 2 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.Quarterly = 3 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.SemiAnnual = 4 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.Term = 6 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.PaymentFrequency.Weekly = 1 -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.RollConvention
+Boutquin.MarketData.Conventions.RollConvention.DayOfMonth = 1 -> Boutquin.MarketData.Conventions.RollConvention
+Boutquin.MarketData.Conventions.RollConvention.EndOfMonth = 2 -> Boutquin.MarketData.Conventions.RollConvention
+Boutquin.MarketData.Conventions.RollConvention.Imm = 3 -> Boutquin.MarketData.Conventions.RollConvention
+Boutquin.MarketData.Conventions.RollConvention.None = 0 -> Boutquin.MarketData.Conventions.RollConvention
+Boutquin.MarketData.Conventions.SettlementConvention
+Boutquin.MarketData.Conventions.SettlementConvention.<Clone>$() -> Boutquin.MarketData.Conventions.SettlementConvention!
+Boutquin.MarketData.Conventions.SettlementConvention.Code.get -> string!
+Boutquin.MarketData.Conventions.SettlementConvention.Code.init -> void
+Boutquin.MarketData.Conventions.SettlementConvention.DateAdjustment.get -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Conventions.SettlementConvention.DateAdjustment.init -> void
+Boutquin.MarketData.Conventions.SettlementConvention.Deconstruct(out string! Code, out int SpotLagBusinessDays, out Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment DateAdjustment) -> void
+Boutquin.MarketData.Conventions.SettlementConvention.Equals(Boutquin.MarketData.Conventions.SettlementConvention? other) -> bool
+Boutquin.MarketData.Conventions.SettlementConvention.SettlementConvention(string! Code, int SpotLagBusinessDays, Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment DateAdjustment) -> void
+Boutquin.MarketData.Conventions.SettlementConvention.SpotLagBusinessDays.get -> int
+Boutquin.MarketData.Conventions.SettlementConvention.SpotLagBusinessDays.init -> void
+Boutquin.MarketData.Conventions.StubConvention
+Boutquin.MarketData.Conventions.StubConvention.LongFinal = 4 -> Boutquin.MarketData.Conventions.StubConvention
+Boutquin.MarketData.Conventions.StubConvention.LongInitial = 2 -> Boutquin.MarketData.Conventions.StubConvention
+Boutquin.MarketData.Conventions.StubConvention.None = 0 -> Boutquin.MarketData.Conventions.StubConvention
+Boutquin.MarketData.Conventions.StubConvention.ShortFinal = 3 -> Boutquin.MarketData.Conventions.StubConvention
+Boutquin.MarketData.Conventions.StubConvention.ShortInitial = 1 -> Boutquin.MarketData.Conventions.StubConvention
+Boutquin.MarketData.Conventions.SwapLegConvention
+Boutquin.MarketData.Conventions.SwapLegConvention.<Clone>$() -> Boutquin.MarketData.Conventions.SwapLegConvention!
+Boutquin.MarketData.Conventions.SwapLegConvention.BusinessDayAdjustment.get -> Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment
+Boutquin.MarketData.Conventions.SwapLegConvention.BusinessDayAdjustment.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.CalendarCode.get -> string!
+Boutquin.MarketData.Conventions.SwapLegConvention.CalendarCode.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.Code.get -> string!
+Boutquin.MarketData.Conventions.SwapLegConvention.Code.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.DayCountCode.get -> string!
+Boutquin.MarketData.Conventions.SwapLegConvention.DayCountCode.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.Deconstruct(out string! Code, out string! DayCountCode, out Boutquin.MarketData.Conventions.PaymentFrequency PaymentFrequency, out Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment BusinessDayAdjustment, out Boutquin.MarketData.Conventions.RollConvention RollConvention, out int PaymentLagBusinessDays, out bool EndOfMonth, out string! CalendarCode) -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.EndOfMonth.get -> bool
+Boutquin.MarketData.Conventions.SwapLegConvention.EndOfMonth.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.Equals(Boutquin.MarketData.Conventions.SwapLegConvention? other) -> bool
+Boutquin.MarketData.Conventions.SwapLegConvention.PaymentFrequency.get -> Boutquin.MarketData.Conventions.PaymentFrequency
+Boutquin.MarketData.Conventions.SwapLegConvention.PaymentFrequency.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.PaymentLagBusinessDays.get -> int
+Boutquin.MarketData.Conventions.SwapLegConvention.PaymentLagBusinessDays.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.RollConvention.get -> Boutquin.MarketData.Conventions.RollConvention
+Boutquin.MarketData.Conventions.SwapLegConvention.RollConvention.init -> void
+Boutquin.MarketData.Conventions.SwapLegConvention.SwapLegConvention(string! Code, string! DayCountCode, Boutquin.MarketData.Conventions.PaymentFrequency PaymentFrequency, Boutquin.MarketData.Abstractions.Calendars.BusinessDayAdjustment BusinessDayAdjustment, Boutquin.MarketData.Conventions.RollConvention RollConvention, int PaymentLagBusinessDays, bool EndOfMonth, string! CalendarCode = "WEEKEND") -> void
+override Boutquin.MarketData.Conventions.FraConvention.Equals(object? obj) -> bool
+override Boutquin.MarketData.Conventions.FraConvention.GetHashCode() -> int
+override Boutquin.MarketData.Conventions.FraConvention.ToString() -> string!
+override Boutquin.MarketData.Conventions.FutureContractConvention.Equals(object? obj) -> bool
+override Boutquin.MarketData.Conventions.FutureContractConvention.GetHashCode() -> int
+override Boutquin.MarketData.Conventions.FutureContractConvention.ToString() -> string!
+override Boutquin.MarketData.Conventions.OisConvention.Equals(object? obj) -> bool
+override Boutquin.MarketData.Conventions.OisConvention.GetHashCode() -> int
+override Boutquin.MarketData.Conventions.OisConvention.ToString() -> string!
+override Boutquin.MarketData.Conventions.SettlementConvention.Equals(object? obj) -> bool
+override Boutquin.MarketData.Conventions.SettlementConvention.GetHashCode() -> int
+override Boutquin.MarketData.Conventions.SettlementConvention.ToString() -> string!
+override Boutquin.MarketData.Conventions.SwapLegConvention.Equals(object? obj) -> bool
+override Boutquin.MarketData.Conventions.SwapLegConvention.GetHashCode() -> int
+override Boutquin.MarketData.Conventions.SwapLegConvention.ToString() -> string!
+static Boutquin.MarketData.Conventions.FraConvention.operator !=(Boutquin.MarketData.Conventions.FraConvention? left, Boutquin.MarketData.Conventions.FraConvention? right) -> bool
+static Boutquin.MarketData.Conventions.FraConvention.operator ==(Boutquin.MarketData.Conventions.FraConvention? left, Boutquin.MarketData.Conventions.FraConvention? right) -> bool
+static Boutquin.MarketData.Conventions.FutureContractConvention.operator !=(Boutquin.MarketData.Conventions.FutureContractConvention? left, Boutquin.MarketData.Conventions.FutureContractConvention? right) -> bool
+static Boutquin.MarketData.Conventions.FutureContractConvention.operator ==(Boutquin.MarketData.Conventions.FutureContractConvention? left, Boutquin.MarketData.Conventions.FutureContractConvention? right) -> bool
+static Boutquin.MarketData.Conventions.InstrumentConventionRegistry.CreateDefault() -> Boutquin.MarketData.Conventions.InstrumentConventionRegistry!
+static Boutquin.MarketData.Conventions.OisConvention.operator !=(Boutquin.MarketData.Conventions.OisConvention? left, Boutquin.MarketData.Conventions.OisConvention? right) -> bool
+static Boutquin.MarketData.Conventions.OisConvention.operator ==(Boutquin.MarketData.Conventions.OisConvention? left, Boutquin.MarketData.Conventions.OisConvention? right) -> bool
+static Boutquin.MarketData.Conventions.SettlementConvention.operator !=(Boutquin.MarketData.Conventions.SettlementConvention? left, Boutquin.MarketData.Conventions.SettlementConvention? right) -> bool
+static Boutquin.MarketData.Conventions.SettlementConvention.operator ==(Boutquin.MarketData.Conventions.SettlementConvention? left, Boutquin.MarketData.Conventions.SettlementConvention? right) -> bool
+static Boutquin.MarketData.Conventions.SwapLegConvention.operator !=(Boutquin.MarketData.Conventions.SwapLegConvention? left, Boutquin.MarketData.Conventions.SwapLegConvention? right) -> bool
+static Boutquin.MarketData.Conventions.SwapLegConvention.operator ==(Boutquin.MarketData.Conventions.SwapLegConvention? left, Boutquin.MarketData.Conventions.SwapLegConvention? right) -> bool

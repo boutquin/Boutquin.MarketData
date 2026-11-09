@@ -32,8 +32,8 @@ public sealed class DividendPackageContractTests
 
     [Theory]
     [InlineData("https://github.com/boutquin/Boutquin.MarketData/blob/main/docs/dividends.md", true)]
-    [InlineData("https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.1/docs/dividends.md", true)]
-    [InlineData("https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.2/docs/dividends.md", false)]
+    [InlineData("https://github.com/boutquin/Boutquin.MarketData/blob/v3.0.0/docs/dividends.md", true)]
+    [InlineData("https://github.com/boutquin/Boutquin.MarketData/blob/v3.0.1/docs/dividends.md", false)]
     [InlineData("https://example.invalid/docs/dividends.md", false)]
     [InlineData("http://github.com/boutquin/Boutquin.MarketData/blob/main/docs/dividends.md", false)]
     [InlineData("docs/dividends.md", false)]
@@ -248,7 +248,7 @@ public sealed class DividendPackageContractTests
         if (Uri.TryCreate(target, UriKind.Absolute, out var uri))
         {
             return string.Equals(uri.AbsoluteUri, CanonicalDividendGuide, StringComparison.Ordinal)
-                || string.Equals(uri.AbsoluteUri, "https://github.com/boutquin/Boutquin.MarketData/blob/v2.0.1/docs/dividends.md", StringComparison.Ordinal);
+                || string.Equals(uri.AbsoluteUri, "https://github.com/boutquin/Boutquin.MarketData/blob/v3.0.0/docs/dividends.md", StringComparison.Ordinal);
         }
 
         var resolvedSegments = originEntry.Split('/').SkipLast(1).ToList();

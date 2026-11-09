@@ -49,11 +49,13 @@ public sealed class DividendHistoryRequestPublicApiTests
         "<Clone>$",
     ];
 
-    private static string[] TrackedApi() => File.ReadAllLines(PublicApiFilePath());
+    private static string[] TrackedApi() =>
+        File.ReadAllLines(PublicApiFilePath("PublicAPI.Shipped.txt"))
+            .Concat(File.ReadAllLines(PublicApiFilePath("PublicAPI.Unshipped.txt"))).ToArray();
 
-    private static string PublicApiFilePath()
+    private static string PublicApiFilePath(string name)
     {
-        var path = Path.Combine(AppContext.BaseDirectory, "PublicAPI.Unshipped.txt");
+        var path = Path.Combine(AppContext.BaseDirectory, name);
         File.Exists(path).Should().BeTrue(
             because: $"the deployed tracking fixture is expected at {path}");
         return path;

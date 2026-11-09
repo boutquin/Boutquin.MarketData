@@ -50,7 +50,7 @@ flag on an existing data directory.
 
 ### Price history and window-anchored levels
 
-`PriceHistoryRequest` bypasses the incremental gap-fill path by default, even with `UseTimeSeriesStore` on: the request is fetched whole through the legacy path. Some providers return levels anchored to the fetch window (for example a total return rebuilt from the first bar of each response), so stored segments fetched at different times carry different anchors and a merged series is wrong at every seam. Set `AllowIncrementalPriceHistoryGapFill = true` only when every adapter serving price history returns levels that do not depend on the window.
+`PriceHistoryRequest` requires an explicit `PriceBasis` and bypasses incremental gap filling by default, even with `UseTimeSeriesStore` on. Setting `AllowIncrementalPriceHistoryGapFill = true` permits it only for `PriceBasis.Raw`, whose levels are window-independent. Adjusted bases fetch the whole requested window, so independently anchored price levels are never spliced. The kernel checks that an adapter declares the requested basis before any time-series store read, including a fully stored range. Price series use a basis-suffixed provider after any registered builder (`default/none.provider.none` for the default raw series), isolating old data without changing Storage's schema. Snapshot `Bar` reads state raw and reject another requested basis; non-raw legacy price imports are refused before append. See [migration to 3.0](migration-3.0.md).
 
 ### Restart recovery and bounded indexes
 
@@ -224,8 +224,8 @@ handle does not capture engine state:
 await using var snap = await pipeline.AcquireReadSnapshotAsync(ct);
 
 var range = new DateRange(from, to);
-var spy = await snap.ExecuteAsync<Bar>(new PriceHistoryRequest([new Symbol("SPY")], range), ct);
-var agg = await snap.ExecuteAsync<Bar>(new PriceHistoryRequest([new Symbol("AGG")], range), ct);
+var spy = await snap.ExecuteAsync<Bar>(new PriceHistoryRequest([new Symbol("SPY")], range) { Basis = PriceBasis.Raw }, ct);
+var agg = await snap.ExecuteAsync<Bar>(new PriceHistoryRequest([new Symbol("AGG")], range) { Basis = PriceBasis.Raw }, ct);
 // Both Bar responses use the watermark captured by the first Bar read.
 // A first read of another record type captures its own, potentially later watermark.
 ```
@@ -406,15 +406,14 @@ query-time filtering it buys. Annotate the column `[BitmapIndex]` on a
 `[ColumnarStorable]` record; no other wiring is required, since the DI layer
 already constructs stores generically from the record's own attributes.
 
-## Qualified dependency candidate migration
+## Storage dependency and Bloom configuration
 
-Release 2.0.1 uses published Storage 2.0.1 archives pinned in `dependency-source.json`. Value-log
+MarketData 3.0 uses published Storage 2.0.1 archives pinned in `dependency-source.json`. Value-log
 dispatch is disabled with `TimeSeriesValueLog = null`; row stores opt in using valid
 `ValueLogOptions`. The old `int.MaxValue` threshold is no longer valid.
 
 `TimeSeriesBloomFilter` now configures physical point-lookup filters in row and
-columnar segments, including compaction output. Set `ExpectedItems` and
-`FalsePositiveRate` to size new filters, or `Enabled = false` to omit them on new
+columnar segments, including compaction output. Leave nullable `ExpectedItems` at its default `null` to size each new filter from its segment’s actual entry count, or supply a positive fixed capacity. `FalsePositiveRate` defaults to 0.01, or `Enabled = false` to omit them on new
 writes. Existing segments reopen their persisted filters; range scans and range
 tombstones remain independent of point membership.
 
@@ -440,3 +439,16 @@ rewriting old payloads. Legacy path components must match exactly; descendant
 symbolic links are rejected. Application storage directories must remain under
 the application's control. Invalid raw-document UTF-16 input and malformed stored
 UTF-8 raise encoding exceptions instead of silently replacing evidence text.
+
+
+## Store sizing, restart coverage and write latency
+
+`DataPipelineOptions.TimeSeriesMemTableCapacity` defaults to 10,000 entries. A larger capacity creates fewer, larger segments before compaction and retains more data in memory. Override an individual store with `TimeSeriesStoreBuilder.WithMemTableCapacity` or `RowStoreConfigurator.WithMemTableCapacity`.
+
+`PersistTimeSeriesCoverageIndex` defaults to `false`. Enable it globally through `DataPipelineOptions`, or per store with `UsePersistedCoverageIndex()`, to persist coverage beside the segments and avoid an engine rescan on the first coverage query after restart. This trades restart work for a manifest rewrite on appends that change coverage; consider dataset count and write frequency. Keep the coverage file with its store. Excluding a corrupt segment at open invalidates the saved coverage and rebuilds it from surviving data.
+
+Both row and columnar stores report missing or corrupt segments excluded at open as `DataQualityIncidentKind.SegmentExclusion` to the configured incident sink. Excluded data becomes a gap; a subsequent eligible live request can attempt recovery. Reporting does not guarantee the provider can recover the data, and a throwing incident sink does not prevent the store from opening.
+
+The default `TimeSeriesWriteAheadLog` uses `GroupCommitBatchSize = 256`, `GroupCommitLatencyMs = 1` and `SegmentMaxBytes = 64 * 1024 * 1024`. The latency cap was 5 ms in earlier builds. Storage awaits each record’s commit, so the lower cap reduces waiting for serial appends; concurrent appends can still share a commit. Set `GroupCommitLatencyMs = 5` to retain the previous batching window. Changing the cap does not remove the durable commit wait.
+
+Legacy price imports require both a raw-basis request and `LegacyL2Snapshot.AttestsRawPriceBasis = true`. Set the attestation only after verifying the original bars are unadjusted; it does not transform adjusted data. See [the migration guide](migration-3.0.md).

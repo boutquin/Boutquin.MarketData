@@ -142,14 +142,14 @@ public sealed class MultiPartitionGapFillTests : IDisposable
     {
         var adapter = new PerSymbolBarAdapter();
         using var sp = BuildKernel(
-            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            svc => svc.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)),
             opt => opt.UseTimeSeriesStore = opt.AllowIncrementalPriceHistoryGapFill = true);
 
         var pipeline = sp.GetRequiredService<IDataPipeline>();
 
         var aapl = new Symbol("AAPL");
         var msft = new Symbol("MSFT");
-        var batch = new PriceHistoryRequest([aapl, msft], s_oneDay);
+        var batch = new PriceHistoryRequest([aapl, msft], s_oneDay) { Basis = PriceBasis.Raw };
 
         // Multi-symbol gap-fill: both symbols must be persisted, each under its OWN dataset key.
         var batchResult = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(batch)
@@ -161,7 +161,7 @@ public sealed class MultiPartitionGapFillTests : IDisposable
         // The definitive corruption probe: read AAPL back alone. Its key must hold AAPL's OWN bar
         // (Open=100), not MSFT's (Open=101) cross-attributed by the Symbols[0] collision.
         var aaplBack = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-                new PriceHistoryRequest([aapl], s_oneDay))
+                new PriceHistoryRequest([aapl], s_oneDay) { Basis = PriceBasis.Raw })
             .ConfigureAwait(true);
 
         aaplBack.Payload.Should().ContainSingle().Which.Open.Should()
@@ -169,7 +169,7 @@ public sealed class MultiPartitionGapFillTests : IDisposable
 
         // And MSFT back alone must hold MSFT's own bar.
         var msftBack = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(
-                new PriceHistoryRequest([msft], s_oneDay))
+                new PriceHistoryRequest([msft], s_oneDay) { Basis = PriceBasis.Raw })
             .ConfigureAwait(true);
 
         msftBack.Payload.Should().ContainSingle().Which.Open.Should()

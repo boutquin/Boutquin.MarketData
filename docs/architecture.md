@@ -232,7 +232,7 @@ in place of the legacy L2 snapshot store, behind the preview flag
 the pipeline retains its existing L2 exact-key behaviour unchanged; with the
 flag on, cache reads become coverage-aware — a request is served from the
 store when its date range is already covered, and only the genuinely missing
-dates trigger an adapter dispatch. See
+dates trigger an adapter dispatch. Price-history requests additionally require `AllowIncrementalPriceHistoryGapFill = true`; its default is `false`, so price history continues through the whole-range legacy path even when this cache tier is enabled. See
 [Time-Series Store Cache Tier](time-series-cache.md) for the full gap-fill
 flow, snapshot-isolated reads for backtests and calibration, the segment
 format and compaction choices, and the Boutquin.Storage 2.0 wire-format

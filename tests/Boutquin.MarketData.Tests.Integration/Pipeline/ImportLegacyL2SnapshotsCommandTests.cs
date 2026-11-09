@@ -83,14 +83,14 @@ public sealed class ImportLegacyL2SnapshotsCommandTests : IDisposable
     }
 
     private static PriceHistoryRequest PriceRequest(string ticker)
-        => new([new Symbol(ticker)], new DateRange(new DateOnly(2020, 1, 1), new DateOnly(2020, 12, 31)));
+        => new([new Symbol(ticker)], new DateRange(new DateOnly(2020, 1, 1), new DateOnly(2020, 12, 31))) { Basis = PriceBasis.Raw };
 
     private static Bar Bar(DateOnly date, decimal close)
         => new(date, close, close, close, close, close, 1_000);
 
     // The default key the "default"-provider PriceBarDatasetKeyBuilder produces for a Daily request.
     private static PriceBarDatasetKey KeyFor(string ticker)
-        => new("default", DataFrequency.Daily, ticker, null);
+        => new("default/none.provider.none", DataFrequency.Daily, ticker, null);
 
     // A site's snapshot source: yields the supplied (request, records) pairs.
     private sealed class ListSource(IReadOnlyList<LegacyL2Snapshot<PriceHistoryRequest, Bar>> items)
@@ -253,9 +253,9 @@ public sealed class ImportLegacyL2SnapshotsCommandTests : IDisposable
 
         var snapshots = new List<LegacyL2Snapshot<PriceHistoryRequest, Bar>>
         {
-            new(PriceRequest("AAA"), [Bar(new DateOnly(2020, 1, 2), 10m), Bar(new DateOnly(2020, 1, 3), 11m)]),
-            new(PriceRequest("BBB"), [Bar(new DateOnly(2020, 2, 2), 20m)]),
-            new(PriceRequest("CCC"), [Bar(new DateOnly(2020, 3, 2), 30m), Bar(new DateOnly(2020, 3, 3), 31m)]),
+            new(PriceRequest("AAA"), [Bar(new DateOnly(2020, 1, 2), 10m), Bar(new DateOnly(2020, 1, 3), 11m)]) { AttestsRawPriceBasis = true },
+            new(PriceRequest("BBB"), [Bar(new DateOnly(2020, 2, 2), 20m)]) { AttestsRawPriceBasis = true },
+            new(PriceRequest("CCC"), [Bar(new DateOnly(2020, 3, 2), 30m), Bar(new DateOnly(2020, 3, 3), 31m)]) { AttestsRawPriceBasis = true },
         };
 
         var command = Command(sp, spyRegistry, new ListSource(snapshots));
@@ -281,8 +281,8 @@ public sealed class ImportLegacyL2SnapshotsCommandTests : IDisposable
 
         var snapshots = new List<LegacyL2Snapshot<PriceHistoryRequest, Bar>>
         {
-            new(PriceRequest("AAA"), aaaBars),
-            new(PriceRequest("BBB"), bbbBars),
+            new(PriceRequest("AAA"), aaaBars) { AttestsRawPriceBasis = true },
+            new(PriceRequest("BBB"), bbbBars) { AttestsRawPriceBasis = true },
         };
 
         var command = Command(sp, registry, new ListSource(snapshots));
@@ -308,7 +308,7 @@ public sealed class ImportLegacyL2SnapshotsCommandTests : IDisposable
         var aaaBars = new List<Bar> { Bar(new DateOnly(2020, 1, 2), 10m), Bar(new DateOnly(2020, 1, 3), 11m) };
         var snapshots = new List<LegacyL2Snapshot<PriceHistoryRequest, Bar>>
         {
-            new(PriceRequest("AAA"), aaaBars),
+            new(PriceRequest("AAA"), aaaBars) { AttestsRawPriceBasis = true },
         };
 
         // First run.

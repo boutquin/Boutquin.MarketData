@@ -242,8 +242,8 @@ public sealed class KernelSnapshotReadBindingTests : IDisposable
             .Resolve<PriceBarDatasetKey, Bar>()!;
 
         var day = new DateOnly(2024, 1, 2); // Tuesday — a business day.
-        var aaplKey = new PriceBarDatasetKey("default", DataFrequency.Daily, "AAPL", null);
-        var msftKey = new PriceBarDatasetKey("default", DataFrequency.Daily, "MSFT", null);
+        var aaplKey = new PriceBarDatasetKey("default/none.provider.none", DataFrequency.Daily, "AAPL", null);
+        var msftKey = new PriceBarDatasetKey("default/none.provider.none", DataFrequency.Daily, "MSFT", null);
         await store.AppendAsync(aaplKey, [new Bar(day, 100m, 100m, 100m, 100m, 100m, 1_000)]);
         await store.AppendAsync(msftKey, [new Bar(day, 101m, 101m, 101m, 101m, 101m, 1_000)]);
 
@@ -252,10 +252,12 @@ public sealed class KernelSnapshotReadBindingTests : IDisposable
 
         var request = new PriceHistoryRequest(
             [new Symbol("AAPL"), new Symbol("MSFT")],
-            new DateRange(day, day));
+            new DateRange(day, day))
+        { Basis = PriceBasis.Raw };
 
         var env = await snap.ExecuteAsync<Bar>(request);
 
+        env.Provenance.Should().OnlyContain(p => p.PriceBasis == PriceBasis.Raw);
         env.Payload.Select(b => b.Open).Should().BeEquivalentTo(
             new[] { 100m, 101m },
             "a multi-symbol snapshot read must return each symbol's own bars, not just Symbols[0]'s");

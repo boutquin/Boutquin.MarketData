@@ -56,6 +56,25 @@ public sealed class PersistedBloomIntegrationTests : IDisposable
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public async Task DefaultSizing_RequestsFilterCapacityFromActualSegmentEntries(bool row)
+    {
+        var codec = new ExactCodec();
+        var builder = Builder(row).WithBloomFilter(codec.Create, codec);
+        var stack = await builder.BuildStackAsync();
+        await using (var owner = (IAsyncDisposable)stack.Engine)
+        {
+            await stack.Store.AppendAsync(s_dataset, [BarAt(0), BarAt(1)]);
+            await stack.Engine.FlushAsync();
+        }
+
+        codec.Settings.Should().NotBeEmpty();
+        codec.Settings.Should().OnlyContain(s => s.ExpectedItems != null && s.ExpectedItems < 1_000,
+            "a flush of two bars must not allocate a 131,072-item filter");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public async Task CustomFilters_FlushCompactAndReopenWithoutFactoryOrAdd(bool row)
     {
         var codec = new ExactCodec();

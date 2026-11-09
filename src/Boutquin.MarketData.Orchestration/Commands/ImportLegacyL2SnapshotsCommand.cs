@@ -47,6 +47,15 @@ public readonly record struct LegacyL2Snapshot<TRequest, TRecord>(
     IReadOnlyList<TRecord> Records)
     where TRequest : IDataRequest
 {
+    /// <summary>
+    /// For price bars, the site's explicit statement that the snapshot's open/high/low/close values
+    /// are unadjusted (<c>PriceBasis.Raw</c>). A legacy snapshot carries no provenance, so the kernel
+    /// cannot tell a provider-adjusted pre-3.0 payload from a raw one; without this attestation the
+    /// importer refuses price bars rather than file possibly adjusted levels in the Raw series.
+    /// Ignored for other record types.
+    /// </summary>
+    public bool AttestsRawPriceBasis { get; init; }
+
     /// <summary>A defensive snapshot of the supplied records, exposed as a read-only collection.</summary>
     public IReadOnlyList<TRecord> Records
     {
@@ -226,7 +235,21 @@ public sealed class ImportLegacyL2SnapshotsCommand<TRequest, TRecord, TDatasetKe
 
             // Project the same dataset key the live pipeline reads/writes for this request, then
             // append the snapshot's canonical records once per snapshot (empty payloads are a no-op).
-            var datasetKey = _keyBuilder.Build(snapshot.Request);
+            if (snapshot.Request is Boutquin.MarketData.Abstractions.Requests.PriceHistoryRequest prices
+                && typeof(TRecord) == typeof(Boutquin.MarketData.Abstractions.Records.Bar)
+                && prices.Basis != Boutquin.MarketData.Abstractions.Requests.PriceBasis.Raw)
+            {
+                throw new Boutquin.MarketData.Abstractions.Exceptions.PriceBasisNotSupportedException(
+                    prices.Basis, [Boutquin.MarketData.Abstractions.Requests.PriceBasis.Raw]);
+            }
+            if (snapshot.Request is Boutquin.MarketData.Abstractions.Requests.PriceHistoryRequest
+                && typeof(TRecord) == typeof(Boutquin.MarketData.Abstractions.Records.Bar)
+                && !snapshot.AttestsRawPriceBasis)
+            {
+                throw new InvalidOperationException(
+                    "Legacy price snapshots carry no basis provenance. Set LegacyL2Snapshot.AttestsRawPriceBasis to true only when the bars are known to be unadjusted.");
+            }
+            var datasetKey = Boutquin.MarketData.Orchestration.Pipeline.PriceBasisSeriesIdentity.Apply(snapshot.Request, _keyBuilder.Build(snapshot.Request));
             await store.AppendAsync(datasetKey, snapshot.Records, cancellationToken).ConfigureAwait(false);
             appendCallCount++;
 

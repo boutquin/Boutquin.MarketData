@@ -16,7 +16,10 @@
 
 using Boutquin.MarketData.Abstractions.Contracts;
 using Boutquin.MarketData.Abstractions.Provenance;
+using Boutquin.MarketData.Abstractions.Records;
+using Boutquin.MarketData.Abstractions.Requests;
 using Boutquin.MarketData.Abstractions.Results;
+using Boutquin.MarketData.Orchestration.Pipeline;
 using Microsoft.Extensions.Logging;
 
 namespace Boutquin.MarketData.Orchestration.Fallback;
@@ -90,6 +93,7 @@ public sealed class FallbackOrchestrator<TRequest, TRecord>
         IFallbackResponseEvaluator<DataEnvelope<IReadOnlyList<TRecord>>> evaluator,
         CancellationToken cancellationToken = default)
     {
+        PriceBasisGuard.EnsureDeclared(request, adapters);
         var ordered = OrderByPriority(adapters);
         var attempts = new List<FallbackAttempt>(ordered.Count);
 
@@ -100,6 +104,12 @@ public sealed class FallbackOrchestrator<TRequest, TRecord>
 
             try
             {
+                if (request is PriceHistoryRequest && typeof(TRecord) == typeof(Bar) && adapter is not IPriceBasisAdapter)
+                {
+                    attempts.Add(new FallbackAttempt(providerKey, priority, Succeeded: false, "Skipped — no declared price basis"));
+                    continue;
+                }
+
                 // Capability evaluation is an adapter call, so it shares FetchAsync's exception
                 // boundary. A false result is still a skip; cancellation still escapes below.
                 if (!adapter.CanHandle(request))
@@ -118,6 +128,12 @@ public sealed class FallbackOrchestrator<TRequest, TRecord>
                 var response = await adapter
                     .FetchAsync(request, cancellationToken)
                     .ConfigureAwait(false);
+
+                if (!PriceBasisGuard.TryAccept(request, response, out var basisRejection))
+                {
+                    attempts.Add(new FallbackAttempt(providerKey, priority, Succeeded: false, $"Rejected — {basisRejection}"));
+                    continue;
+                }
 
                 if (evaluator.IsUsable(response, out var reason))
                 {

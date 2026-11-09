@@ -19,6 +19,7 @@ using System.Text;
 
 using Boutquin.MarketData.Abstractions.Contracts;
 using Boutquin.MarketData.Abstractions.Diagnostics;
+using Boutquin.MarketData.Abstractions.Exceptions;
 using Boutquin.MarketData.Abstractions.Provenance;
 using Boutquin.MarketData.Abstractions.Records;
 using Boutquin.MarketData.Abstractions.Requests;
@@ -177,7 +178,7 @@ public sealed class DataPipeline : IDataPipeline
         var cached = await _localCache
             .GetAsync<DataEnvelope<IReadOnlyList<TRecord>>>(cacheKey, cancellationToken)
             .ConfigureAwait(false);
-        if (cached is not null)
+        if (cached is not null && PriceBasisGuard.CanReplay<TRecord>(request, cached.Provenance))
         {
             _logger.LogDebug("L1 cache hit for {CacheKey}", cacheKey);
             var cacheProvenance = cached.Provenance
@@ -219,6 +220,7 @@ public sealed class DataPipeline : IDataPipeline
 
                 if (partitionRequests is not null)
                 {
+                    PriceBasisGuard.EnsurePartitionWindows<TRequest, TRecord>(request, partitionRequests);
                     // DividendPayment and Bar have no row-level symbol. A consumer-preserved
                     // multi-symbol partition cannot be assigned to any physical symbol series.
                     // Reuse the already-selected partition list in the legacy path so the consumer
@@ -239,7 +241,7 @@ public sealed class DataPipeline : IDataPipeline
                     else
                     {
                         var partitionedEnvelope = await RunPartitionedTimeSeriesAsync<TRequest, TRecord>(
-                            executor, partitionRequests, cancellationToken).ConfigureAwait(false);
+                            executor, request, partitionRequests, cancellationToken).ConfigureAwait(false);
                         if (partitionedEnvelope is not null)
                         {
                             return partitionedEnvelope;
@@ -284,7 +286,7 @@ public sealed class DataPipeline : IDataPipeline
             if (snapshot is not null)
             {
                 var staleness = _stalenessPolicy.CheckStaleness(cacheKey, snapshot.Metadata.StoredAtUtc);
-                if (staleness is null)
+                if (staleness is null && PriceBasisGuard.CanReplay<TRecord>(request, snapshot.Metadata.Provenance))
                 {
                     _logger.LogDebug("L2 snapshot hit (fresh) for {CacheKey}", cacheKey);
                     // Update provenance to reflect that data was served from L2 snapshot, not live API
@@ -315,7 +317,10 @@ public sealed class DataPipeline : IDataPipeline
                     return snapshotEnvelope;
                 }
 
-                _logger.LogInformation("L2 snapshot stale for {CacheKey}: {Issue}", cacheKey, staleness.Message);
+                if (staleness is not null)
+                {
+                    _logger.LogInformation("L2 snapshot stale for {CacheKey}: {Issue}", cacheKey, staleness.Message);
+                }
             }
         }
 
@@ -358,6 +363,8 @@ public sealed class DataPipeline : IDataPipeline
             partitions = partitioner?.Partition(request)
                 ?? (BatchRequestSplitter.TrySplit(request, out var defaultPartitions) ? defaultPartitions : [request]);
         }
+
+        PriceBasisGuard.EnsurePartitionWindows<TRequest, TRecord>(request, partitions);
 
         // Step 6: Fetch loop
         var allRecords = new List<TRecord>();
@@ -440,7 +447,7 @@ public sealed class DataPipeline : IDataPipeline
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not (PriceBasisMismatchException or PriceBasisNotSupportedException))
             {
                 _logger.LogError(
                     ex,
@@ -482,6 +489,11 @@ public sealed class DataPipeline : IDataPipeline
                     break;
                 }
             }
+        }
+
+        if (partitions.Count > 1 && allRecords.Count > 0 && request is PriceHistoryRequest priceRequest && typeof(TRecord) == typeof(Bar))
+        {
+            PriceBasisGuard.EnsureMerged(priceRequest, allProvenance);
         }
 
         // Step 7: Assemble result — prefer adapter-reported coverage (uses source-specific
@@ -549,6 +561,7 @@ public sealed class DataPipeline : IDataPipeline
     // null), signalling the caller to fall back to the legacy path for the whole request.
     private async Task<DataEnvelope<IReadOnlyList<TRecord>>?> RunPartitionedTimeSeriesAsync<TRequest, TRecord>(
         TimeSeriesPipelineExecutor executor,
+        TRequest request,
         IReadOnlyList<TRequest> partitionRequests,
         CancellationToken cancellationToken)
         where TRequest : IDataRequest
@@ -581,7 +594,7 @@ public sealed class DataPipeline : IDataPipeline
             {
                 throw;
             }
-            catch (Exception ex) when (ex is not (UnsupportedFormatVersionException or CorruptSegmentException))
+            catch (Exception ex) when (ex is not (UnsupportedFormatVersionException or CorruptSegmentException or PriceBasisMismatchException or PriceBasisNotSupportedException))
             {
                 _logger.LogError(
                     ex,
@@ -612,6 +625,12 @@ public sealed class DataPipeline : IDataPipeline
             provenance.AddRange(envelope.Provenance);
             issues.AddRange(envelope.Issues);
             coverages.Add(envelope.Coverage);
+        }
+
+        if (partitionRequests.Count > 1 && payload.Count > 0
+            && request is PriceHistoryRequest prices && typeof(TRecord) == typeof(Bar))
+        {
+            PriceBasisGuard.EnsureMerged(prices, provenance);
         }
 
         var coverage = coverages.Count > 0

@@ -107,15 +107,15 @@ public sealed class RequestTypeGapFillTests : IDisposable
         var adapter = new CountingAdapter<PriceHistoryRequest, Bar>("prices",
             range => [new Bar(range.From, 1m, 1m, 1m, 1m, 1m, 1)]);
         using var kernel = BuildKernel(
-            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)),
             options =>
             {
                 options.UseTimeSeriesStore = true;
                 options.L1CacheTtl = TimeSpan.Zero;
             });
         var pipeline = kernel.GetRequiredService<IDataPipeline>();
-        var first = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 5)));
-        var wider = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 9)));
+        var first = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 5))) { Basis = PriceBasis.Raw };
+        var wider = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 9))) { Basis = PriceBasis.Raw };
 
         await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(first);
         await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(wider);
@@ -130,7 +130,7 @@ public sealed class RequestTypeGapFillTests : IDisposable
         var adapter = new CountingAdapter<PriceHistoryRequest, Bar>("prices",
             range => [new Bar(range.From, 1m, 1m, 1m, 1m, 1m, 1)]);
         using var kernel = BuildKernel(
-            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter),
+            services => services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)),
             options =>
             {
                 options.UseTimeSeriesStore = options.AllowIncrementalPriceHistoryGapFill = true;
@@ -138,8 +138,8 @@ public sealed class RequestTypeGapFillTests : IDisposable
                 options.TimeSeriesStalenessMaxAge = TimeSpan.MaxValue;
             });
         var pipeline = kernel.GetRequiredService<IDataPipeline>();
-        var first = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 5)));
-        var wider = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 9)));
+        var first = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 5))) { Basis = PriceBasis.Raw };
+        var wider = new PriceHistoryRequest([new Symbol("AAPL")], new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 9))) { Basis = PriceBasis.Raw };
 
         await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(first);
         await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(wider);

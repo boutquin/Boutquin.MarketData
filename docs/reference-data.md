@@ -341,6 +341,7 @@ before using the payload; a completed task alone does not establish usable data.
 ```csharp
 try
 {
+    var priceRequest = new PriceHistoryRequest([new Symbol("SPY")], range) { Basis = PriceBasis.Raw };
     var result = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(priceRequest, ct);
     // Inspect result.Issues and result.Coverage before consuming result.Payload.
 }

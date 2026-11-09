@@ -157,11 +157,9 @@ public sealed class DividendHistoryRequestTests
     }
 
     [Fact]
-    public void DatasetKey_PreservesPriceHistoryIdentityForLegacySafeSingletons()
+    public void DatasetKey_PreservesLegacyIdentityWhilePricesAddBasisSuffix()
     {
-        // Established separator-free single-symbol keys remain byte-identical to price history;
-        // multi-symbol dividend keys use an injective list encoding because opaque tickers may
-        // themselves contain the price family's underscore separator.
+        // Dividend identities stay unchanged; every price identity now appends its required basis.
         string[][] symbolSets =
         [
             ["SCHD"],
@@ -177,11 +175,11 @@ public sealed class DividendHistoryRequestTests
             foreach (var venue in venues)
             {
                 var dividends = new DividendHistoryRequest(symbols, s_range) { Exchange = venue };
-                var prices = new PriceHistoryRequest(symbols, s_range) { Exchange = venue };
+                var prices = new PriceHistoryRequest(symbols, s_range) { Basis = PriceBasis.Raw, Exchange = venue };
 
                 dividends.DatasetKey.Should().Be(
-                    prices.DatasetKey,
-                    because: "tickers [{0}] on venue {1} must key identically across request families",
+                    prices.DatasetKey[..^"/basis:none.provider.none".Length],
+                    because: "tickers [{0}] on venue {1} retain their identity before the price-only basis suffix",
                     string.Join(",", tickers),
                     venue?.ToString() ?? "(none)");
             }

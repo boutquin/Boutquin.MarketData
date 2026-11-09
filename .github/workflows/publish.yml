@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing qualified 2.0.0/2.0.1 stable or numeric RC tag
+        description: Existing qualified exact stable or numeric RC tag
         required: true
         type: string
       manifest_sha256:
@@ -35,7 +35,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
           MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
         run: |
-          [[ "$RELEASE_TAG" =~ ^v2\.0\.[01](-rc\.[0-9]+(\.[0-9]+)*)?$ ]]
+          [[ "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.[0-9]+(\.[0-9]+)*)?$ ]]
           [[ "$MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]]
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -59,6 +59,7 @@ jobs:
         run: |
           if [[ "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             python3 scripts/check-release-docs.py "${BASH_REMATCH[1]}"
+            python3 scripts/check-api-release-baseline.py --release
           fi
       - name: Build metadata inspector only
         run: dotnet build scripts/package-inspector/PackageInspector.csproj -c Release

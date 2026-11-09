@@ -56,16 +56,17 @@ public sealed class DataPipelineOptionsDefaultsTests
         var wal = Fresh().TimeSeriesWriteAheadLog;
 
         wal.GroupCommitBatchSize.Should().Be(256);
-        wal.GroupCommitLatencyMs.Should().Be(5);
+        wal.GroupCommitLatencyMs.Should().Be(1);
         wal.SegmentMaxBytes.Should().Be(64L * 1024L * 1024L);
     }
 
     [Fact]
-    public void TimeSeriesBloomFilter_DefaultsTo131072At1Percent()
+    public void TimeSeriesBloomFilter_DefaultsToSizingFromActualEntriesAt1Percent()
     {
         var bloom = Fresh().TimeSeriesBloomFilter;
 
-        bloom.ExpectedItems.Should().Be(131_072);
+        // The kernel reads by range only, so a fixed 131,072-item filter per flush is wasted space.
+        ((int?)bloom.ExpectedItems).Should().BeNull();
         bloom.FalsePositiveRate.Should().Be(0.01);
     }
 

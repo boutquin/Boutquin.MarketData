@@ -63,6 +63,9 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
     private const int DefaultRowGroupMaxRows = 1 << 17;
     private const int DefaultFullCompactionThreshold = 4;
 
+    // Capacity for a standalone BuildBloomFilter() call only; stores size each segment's filter from its entries.
+    private const int StandaloneBloomCapacity = 131_072;
+
     private readonly string _recordTypeToken;
 
     private string _segmentRoot = Path.Combine(
@@ -70,16 +73,18 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
         ".marketdata-timeseries",
         "{record-type}");
     private IDatasetCoverageIndex<TDatasetKey>? _coverageIndex;
+    private bool _persistedCoverageIndex;
+    private int _memTableCapacity = DefaultMemTableCapacity;
     private WriteAheadLogOptions _walOptions = new()
     {
         GroupCommitBatchSize = 256,
-        GroupCommitLatencyMs = 5,
+        GroupCommitLatencyMs = 1,
         SegmentMaxBytes = 64L * 1024L * 1024L,
     };
 
     private TimeSeriesBloomFilterOptions _bloomOptions = new();
     private Func<TimeSeriesBloomFilterOptions, IBloomFilter<TimeSeriesKey<TDatasetKey>>> _bloomFactory =
-        opts => BloomFilter.ForSerializable<TimeSeriesKey<TDatasetKey>>(opts.ExpectedItems, opts.FalsePositiveRate);
+        opts => BloomFilter.ForSerializable<TimeSeriesKey<TDatasetKey>>(opts.ExpectedItems ?? StandaloneBloomCapacity, opts.FalsePositiveRate);
 
     private bool _customBloomFactory;
     private IBloomFilterStateCodec<TimeSeriesKey<TDatasetKey>>? _bloomStateCodec;
@@ -126,7 +131,7 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
     /// <summary>The configured group-commit WAL options (defaults: 256-append batch, 5 ms, 64 MiB).</summary>
     public WriteAheadLogOptions WriteAheadLogOptions => _walOptions;
 
-    /// <summary>The configured per-segment bloom-filter options (defaults: 131,072 items at 1%).</summary>
+    /// <summary>The configured per-segment bloom-filter options (defaults: sized from each segment's entries, 1% false positives).</summary>
     public TimeSeriesBloomFilterOptions BloomFilterOptions => _bloomOptions;
 
     /// <summary>Whether WiscKey value-log dispatch was explicitly enabled (row format only).</summary>
@@ -159,6 +164,43 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
     {
         ArgumentNullException.ThrowIfNull(coverageIndex);
         _coverageIndex = coverageIndex;
+        return this;
+    }
+
+    /// <summary>Whether coverage bounds persist to a manifest beside the segments. Defaults to <see langword="false"/>.</summary>
+    public bool PersistedCoverageIndex => _persistedCoverageIndex;
+
+    /// <summary>
+    /// Persists the dataset coverage index to <see cref="ResolveCoverageIndexPath"/> so the first
+    /// coverage query after a restart does not rescan the engine.
+    /// </summary>
+    /// <remarks>
+    /// Opt-in. Storage rewrites the whole manifest (every dataset) on each append that touches
+    /// coverage, so a store holding very many datasets pays for that on the write path. An explicit
+    /// <see cref="WithCoverageIndex"/> takes precedence. When a corrupt segment is excluded at open,
+    /// the index is rebuilt from the surviving data, so an excluded span reads as a gap.
+    /// </remarks>
+    /// <returns>This builder.</returns>
+    public TimeSeriesStoreBuilder<TDatasetKey, TRecord> UsePersistedCoverageIndex()
+    {
+        _persistedCoverageIndex = true;
+        return this;
+    }
+
+    /// <summary>The coverage manifest path used when <see cref="UsePersistedCoverageIndex"/> is enabled.</summary>
+    public string ResolveCoverageIndexPath() => Path.Combine(ResolveSegmentFolder(), "coverage", "index.json");
+
+    /// <summary>The MemTable entry count that triggers an automatic flush. Defaults to 10,000.</summary>
+    public int MemTableCapacity => _memTableCapacity;
+
+    /// <summary>Sets the MemTable entry count that triggers an automatic flush.</summary>
+    /// <param name="capacity">Positive entry count. Larger values mean fewer, bigger segments.</param>
+    /// <returns>This builder.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="capacity"/> is not positive.</exception>
+    public TimeSeriesStoreBuilder<TDatasetKey, TRecord> WithMemTableCapacity(int capacity)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
+        _memTableCapacity = capacity;
         return this;
     }
 
@@ -223,7 +265,7 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
             options.Enabled, options.ExpectedItems, options.FalsePositiveRate);
         _bloomOptions = options;
         _customBloomFactory = false;
-        _bloomFactory = opts => BloomFilter.ForSerializable<TimeSeriesKey<TDatasetKey>>(opts.ExpectedItems, opts.FalsePositiveRate);
+        _bloomFactory = opts => BloomFilter.ForSerializable<TimeSeriesKey<TDatasetKey>>(opts.ExpectedItems ?? StandaloneBloomCapacity, opts.FalsePositiveRate);
         return this;
     }
 
@@ -441,8 +483,9 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
                 engineValueLog = _valueLogEnabled ? _valueLog : null;
             }
 
+            var excludedSegments = 0;
             var lsmOptions = new LsmStorageEngineOptions<TimeSeriesKey<TDatasetKey>, TRecord>(
-                DefaultMemTableCapacity,
+                _memTableCapacity,
                 segmentFolder,
                 SegmentPrefix: "ts",
                 segmentFormat,
@@ -451,7 +494,12 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
                 engineValueLog)
             {
                 CorruptSegmentRecovery = _corruptSegmentRecovery,
-                OnCorruptSegmentExcluded = _onCorruptSegmentExcluded,
+                OnCorruptSegmentExcluded = exclusion =>
+                {
+                    Interlocked.Increment(ref excludedSegments);
+                    SegmentExclusionReporter.Report(DataQualityIncidentSink, typeof(TRecord).Name, exclusion);
+                    _onCorruptSegmentExcluded?.Invoke(exclusion);
+                },
             };
 
             var innerEngine = await LsmStorageEngine<TimeSeriesKey<TDatasetKey>, TRecord>
@@ -460,9 +508,19 @@ public sealed class TimeSeriesStoreBuilder<TDatasetKey, TRecord>
 
             var tsEngine = new LsmTimeSeriesStorageEngine<TDatasetKey, TRecord>(owningEngine, tsOptions);
 
-            var coverage = _coverageIndex ?? new InMemoryDatasetCoverageIndex<TDatasetKey>();
+            var coverage = _coverageIndex
+                ?? (_persistedCoverageIndex
+                    ? new FileDatasetCoverageIndex<TDatasetKey>(ResolveCoverageIndexPath())
+                    : new InMemoryDatasetCoverageIndex<TDatasetKey>());
 
             var store = new LsmTimeSeriesStore<TDatasetKey, TRecord>(tsEngine, coverage);
+
+            // A persisted manifest can still claim a span whose segment was just excluded; rebuild it
+            // from the surviving data so that span reads as a gap and is re-fetched.
+            if (_persistedCoverageIndex && _coverageIndex is null && Volatile.Read(ref excludedSegments) > 0)
+            {
+                await store.RebuildCoverageAsync(cancellationToken).ConfigureAwait(false);
+            }
 
             // The ownership wrapper is the one ILsmStorageEngine identity exposed to the store,
             // stack, and registry. It delegates snapshots and every data operation to innerEngine,

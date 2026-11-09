@@ -15,6 +15,7 @@
 //
 
 using Boutquin.MarketData.Abstractions.Contracts;
+using Boutquin.MarketData.Abstractions.Provenance;
 using Boutquin.MarketData.Abstractions.Records;
 using Boutquin.MarketData.Abstractions.ReferenceData;
 using Boutquin.MarketData.Abstractions.Requests;
@@ -41,10 +42,10 @@ public sealed class RequestCacheIdentityTests : IDisposable
     [InlineData(true)]
     public async Task Price_pipeline_preserves_distinct_opaque_and_structured_identities(bool listCollision)
     {
-        var first = new PriceHistoryRequest([new Symbol(listCollision ? "A_B" : "A/XNAS")], s_range);
+        var first = new PriceHistoryRequest([new Symbol(listCollision ? "A_B" : "A/XNAS")], s_range) { Basis = PriceBasis.Raw };
         var second = listCollision
-            ? new PriceHistoryRequest([new Symbol("A"), new Symbol("B")], s_range)
-            : new PriceHistoryRequest([new Symbol("A")], s_range) { Exchange = ExchangeCode.XNAS };
+            ? new PriceHistoryRequest([new Symbol("A"), new Symbol("B")], s_range) { Basis = PriceBasis.Raw }
+            : new PriceHistoryRequest([new Symbol("A")], s_range) { Basis = PriceBasis.Raw, Exchange = ExchangeCode.XNAS };
         await AssertSeparateCacheEntries<PriceHistoryRequest, Bar>(first, second,
             [new Bar(s_range.From, 111m, 111m, 111m, 111m, 111m, 1)],
             [new Bar(s_range.From, 222m, 222m, 222m, 222m, 222m, 1)]);
@@ -102,13 +103,27 @@ public sealed class RequestCacheIdentityTests : IDisposable
         var cache = provider.GetRequiredService<ILocalCache>();
         static string Key(TRequest request) => CacheKeyBuilder.FromDateRange(
             $"pipeline-v2/{typeof(TRecord).Name}/{request.Frequency}", request.DatasetKey, request.Range.From, request.Range.To);
-        await cache.SetAsync(Key(first), new DataEnvelope<IReadOnlyList<TRecord>>(firstPayload, new(1, 1, 0, 1m), [], []), TimeSpan.FromMinutes(1));
-        await cache.SetAsync(Key(second), new DataEnvelope<IReadOnlyList<TRecord>>(secondPayload, new(1, 1, 0, 1m), [], []), TimeSpan.FromMinutes(1));
+        await cache.SetAsync(Key(first), new DataEnvelope<IReadOnlyList<TRecord>>(firstPayload, new(1, 1, 0, 1m), [], Provenance(first)), TimeSpan.FromMinutes(1));
+        await cache.SetAsync(Key(second), new DataEnvelope<IReadOnlyList<TRecord>>(secondPayload, new(1, 1, 0, 1m), [], Provenance(second)), TimeSpan.FromMinutes(1));
         var pipeline = provider.GetRequiredService<IDataPipeline>();
         var firstResult = await pipeline.ExecuteAsync<TRequest, TRecord>(first);
         var secondResult = await pipeline.ExecuteAsync<TRequest, TRecord>(second);
         firstResult.Payload.Should().Equal(firstPayload);
         secondResult.Payload.Should().Equal(secondPayload);
+    }
+
+    private static IReadOnlyList<DataProvenance> Provenance(IDataRequest request) =>
+        request is PriceHistoryRequest prices
+            ? [new(new ProviderCode("fixture"), request.DatasetKey, LicenseType.Free, RetrievalMode.Live, FreshnessClass.EndOfDay, DateTimeOffset.UnixEpoch, null) { PriceBasis = prices.Basis }] : [];
+
+    [Fact]
+    public async Task Price_pipeline_keeps_bases_in_separate_entries()
+    {
+        var first = new PriceHistoryRequest([new Symbol("SPY")], s_range) { Basis = new(PriceAdjustment.All, AdjustedCloseSource.ProviderSupplied, PriceAdjustment.None) };
+        var second = first with { Basis = new(PriceAdjustment.All, AdjustedCloseSource.AdapterComputed, PriceAdjustment.Splits) };
+        await AssertSeparateCacheEntries(first, second,
+            new Bar[] { new(s_range.From, 100m, 100m, 100m, 100m, 100m, 1) },
+            new Bar[] { new(s_range.From, 200m, 200m, 200m, 200m, 200m, 1) });
     }
 
     public void Dispose()

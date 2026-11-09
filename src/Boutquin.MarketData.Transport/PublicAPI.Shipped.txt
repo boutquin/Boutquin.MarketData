@@ -1,1 +1,40 @@
 #nullable enable
+Boutquin.MarketData.Transport.Http.HttpClientFactory
+Boutquin.MarketData.Transport.Http.IHttpDataTransport
+Boutquin.MarketData.Transport.Http.IHttpDataTransport.GetAsync(System.Uri! uri, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? headers = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IO.Stream!>!
+Boutquin.MarketData.Transport.Http.ResilientHttpDataTransport
+Boutquin.MarketData.Transport.Http.ResilientHttpDataTransport.Dispose() -> void
+Boutquin.MarketData.Transport.Http.ResilientHttpDataTransport.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Boutquin.MarketData.Transport.Http.ResilientHttpDataTransport.GetAsync(System.Uri! uri, System.Collections.Generic.IReadOnlyDictionary<string!, string!>? headers = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IO.Stream!>!
+Boutquin.MarketData.Transport.Http.ResilientHttpDataTransport.ResilientHttpDataTransport(System.Net.Http.HttpClient? httpClient = null, Boutquin.MarketData.Transport.Http.TransportOptions? options = null, Microsoft.Extensions.Logging.ILogger<Boutquin.MarketData.Transport.Http.ResilientHttpDataTransport!>? logger = null, bool ownsClient = false) -> void
+Boutquin.MarketData.Transport.Http.TransportOptions
+Boutquin.MarketData.Transport.Http.TransportOptions.AllowPrivateNetworks.get -> bool
+Boutquin.MarketData.Transport.Http.TransportOptions.AllowPrivateNetworks.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.BaseRetryDelay.get -> System.TimeSpan
+Boutquin.MarketData.Transport.Http.TransportOptions.BaseRetryDelay.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.EnableRateLimiting.get -> bool
+Boutquin.MarketData.Transport.Http.TransportOptions.EnableRateLimiting.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.EnableRetry.get -> bool
+Boutquin.MarketData.Transport.Http.TransportOptions.EnableRetry.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.MaxResponseBytes.get -> long
+Boutquin.MarketData.Transport.Http.TransportOptions.MaxResponseBytes.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.MaxRetryAttempts.get -> int
+Boutquin.MarketData.Transport.Http.TransportOptions.MaxRetryAttempts.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.PermitLimit.get -> int
+Boutquin.MarketData.Transport.Http.TransportOptions.PermitLimit.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.PooledConnectionLifetime.get -> System.TimeSpan
+Boutquin.MarketData.Transport.Http.TransportOptions.PooledConnectionLifetime.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.QueueLimit.get -> int
+Boutquin.MarketData.Transport.Http.TransportOptions.QueueLimit.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.RateLimitWindow.get -> System.TimeSpan
+Boutquin.MarketData.Transport.Http.TransportOptions.RateLimitWindow.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.SegmentsPerWindow.get -> int
+Boutquin.MarketData.Transport.Http.TransportOptions.SegmentsPerWindow.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.SensitiveQueryParameters.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+Boutquin.MarketData.Transport.Http.TransportOptions.SensitiveQueryParameters.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.Timeout.get -> System.TimeSpan
+Boutquin.MarketData.Transport.Http.TransportOptions.Timeout.set -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.TransportOptions() -> void
+Boutquin.MarketData.Transport.Http.TransportOptions.UserAgent.get -> string!
+Boutquin.MarketData.Transport.Http.TransportOptions.UserAgent.set -> void
+static Boutquin.MarketData.Transport.Http.HttpClientFactory.Create(string! productName, string? contactUrl = null, System.TimeSpan? timeout = null) -> System.Net.Http.HttpClient!

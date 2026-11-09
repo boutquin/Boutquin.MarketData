@@ -33,7 +33,7 @@ public sealed class BatchDataRequestTests
     [Fact]
     public void PriceHistoryRequest_implements_IBatchDataRequest_of_Symbol()
     {
-        var request = new PriceHistoryRequest([new Symbol("AAPL"), new Symbol("MSFT")], s_range);
+        var request = new PriceHistoryRequest([new Symbol("AAPL"), new Symbol("MSFT")], s_range) { Basis = PriceBasis.Raw };
 
         request.Should().BeAssignableTo<IBatchDataRequest<Symbol>>();
         ((IBatchDataRequest<Symbol>)request).PartitionKeys
@@ -66,7 +66,7 @@ public sealed class BatchDataRequestTests
     public void PriceHistoryRequest_PartitionKeys_returns_same_reference_as_Symbols()
     {
         var symbols = new List<Symbol> { new("AAPL"), new("GOOG") };
-        var request = new PriceHistoryRequest(symbols, s_range);
+        var request = new PriceHistoryRequest(symbols, s_range) { Basis = PriceBasis.Raw };
 
         request.PartitionKeys.Should().BeSameAs(request.Symbols);
     }

@@ -11,8 +11,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 def validate(feed, tag, digest, commit):
-    if not re.fullmatch(r"v2\.0\.[01](?:-rc\.[0-9]+(?:\.[0-9]+)*)?", tag):
-        raise ValueError("Only explicit 2.0.0/2.0.1 stable or numeric RC tags can be published")
+    if not re.fullmatch(r"v(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-rc\.[0-9]+(?:\.[0-9]+)*)?", tag):
+        raise ValueError("Only exact stable or numeric RC tags can be published")
     if not re.fullmatch(r"[0-9a-f]{64}", digest):
         raise ValueError("Expected the independently frozen manifest SHA-256")
     manifest = feed / "package-hashes.json"
@@ -36,6 +36,7 @@ def main():
     a = p.parse_args()
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     manifest = validate(a.feed, a.tag, a.manifest_sha256, commit)
+    subprocess.run([sys.executable, str(ROOT / "scripts/check-api-release-baseline.py"), "--release"], check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/verify-rc-packages.py"), str(a.feed), a.tag[1:], commit,
                     "--manifest", str(manifest), "--report", str(a.feed / "publication-inspection.json")], check=True)
     print("PASS: original qualified archives match the public source tag and pinned manifest")

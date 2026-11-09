@@ -150,3 +150,7 @@ Join the [GitHub Discussions](https://github.com/boutquin/Boutquin.MarketData/di
 ---
 
 Thank you for contributing!
+
+## Released API baselines
+
+`PublicAPI.Shipped.txt` records the reconciled 2.0.1 surface. New development goes in `PublicAPI.Unshipped.txt`; removed released signatures require `*REMOVED*` entries during development. At a release boundary, reconcile additions and removal pairs against the exact qualified source, archive the previous files and retirement list, then reset Unshipped to its nullable header. Run `python3 scripts/check-api-release-baseline.py` before freezing the next feature baseline; use `--release` at a release boundary to require no pending entries. This chore never repacks a released identity.

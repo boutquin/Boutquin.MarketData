@@ -153,14 +153,14 @@ public sealed class Round3PipelineRegressionTests : IDisposable
             services.ConfigureTimeSeriesStore<PriceBarDatasetKey, Bar>(
                 options => options.WithSegmentRoot(Path.Combine(_root, "row-bars")).UseRowFormat()));
         var registry = host.GetRequiredService<ITimeSeriesStoreRegistry>();
-        var key = new PriceBarDatasetKey("default", DataFrequency.Daily, "VTI", null);
+        var key = new PriceBarDatasetKey("default/none.provider.none", DataFrequency.Daily, "VTI", null);
         var expected = new Bar(date, 10m, 11m, 9m, 10m, 10m, 100);
         await registry.Resolve<PriceBarDatasetKey, Bar>()!.AppendAsync(key, [expected]).ConfigureAwait(true);
         await using var snapshot = await host.GetRequiredService<IDataPipeline>()
             .AcquireReadSnapshotAsync().ConfigureAwait(true);
         DataEnvelope<IReadOnlyList<Bar>>? result = null;
         Func<Task> read = async () => result = await snapshot.ExecuteAsync<Bar>(
-            new PriceHistoryRequest([new Symbol("VTI")], new(date, date))).ConfigureAwait(true);
+            new PriceHistoryRequest([new Symbol("VTI")], new(date, date)) { Basis = PriceBasis.Raw }).ConfigureAwait(true);
         await read.Should().NotThrowAsync().ConfigureAwait(true);
         result!.Payload.Should().Equal(expected);
     }
@@ -174,11 +174,11 @@ public sealed class Round3PipelineRegressionTests : IDisposable
     {
         var adapter = new BatchPriceAdapter();
         await using var host = BuildHost(services =>
-            services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter), useTimeSeriesStore);
+            services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw)), useTimeSeriesStore);
         var date = new DateOnly(2024, 6, 10);
         var symbols = new[] { new Symbol("A"), new Symbol("B") }.Take(count).ToArray();
         var result = await host.GetRequiredService<IDataPipeline>().ExecuteAsync<PriceHistoryRequest, Bar>(
-            new(symbols, new(date, date))).ConfigureAwait(true);
+            new(symbols, new(date, date)) { Basis = PriceBasis.Raw }).ConfigureAwait(true);
         result.Payload.Select(row => row.Close).Should().Equal(symbols.Select(symbol => (decimal)symbol.Ticker[0]));
         adapter.Shapes.Should().Equal(Enumerable.Repeat(1, count));
         result.Issues.Should().BeEmpty();
@@ -213,7 +213,8 @@ public sealed class Round3PipelineRegressionTests : IDisposable
             Shapes.Add(request.Symbols.Count);
             IReadOnlyList<Bar> rows = request.Symbols.Select(symbol =>
                 new Bar(request.Range.From, symbol.Ticker[0], symbol.Ticker[0], symbol.Ticker[0], symbol.Ticker[0], symbol.Ticker[0], 1)).ToArray();
-            return Task.FromResult(new DataEnvelope<IReadOnlyList<Bar>>(rows, new(rows.Count, rows.Count, 0, 1m), [], []));
+            return Task.FromResult(new DataEnvelope<IReadOnlyList<Bar>>(rows, new(rows.Count, rows.Count, 0, 1m), [],
+                [new(ProviderKey, request.DatasetKey, LicenseType.Free, RetrievalMode.Live, FreshnessClass.EndOfDay, DateTimeOffset.UnixEpoch, null) { PriceBasis = PriceBasis.Raw }]));
         }
     }
 

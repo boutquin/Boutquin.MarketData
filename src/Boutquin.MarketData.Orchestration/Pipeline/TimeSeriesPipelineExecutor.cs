@@ -174,11 +174,11 @@ internal sealed class TimeSeriesPipelineExecutor
         // Find the IDatasetKeyBuilder<TRequest, TDatasetKey> registered for this request type. The
         // open generic is closed over (TRequest, ?) — we scan the registered builder descriptors to
         // discover the concrete TDatasetKey. No builder ⇒ this request type is not time-series-backed.
-        if (request is PriceHistoryRequest && !_options.AllowIncrementalPriceHistoryGapFill)
+        if (request is PriceHistoryRequest prices && (!_options.AllowIncrementalPriceHistoryGapFill || !prices.Basis.LevelsAreWindowIndependent))
         {
             _logger.LogDebug(
-                "Incremental price-history gap-fill is disabled; {RequestType} uses the legacy "
-                + "exact-range path so window-anchored levels are never spliced.", typeof(TRequest).Name);
+                "Incremental price-history gap-fill declined for {RequestType}: {Reason}; exact-range fetch preserves window-anchored levels.",
+                typeof(TRequest).Name, !_options.AllowIncrementalPriceHistoryGapFill ? "option off" : "basis not window-independent");
             return null;
         }
 
@@ -190,6 +190,8 @@ internal sealed class TimeSeriesPipelineExecutor
                 + "the legacy path for this request.", typeof(TRequest).Name);
             return null;
         }
+
+        PriceBasisGuard.EnsureDeclared(request, _serviceProvider.GetServices<IDataSourceAdapter<TRequest, TRecord>>().ToArray());
 
         var worker = s_runAsyncMethod
             .MakeGenericMethod(typeof(TRequest), typeof(TRecord), datasetKeyType);
@@ -265,10 +267,11 @@ internal sealed class TimeSeriesPipelineExecutor
         var datasetKey = providerAwareBuilder is not null && hasKnownProvider
             ? providerAwareBuilder.Build(request, knownProvider)
             : builder.Build(request);
+        datasetKey = PriceBasisSeriesIdentity.Apply(request, datasetKey);
         var contributingKeys = providerAwareBuilder is null
             ? new List<TDatasetKey> { datasetKey }
             : recoveredProviders
-                .Select(provider => providerAwareBuilder.Build(request, provider))
+                .Select(provider => PriceBasisSeriesIdentity.Apply(request, providerAwareBuilder.Build(request, provider)))
                 .Distinct()
                 .ToList();
         if (!contributingKeys.Contains(datasetKey))
@@ -557,7 +560,7 @@ internal sealed class TimeSeriesPipelineExecutor
                     typeof(TRequest), request.DatasetKey, result.SelectedProviderKey, ct).ConfigureAwait(false);
                 if (builder is IProviderAwareDatasetKeyBuilder<TRequest, TDatasetKey> providerBuilder)
                 {
-                    datasetKey = providerBuilder.Build(gapRequest, result.SelectedProviderKey);
+                    datasetKey = PriceBasisSeriesIdentity.Apply(gapRequest, providerBuilder.Build(gapRequest, result.SelectedProviderKey));
                     if (!contributingKeys.Contains(datasetKey))
                     {
                         contributingKeys.Add(datasetKey);
@@ -1382,7 +1385,8 @@ internal sealed class TimeSeriesPipelineExecutor
                     RetrievalMode: mode,
                     Freshness: FreshnessClass.EndOfDay,
                     RetrievedAtUtc: _clock.UtcNow,
-                    SourceUrl: null));
+                    SourceUrl: null)
+            { PriceBasis = request is PriceHistoryRequest && typeof(TRecord) == typeof(Boutquin.MarketData.Abstractions.Records.Bar) ? PriceBasis.Raw : null });
         }
 
         var issues = sources.SelectMany(static source => source.Issues).Distinct().ToList();

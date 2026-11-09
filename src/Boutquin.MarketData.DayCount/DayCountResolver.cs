@@ -38,7 +38,7 @@ namespace Boutquin.MarketData.DayCount;
 /// <para>
 /// ACT/ACT disambiguation: <c>"ACT/ACT"</c> without further qualification resolves to ICMA
 /// (in-period) since that is the convention most new consumers reach for. The ISDA variant
-/// is not yet shipped; use an <c>"ACT/ACT ISDA"</c> alias when that lands in a later spec.
+/// is not supported; callers needing it must supply a separate calculator.
 /// </para>
 /// </remarks>
 public static class DayCountResolver

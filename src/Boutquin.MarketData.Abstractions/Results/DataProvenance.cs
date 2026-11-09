@@ -15,6 +15,7 @@
 //
 
 using Boutquin.MarketData.Abstractions.Provenance;
+using Boutquin.MarketData.Abstractions.Requests;
 
 namespace Boutquin.MarketData.Abstractions.Results;
 
@@ -48,4 +49,15 @@ public sealed record DataProvenance(
     FreshnessClass Freshness,
     DateTimeOffset RetrievedAtUtc,
     string? SourceUrl,
-    DateOnly? DataDate = null);
+    DateOnly? DataDate = null)
+{
+    /// <summary>The stated price basis, or null for legacy or non-price provenance.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">The invalid default struct is assigned.</exception>
+    public PriceBasis? PriceBasis
+    {
+        get;
+        init => field = value is { AdjustedCloseSource: 0 }
+            ? throw new ArgumentOutOfRangeException(nameof(value), "An explicit price basis is required.")
+            : value;
+    }
+}

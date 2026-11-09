@@ -39,6 +39,10 @@ public interface IDataPipeline
     /// <param name="request">The data request describing what to fetch.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A <see cref="DataEnvelope{TPayload}"/> wrapping the fetched records with metadata.</returns>
+    /// <exception cref="Exceptions.PriceBasisNotSupportedException">No registered price adapter declares the requested basis.</exception>
+    /// <exception cref="Exceptions.PriceBasisMismatchException">A cached, merged or snapshot price basis differs from the request.</exception>
+    /// <exception cref="InvalidOperationException">A custom adjusted-price partition changes the original date window.</exception>
+    /// <remarks>Price requests require an explicit basis. Basis exceptions propagate regardless of partition-continuation options; ordinary exhausted adapter chains remain failed-partition issues.</remarks>
     Task<DataEnvelope<IReadOnlyList<TRecord>>> ExecuteAsync<TRequest, TRecord>(
         TRequest request,
         CancellationToken cancellationToken = default)

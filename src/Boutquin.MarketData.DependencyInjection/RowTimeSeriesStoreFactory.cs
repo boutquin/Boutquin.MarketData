@@ -58,7 +58,7 @@ public sealed class RowTimeSeriesStoreOptions
     public WriteAheadLogOptions WriteAheadLog { get; set; } = new()
     {
         GroupCommitBatchSize = 256,
-        GroupCommitLatencyMs = 5,
+        GroupCommitLatencyMs = 1,
         SegmentMaxBytes = 64L * 1024L * 1024L,
     };
 
@@ -70,6 +70,19 @@ public sealed class RowTimeSeriesStoreOptions
 
     /// <summary>Optional row-path SSTable block compression codec.</summary>
     public ICompressionCodec? CompressionCodec { get; set; }
+
+    /// <summary>MemTable entry count that triggers an automatic flush. Defaults to 10,000.</summary>
+    public int MemTableCapacity { get; set; } = 10_000;
+
+    /// <summary>
+    /// Persists the coverage index beside the segments so the first coverage query after a restart
+    /// does not rescan the engine. Defaults to <see langword="false"/>; see
+    /// <see cref="TimeSeriesStoreBuilder{TDatasetKey, TRecord}.UsePersistedCoverageIndex"/> for the trade-off.
+    /// </summary>
+    public bool PersistCoverageIndex { get; set; }
+
+    /// <summary>Optional destination for corrupt-segment exclusion incidents raised when the store opens.</summary>
+    public IDataQualityIncidentSink? DataQualityIncidentSink { get; set; }
 }
 
 /// <summary>
@@ -116,6 +129,35 @@ public sealed class RowStoreConfigurator
         return this;
     }
 
+    /// <summary>Sets the MemTable entry count that triggers an automatic flush.</summary>
+    /// <param name="capacity">Positive entry count.</param>
+    /// <returns>This configurator.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="capacity"/> is not positive.</exception>
+    public RowStoreConfigurator WithMemTableCapacity(int capacity)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
+        _options.MemTableCapacity = capacity;
+        return this;
+    }
+
+    /// <summary>Persists the coverage index beside the segments (opt-in).</summary>
+    /// <returns>This configurator.</returns>
+    public RowStoreConfigurator UsePersistedCoverageIndex()
+    {
+        _options.PersistCoverageIndex = true;
+        return this;
+    }
+
+    /// <summary>Routes corrupt-segment exclusion incidents to <paramref name="sink"/>.</summary>
+    /// <param name="sink">The destination sink.</param>
+    /// <returns>This configurator.</returns>
+    public RowStoreConfigurator WithDataQualityIncidentSink(IDataQualityIncidentSink sink)
+    {
+        ArgumentNullException.ThrowIfNull(sink);
+        _options.DataQualityIncidentSink = sink;
+        return this;
+    }
+
     /// <summary>
     /// Enables WiscKey value-log dispatch for this row store. Only valid on a row store —
     /// which this always is — so, unlike the columnar builder, it cannot be mis-paired with columnar.
@@ -136,6 +178,9 @@ public sealed class RowStoreConfigurator
         target.BloomFilter = _options.BloomFilter;
         target.ValueLog = _options.ValueLog;
         target.CompressionCodec = _options.CompressionCodec;
+        target.MemTableCapacity = _options.MemTableCapacity;
+        target.PersistCoverageIndex = _options.PersistCoverageIndex;
+        target.DataQualityIncidentSink = _options.DataQualityIncidentSink;
     }
 }
 
@@ -148,7 +193,6 @@ public sealed class RowStoreConfigurator
 /// </summary>
 public static class RowTimeSeriesStoreFactory
 {
-    private const int DefaultMemTableCapacity = 10_000;
     private const int DefaultFullCompactionThreshold = 4;
 
     /// <summary>
@@ -175,6 +219,7 @@ public static class RowTimeSeriesStoreFactory
         }
 
         ArgumentNullException.ThrowIfNull(options.BloomFilter);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.MemTableCapacity);
         var bloomOptions = new SegmentBloomFilterOptions<TimeSeriesKey<TDatasetKey>>(
             options.BloomFilter.Enabled, options.BloomFilter.ExpectedItems, options.BloomFilter.FalsePositiveRate);
         var segmentFolder = options.SegmentRoot.Replace("{record-type}", recordTypeToken, StringComparison.Ordinal);
@@ -196,8 +241,9 @@ public static class RowTimeSeriesStoreFactory
                 SegmentFormat = TimeSeriesSegmentFormat.Row,
             };
 
+            var excludedSegments = 0;
             var lsmOptions = new LsmStorageEngineOptions<TimeSeriesKey<TDatasetKey>, TRecord>(
-                DefaultMemTableCapacity,
+                options.MemTableCapacity,
                 segmentFolder,
                 SegmentPrefix: "ts",
                 segmentFormat,
@@ -206,14 +252,25 @@ public static class RowTimeSeriesStoreFactory
                 options.ValueLog)
             {
                 CorruptSegmentRecovery = CorruptSegmentRecoveryDisposition.ExcludeAndSurface,
+                OnCorruptSegmentExcluded = exclusion =>
+                {
+                    Interlocked.Increment(ref excludedSegments);
+                    SegmentExclusionReporter.Report(options.DataQualityIncidentSink, typeof(TRecord).Name, exclusion);
+                },
             };
 
             var innerEngine = await LsmStorageEngine<TimeSeriesKey<TDatasetKey>, TRecord>
                 .OpenAsync(lsmOptions, cancellationToken).ConfigureAwait(false);
             owningEngine = new WalOwningLsmStorageEngine<TimeSeriesKey<TDatasetKey>, TRecord>(innerEngine, wal);
             var tsEngine = new LsmTimeSeriesStorageEngine<TDatasetKey, TRecord>(owningEngine, tsOptions);
-            var coverage = new InMemoryDatasetCoverageIndex<TDatasetKey>();
+            IDatasetCoverageIndex<TDatasetKey> coverage = options.PersistCoverageIndex
+                ? new FileDatasetCoverageIndex<TDatasetKey>(Path.Combine(segmentFolder, "coverage", "index.json"))
+                : new InMemoryDatasetCoverageIndex<TDatasetKey>();
             var store = new LsmTimeSeriesStore<TDatasetKey, TRecord>(tsEngine, coverage);
+            if (options.PersistCoverageIndex && Volatile.Read(ref excludedSegments) > 0)
+            {
+                await store.RebuildCoverageAsync(cancellationToken).ConfigureAwait(false);
+            }
 
             return new TimeSeriesStack<TDatasetKey, TRecord>(store, owningEngine);
         }

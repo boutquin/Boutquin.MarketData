@@ -57,12 +57,12 @@ public sealed class Round2PipelineRegressionTests : IDisposable
                 options.UseTimeSeriesStore = useTimeSeriesStore;
                 options.L1CacheTtl = TimeSpan.Zero;
             });
-        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(adapter);
+        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(adapter, PriceBasis.Raw));
         services.AddSingleton<IRequestPartitioner<PriceHistoryRequest>>(partitioner);
         using var provider = services.BuildServiceProvider();
         var pipeline = provider.GetRequiredService<IDataPipeline>();
         var range = new DateRange(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2));
-        var batch = new PriceHistoryRequest([new Symbol("AAPL"), new Symbol("MSFT")], range);
+        var batch = new PriceHistoryRequest([new Symbol("AAPL"), new Symbol("MSFT")], range) { Basis = PriceBasis.Raw };
 
         var aggregate = await pipeline.ExecuteAsync<PriceHistoryRequest, Bar>(batch).ConfigureAwait(true);
         adapter.Requests.Should().ContainSingle().Which.Symbols.Should().Equal(batch.Symbols);
@@ -98,7 +98,8 @@ public sealed class Round2PipelineRegressionTests : IDisposable
         var backup = new PriceAdapter();
         using var host = MetadataHost(backup, useTimeSeriesStore, new CapabilityFailureAdapter(false));
         var request = new PriceHistoryRequest([new Symbol("AAPL")],
-            new(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2)));
+            new(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2)))
+        { Basis = PriceBasis.Raw };
         var execute = async () => await host.GetRequiredService<IDataPipeline>()
             .ExecuteAsync<PriceHistoryRequest, Bar>(request).ConfigureAwait(true);
         var result = await execute.Should().NotThrowAsync("capability failures cannot bypass fallback");
@@ -115,7 +116,8 @@ public sealed class Round2PipelineRegressionTests : IDisposable
         using var host = MetadataHost(backup, useTimeSeriesStore, new CapabilityFailureAdapter(true));
         var execute = async () => await host.GetRequiredService<IDataPipeline>()
             .ExecuteAsync<PriceHistoryRequest, Bar>(new([new Symbol("AAPL")],
-                new(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2)))).ConfigureAwait(true);
+                new(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2)))
+            { Basis = PriceBasis.Raw }).ConfigureAwait(true);
         await execute.Should().ThrowAsync<OperationCanceledException>();
         backup.Requests.Should().BeEmpty();
     }
@@ -128,7 +130,8 @@ public sealed class Round2PipelineRegressionTests : IDisposable
     {
         var source = new PriceAdapter();
         var request = new PriceHistoryRequest([new Symbol("AAPL")],
-            new(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2)));
+            new(new DateOnly(2024, 1, 2), new DateOnly(2024, 1, 2)))
+        { Basis = PriceBasis.Raw };
         DataEnvelope<IReadOnlyList<Bar>> result;
         DataProvenance original;
         using (var host = MetadataHost(source, true))
@@ -180,10 +183,10 @@ public sealed class Round2PipelineRegressionTests : IDisposable
             });
         if (primary is not null)
         {
-            services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(primary);
+            services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(primary, PriceBasis.Raw));
         }
 
-        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(source);
+        services.AddSingleton<IDataSourceAdapter<PriceHistoryRequest, Bar>>(new DeclaringPriceAdapter(source, PriceBasis.Raw));
         return services.BuildServiceProvider();
     }
 

@@ -130,7 +130,7 @@ var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseD
 Assert.Equal(12, manifest.RootElement.GetArrayLength());
 foreach(var item in manifest.RootElement.EnumerateArray()) {
 var assembly=Assembly.Load(item.GetProperty("id").GetString()!);
-Assert.Equal("2.0.0.0", assembly.GetName().Version!.ToString());
+Assert.Equal("'''+version.split('-')[0].split('.')[0]+'''.0.0.0", assembly.GetName().Version!.ToString());
 Assert.Equal("'''+version.split('-')[0]+'.0'+'''", System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion);
 Assert.Equal("'''+version+'+'+commit+'''", assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion);
 Assert.Equal(item.GetProperty("dllSha256").GetString(),Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(assembly.Location))));

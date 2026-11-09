@@ -220,6 +220,6 @@ internal sealed class LsmSnapshotReadBinding<TDatasetKey, TRecord> : ISnapshotRe
         // Build(request) is the single method on IDatasetKeyBuilder<TRequest, TDatasetKey>; invoking
         // it through the open-generic-resolved instance returns the strongly-typed key.
         var build = builderType.GetMethod(nameof(IDatasetKeyBuilder<IDataRequest, TDatasetKey>.Build))!;
-        return (TDatasetKey)build.Invoke(builder, [request])!;
+        return Boutquin.MarketData.Orchestration.Pipeline.PriceBasisSeriesIdentity.Apply(request, (TDatasetKey)build.Invoke(builder, [request])!);
     }
 }
