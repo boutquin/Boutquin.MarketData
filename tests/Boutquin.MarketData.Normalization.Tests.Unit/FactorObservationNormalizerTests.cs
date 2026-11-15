@@ -39,17 +39,22 @@ public sealed class FactorObservationNormalizerTests
 
     private static readonly DateOnly s_date = new(2024, 1, 2);
 
-    [Theory]
-    [InlineData("Mkt-RF", 0.39, 0.0039)]
-    [InlineData("SMB", -0.12, -0.0012)]
-    [InlineData("HML", 0.05, 0.0005)]
-    public void Converts_percent_factor_return_to_decimal(string name, double raw, double expected)
+    public static TheoryData<string, decimal, decimal> FactorReturns => new()
     {
-        var obs = new FactorObservation(s_date, name, (decimal)raw);
+        { "Mkt-RF", 0.39m, 0.0039m },
+        { "SMB", -0.12m, -0.0012m },
+        { "HML", 0.05m, 0.0005m }
+    };
+
+    [Theory]
+    [MemberData(nameof(FactorReturns))]
+    public void Converts_percent_factor_return_to_decimal(string name, decimal raw, decimal expected)
+    {
+        var obs = new FactorObservation(s_date, name, raw);
 
         var result = _sut.Normalize(obs);
 
-        result.Value.Should().Be((decimal)expected);
+        result.Value.Should().Be(expected);
     }
 
     [Theory]

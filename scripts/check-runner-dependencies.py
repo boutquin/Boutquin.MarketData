@@ -86,9 +86,9 @@ def verify(feed, packages=None):
         head = "nuget.org"
         directory = feed
     pins = {
-        item.attrib["Include"]: item.attrib["Version"]
+        (item.get("Include") or item.get("Update")): item.attrib["Version"]
         for item in ET.parse(ROOT / "Directory.Packages.props").iter("PackageVersion")
-        if item.attrib["Include"].startswith(("Boutquin.Storage.", "Boutquin.Numerics", "Boutquin.Domain"))
+        if (item.get("Include") or item.get("Update")).startswith(("Boutquin.Storage.", "Boutquin.Numerics", "Boutquin.Domain"))
     }
     all_packages = lock["packages"] + lock.get("publishedPackages", []) + lock.get("preparedPackages", [])
     declared = {item["id"]: item["version"] for item in all_packages}
